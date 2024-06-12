@@ -8,19 +8,19 @@ using Random = UnityEngine.Random;
 public class Square : MonoBehaviour
 {
     [SerializeField] private TextMesh text;
-    [SerializeField] private int squareValue;
-    [SerializeField] private int squareIndex;
+    [SerializeField] private int value;
+    [SerializeField] private int index;
     [SerializeField] private int column;
     [SerializeField] private int row;
     [SerializeField] private SpriteRenderer sprintRendererBg;
-    [SerializeField] private Color squareColor;
+    [SerializeField] private Color color;
 
     private List<Color> _colors;
 
-    public Color SquareColor
+    public Color Color
     {
-        get => squareColor;
-        set => squareColor = value;
+        get => color;
+        set => color = value;
     }
 
     public int Row
@@ -35,23 +35,23 @@ public class Square : MonoBehaviour
         set => column = value;
     }
 
-    public int SquareValue
+    public int Value
     {
-        get => squareValue;
-        set => squareValue = value;
+        get => value;
+        set => this.value = value;
     }
 
-    public int SquareIndex
+    public int Index
     {
-        get => squareIndex;
-        set => squareIndex = value;
+        get => index;
+        set => index = value;
     }
 
     private void Awake()
     {
         _colors = new List<Color>(new[]
         {
-            Constants.SquareColor.Blue,
+            Constants.SquareColor.White,
             Constants.SquareColor.Red,
             Constants.SquareColor.Green,
             Constants.SquareColor.Green,
@@ -71,13 +71,8 @@ public class Square : MonoBehaviour
 
     public void SetTextAndColor()
     {
-        if (squareValue == 0)
-        {
-            return;
-        }
-
-        text.text = squareValue.ToString();
-        var random = squareValue % 5 - 1;
+        text.text = value == 0 ? "" : value.ToString();
+        var random = value % 5;
         sprintRendererBg.color = _colors[random];
     }
 }

@@ -8,15 +8,13 @@ using Random = UnityEngine.Random;
 public class BoardManager : Singleton<BoardManager>
 {
     [SerializeField] private Square square;
-    [SerializeField] private GameObject lineColumn;
     [SerializeField] private Transform parentTransform;
-    [SerializeField] private Camera cameraMain;
     [SerializeField] private int row;
     [SerializeField] private int column;
 
     private readonly List<Square> _listSquare = new();
-    private readonly List<GameObject> _listLineColumn = new();
-    private readonly List<int> _listSquareValue = new() { 2, 4, 8, 16, 32, 64, 128 };
+    private readonly List<int> _listSquareValue = new() { 2, 4 };
+    // private readonly List<int> _listSquareValue = new() { 2, 4, 8, 16, 32, 64, 128 };
 
     private int _columnIndex;
     private int _randomNum;
@@ -24,33 +22,17 @@ public class BoardManager : Singleton<BoardManager>
     private int _endValueSquareToPoint;
     private float _durationSquareToPoint;
     private bool _isRunToPoint;
-    private Square _squareOnBoard;
 
-    public List<Square> ListSquare => _listSquare;
-    public int EndValueSquareToPoint => _endValueSquareToPoint;
-    public float DurationSquareToPoint => _durationSquareToPoint;
+    // public List<Square> ListSquare => _listSquare;
+    public int SquareValue => _squareValue;
+    public int Row => row;
+    public int Column => column;
 
-    public int SquareValue
-    {
-        get => _squareValue;
-        set => _squareValue = value;
-    }
+    public Square ProcessingSquare { get; set; }
 
-    void Start()
+   private void Start()
     {
         RenderSquareBoard();
-        RenderLineColumn();
-    }
-
-    private void RenderLineColumn()
-    {
-        for (int i = 0; i < column; i++)
-        {
-            var posLine = new Vector2(i * 2 - row, 0);
-            lineColumn.SetActive(false);
-            lineColumn.GetComponent<LineColumn>().Column = i;
-            _listLineColumn.Add(Instantiate(lineColumn, posLine, Quaternion.identity, parentTransform));
-        }
     }
 
     private void RenderSquareBoard()
@@ -60,10 +42,10 @@ public class BoardManager : Singleton<BoardManager>
             for (var x = 0; x < column; x++)
             {
                 var index = x + (row - y) * column;
-                square.SquareValue = 0;
-                square.SquareIndex = index;
+                square.Value = 0;
+                square.Index = index;
                 square.Column = x;
-                square.Row = y;
+                square.Row = row - y;
 
                 _listSquare.Add(Instantiate(square,
                     new Vector2(x * 2 - row, y * 2 - column),
@@ -76,105 +58,85 @@ public class BoardManager : Singleton<BoardManager>
 
     private void Update()
     {
-        CheckPointClick();
-
         if (_squareValue == 0)
         {
             SetRandomSquareValue();
         }
     }
-
-    private void CheckPointClick()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (_isRunToPoint)
-            {
-                return;
-            }
-
-            ShowLineColumn();
-        }
-
-        if (Input.GetMouseButtonUp(0))
-        {
-            var squareEmpty = GetSquareEmpty(_columnIndex);
-        
-            if (squareEmpty.Count == 0 )
-            {
-                return;
-            }
-            StartCoroutine(DeActiveLineColumn());
-        }
-    }
-
-    private void ShowLineColumn()
-    {
-        
-        var worldPos = cameraMain.ScreenToWorldPoint(Input.mousePosition);
-
-        var index = (int)(worldPos.x / 2 + 3);
-        if (index < 0 || index > column - 1)
-        {
-            return;
-        }
-
-        var squareEmpty = GetSquareEmpty(index);
-        
-        if (squareEmpty.Count == 0)
-        {
-            return;
-        }
-        _isRunToPoint = true;
-        _endValueSquareToPoint = (squareEmpty.Count - 3) * 2;
-        _squareOnBoard = squareEmpty.FirstOrDefault();
-        _durationSquareToPoint = Constants.TimeMove.TimeSquareMoveToPoint * squareEmpty.Count / 5;
-
-        _columnIndex = index;
-        _listLineColumn.ForEach(lineObj => lineObj.SetActive(false));
-        _listLineColumn[_columnIndex].SetActive(true);
-    }
-
-    private List<Square> GetSquareEmpty(int index)
+    
+    public List<Square> GetSquareEmpty(int index)
     {
         return _listSquare
-            .Where(s => s.Column == index && s.SquareValue == 0)
-            .OrderBy(s => s.SquareIndex)
+            .Where(s => s.Column == index && s.Value == 0)
+            .OrderBy(s => s.Index)
             .ToList();
     }
-
-    private IEnumerator DeActiveLineColumn()
+    
+    public void SetSquare()
     {
-        yield return new WaitForSeconds(_durationSquareToPoint);
-     
-        SetSquareToBoard();
+        ProcessingSquare.Value = _squareValue;
+        ProcessingSquare.SetTextAndColor();
+        
+        CompareSquare(ProcessingSquare);
+        SetRandomSquareValue();
     }
-
-    private void SetSquareToBoard()
+    
+    private void CompareSquare(Square processingSquare)
     {
-        _listLineColumn[_columnIndex].SetActive(false);
+        var squaresSame = _listSquare
+            .Where(s => IsEntryPassSquare(processingSquare, s))
+            .ToList();
+        var squarePrevRow = squaresSame.FirstOrDefault(s => s.Row == processingSquare.Row - 1);
 
-        if (!_squareOnBoard)
+        var countSquare = squaresSame.Count;
+        if (countSquare == 0)
         {
             return;
         }
 
-        _squareOnBoard.SquareValue = _squareValue;
-        _squareOnBoard.SetTextAndColor();
-        CompareSquare();
-        SetRandomSquareValue();
-        _isRunToPoint = false;
+        processingSquare.Value *= (int)Mathf.Pow(2, countSquare);
+        squaresSame.ForEach(squareSameValue =>
+        {
+            squareSameValue.Value = 0;
+            squareSameValue.SetTextAndColor();
+        });
+
+        processingSquare.SetTextAndColor();
+
+        if (squarePrevRow is not null)
+        {
+            InvertedSquare(processingSquare, squarePrevRow);
+        }
     }
 
-    private void CompareSquare()
+    private static bool IsEntryPassSquare(Square squareCheck, Square square1)
     {
-        throw new NotImplementedException();
+        bool IsNextToSameColumn(Square s) =>
+            (s.Column == squareCheck.Column + 1 || s.Column == squareCheck.Column - 1)
+            && s.Row == squareCheck.Row;
+
+        bool IsNexToSameRow(Square s) => s.Row == squareCheck.Row - 1 && s.Column == squareCheck.Column;
+        
+        return square1.Value == squareCheck.Value && (IsNextToSameColumn(square1) || IsNexToSameRow(square1));
     }
+
+    private void InvertedSquare(Square processingSquare, Square invertedSquare)
+    {
+        invertedSquare.Value = processingSquare.Value;
+        invertedSquare.SetTextAndColor();
+
+        processingSquare.Value = 0;
+        processingSquare.SetTextAndColor();
+        
+        CompareSquare(invertedSquare);
+    }
+
 
     private void SetRandomSquareValue()
     {
-        _randomNum = Random.Range(0, column + 1);
+        _randomNum = Random.Range(0, _listSquareValue.Count);
         _squareValue = _listSquareValue[_randomNum];
-        print("Value: " + _squareValue);
+        
+        print("Value: " + _squareValue);//TODO
     }
 }

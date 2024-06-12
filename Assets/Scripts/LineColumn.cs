@@ -9,6 +9,7 @@ public class LineColumn : MonoBehaviour
 
     private Square _squareScript;
     private BoardManager _boardManager;
+    private PlayerManager _playerManager ;
 
     private int _column;
 
@@ -22,6 +23,7 @@ public class LineColumn : MonoBehaviour
     {
         _squareScript = square.GetComponent<Square>();
         _boardManager = BoardManager.Instance;
+        _playerManager = PlayerManager.Instance;
     }
 
     private void OnEnable()
@@ -31,10 +33,10 @@ public class LineColumn : MonoBehaviour
 
     private void SquareMoveToPoint()
     {
-        _squareScript.SquareValue = _boardManager.SquareValue;
+        _squareScript.Value = _boardManager.SquareValue;
 
         square.transform
-            .DOMoveY(_boardManager.EndValueSquareToPoint, _boardManager.DurationSquareToPoint)
+            .DOMoveY(_playerManager.EndValueSquareToPoint, _playerManager.DurationSquareToPoint)
             .SetEase(Ease.Linear)
             // .OnComplete(() => { Debug.Log("square.transform.position: " + square.transform.position); })
             ;
@@ -43,7 +45,7 @@ public class LineColumn : MonoBehaviour
     private void OnDisable()
     {
         square.transform.position = new Vector2(square.transform.position.x, -5);
-        _squareScript.SquareColor = Constants.SquareColor.White;
-        _squareScript.SquareValue = 0;
+        _squareScript.Color = Constants.SquareColor.White;
+        _squareScript.Value = 0;
     }
 }
