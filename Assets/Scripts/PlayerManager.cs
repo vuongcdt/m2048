@@ -61,7 +61,7 @@ public class PlayerManager : Singleton<PlayerManager>
             return;
         }
 
-        var squareEmpty = _boardManager.GetSquareEmpty(_columnIndex);
+        var squareEmpty = _boardManager.GetSquareEmptyByColumn(_columnIndex);
 
         if (squareEmpty.Count == 0)
         {
@@ -81,7 +81,7 @@ public class PlayerManager : Singleton<PlayerManager>
             return;
         }
 
-        var squareEmpty = _boardManager.GetSquareEmpty(index);
+        var squareEmpty = _boardManager.GetSquareEmptyByColumn(index);
 
         if (squareEmpty.Count == 0)
         {

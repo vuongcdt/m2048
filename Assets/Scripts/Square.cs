@@ -57,22 +57,18 @@ public class Square : MonoBehaviour
             Constants.SquareColor.Green,
             Constants.SquareColor.Magenta
         });
+        SetTextAndColor();
     }
 
-    private void Start()
+    private void FixedUpdate()
     {
         SetTextAndColor();
     }
 
-    private void OnEnable()
-    {
-        SetTextAndColor();
-    }
-
-    public void SetTextAndColor()
+    private void SetTextAndColor()
     {
         text.text = value == 0 ? "" : value.ToString();
-        var random = value % 5;
+        var random = value % 5;//TODO
         sprintRendererBg.color = _colors[random];
     }
 }

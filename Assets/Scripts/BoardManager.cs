@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -18,19 +16,19 @@ public class BoardManager : Singleton<BoardManager>
 
     private int _columnIndex;
     private int _randomNum;
-    private int _squareValue;
+    private int _squareNextValue;
     private int _endValueSquareToPoint;
     private float _durationSquareToPoint;
     private bool _isRunToPoint;
 
     // public List<Square> ListSquare => _listSquare;
-    public int SquareValue => _squareValue;
+    public int SquareNextValue => _squareNextValue;
     public int Row => row;
     public int Column => column;
 
     public Square ProcessingSquare { get; set; }
 
-   private void Start()
+    private void Start()
     {
         RenderSquareBoard();
     }
@@ -41,11 +39,10 @@ public class BoardManager : Singleton<BoardManager>
         {
             for (var x = 0; x < column; x++)
             {
-                var index = x + (row - y) * column;
                 square.Value = 0;
-                square.Index = index;
                 square.Column = x;
                 square.Row = row - y;
+                square.Index = x + (row - y) * column;
 
                 _listSquare.Add(Instantiate(square,
                     new Vector2(x * 2 - row, y * 2 - column),
@@ -56,59 +53,70 @@ public class BoardManager : Singleton<BoardManager>
         }
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        if (_squareValue == 0)
+        if (_squareNextValue == 0)
         {
             SetRandomSquareValue();
         }
     }
-    
-    public List<Square> GetSquareEmpty(int index)
+
+    public List<Square> GetSquareEmptyByColumn(int index)
     {
         return _listSquare
             .Where(s => s.Column == index && s.Value == 0)
             .OrderBy(s => s.Index)
             .ToList();
     }
-    
+
     public void SetSquare()
     {
-        ProcessingSquare.Value = _squareValue;
-        ProcessingSquare.SetTextAndColor();
-        
+        ProcessingSquare.Value = _squareNextValue;
+
         CompareSquare(ProcessingSquare);
         SetRandomSquareValue();
     }
-    
+
     private void CompareSquare(Square processingSquare)
     {
         var squaresSame = _listSquare
             .Where(s => IsEntryPassSquare(processingSquare, s))
             .ToList();
-        var squarePrevRow = squaresSame.FirstOrDefault(s => s.Row == processingSquare.Row - 1);
 
         var countSquare = squaresSame.Count;
+        var squarePrevRow = squaresSame.FirstOrDefault(s => s.Row == processingSquare.Row - 1);
         if (countSquare == 0)
         {
             return;
         }
 
         processingSquare.Value *= (int)Mathf.Pow(2, countSquare);
-        squaresSame.ForEach(squareSameValue =>
-        {
-            squareSameValue.Value = 0;
-            squareSameValue.SetTextAndColor();
-        });
 
-        processingSquare.SetTextAndColor();
+        squaresSame.ForEach(squareSameValue => squareSameValue.Value = 0);
 
+        // CheckEmptySquareInBoard();
+        
+        // var squarePrevRow = _listSquare
+        //     .Where(s => IsEntryPassSquare(processingSquare, s))
+        //     .FirstOrDefault(s => s.Row == processingSquare.Row - 1);
+        
         if (squarePrevRow is not null)
         {
             InvertedSquare(processingSquare, squarePrevRow);
         }
     }
 
+    private void CheckEmptySquareInBoard()
+    {
+        Square SquareNextRow(Square s) => _listSquare.FirstOrDefault(e => e.Row == s.Row + 1 && e.Value != 0);
+
+        var emptySquares = _listSquare
+            .Where(s => s.Value == 0 && SquareNextRow(s))
+            .ToList();
+
+        emptySquares.ForEach(e => { InvertedSquare(e, SquareNextRow(e)); });
+    }
+    
     private static bool IsEntryPassSquare(Square squareCheck, Square square1)
     {
         bool IsNextToSameColumn(Square s) =>
@@ -116,27 +124,21 @@ public class BoardManager : Singleton<BoardManager>
             && s.Row == squareCheck.Row;
 
         bool IsNexToSameRow(Square s) => s.Row == squareCheck.Row - 1 && s.Column == squareCheck.Column;
-        
+
         return square1.Value == squareCheck.Value && (IsNextToSameColumn(square1) || IsNexToSameRow(square1));
     }
 
-    private void InvertedSquare(Square processingSquare, Square invertedSquare)
+    private void InvertedSquare(Square squareHasValue, Square squareEmpty)
     {
-        invertedSquare.Value = processingSquare.Value;
-        invertedSquare.SetTextAndColor();
-
-        processingSquare.Value = 0;
-        processingSquare.SetTextAndColor();
-        
-        CompareSquare(invertedSquare);
+        squareEmpty.Value = squareHasValue.Value;
+        squareHasValue.Value = 0;
+        CompareSquare(squareEmpty);
     }
 
 
     private void SetRandomSquareValue()
     {
         _randomNum = Random.Range(0, _listSquareValue.Count);
-        _squareValue = _listSquareValue[_randomNum];
-        
-        print("Value: " + _squareValue);//TODO
+        _squareNextValue = _listSquareValue[_randomNum];
     }
 }

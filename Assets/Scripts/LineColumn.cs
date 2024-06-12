@@ -9,7 +9,7 @@ public class LineColumn : MonoBehaviour
 
     private Square _squareScript;
     private BoardManager _boardManager;
-    private PlayerManager _playerManager ;
+    private PlayerManager _playerManager;
 
     private int _column;
 
@@ -33,7 +33,7 @@ public class LineColumn : MonoBehaviour
 
     private void SquareMoveToPoint()
     {
-        _squareScript.Value = _boardManager.SquareValue;
+        _squareScript.Value = _boardManager.SquareNextValue;
 
         square.transform
             .DOMoveY(_playerManager.EndValueSquareToPoint, _playerManager.DurationSquareToPoint)
