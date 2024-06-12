@@ -53,9 +53,13 @@ public class Square : MonoBehaviour
         {
             Constants.SquareColor.White,
             Constants.SquareColor.Red,
+            Constants.SquareColor.Blue,
             Constants.SquareColor.Green,
-            Constants.SquareColor.Green,
-            Constants.SquareColor.Magenta
+            Constants.SquareColor.Yellow,
+            Constants.SquareColor.Magenta,
+            Constants.SquareColor.Cyan,
+            Constants.SquareColor.Grey,
+            
         });
         SetTextAndColor();
     }
@@ -68,7 +72,7 @@ public class Square : MonoBehaviour
     private void SetTextAndColor()
     {
         text.text = value == 0 ? "" : value.ToString();
-        var random = value % 5;//TODO
+        var random = value % 7;//TODO
         sprintRendererBg.color = _colors[random];
     }
 }

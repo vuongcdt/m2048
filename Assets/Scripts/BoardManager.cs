@@ -20,6 +20,7 @@ public class BoardManager : Singleton<BoardManager>
     private int _endValueSquareToPoint;
     private float _durationSquareToPoint;
     private bool _isRunToPoint;
+    private bool _isCheckSquare;
 
     // public List<Square> ListSquare => _listSquare;
     public int SquareNextValue => _squareNextValue;
@@ -72,8 +73,11 @@ public class BoardManager : Singleton<BoardManager>
     public void SetSquare()
     {
         ProcessingSquare.Value = _squareNextValue;
-
+        
+        _isCheckSquare = true;
         CompareSquare(ProcessingSquare);
+        _isCheckSquare = false;
+        
         SetRandomSquareValue();
     }
 
@@ -86,37 +90,44 @@ public class BoardManager : Singleton<BoardManager>
         var countSquare = squaresSame.Count;
         if (countSquare == 0)
         {
+            _isCheckSquare = false;
             return;
         }
 
         processingSquare.Value *= (int)Mathf.Pow(2, countSquare);
-
         squaresSame.ForEach(squareSameValue => squareSameValue.Value = 0);
 
         FillBoard();
+        
+        if (_isCheckSquare)
+        {
+            CompareSquare(ProcessingSquare);
+        }
     }
 
     private void FillBoard()
     {
-        Square SquareHasValueSameColumnNextRow(Square s) => _listSquare
-            .FirstOrDefault(e => e.Column == s.Column && e.Value != 0 && e.Row == s.Row + 1);
-
         var emptySquares = _listSquare
             .Where(s => s.Value == 0 && SquareHasValueSameColumnNextRow(s))
             .ToList();
 
         emptySquares.ForEach(squareEmpty => InvertedSquare(SquareHasValueSameColumnNextRow(squareEmpty), squareEmpty));
+   
+        return;
+
+        Square SquareHasValueSameColumnNextRow(Square s) => _listSquare
+            .FirstOrDefault(e => e.Column == s.Column && e.Value != 0 && e.Row == s.Row + 1);
     }
 
     private static bool IsEntryPassSquare(Square squareCheck, Square square1)
     {
+        return square1.Value == squareCheck.Value && (IsNextToSameColumn(square1) || IsNexToSameRow(square1));
+
         bool IsNextToSameColumn(Square s) =>
             (s.Column == squareCheck.Column + 1 || s.Column == squareCheck.Column - 1)
             && s.Row == squareCheck.Row;
 
         bool IsNexToSameRow(Square s) => s.Row == squareCheck.Row - 1 && s.Column == squareCheck.Column;
-
-        return square1.Value == squareCheck.Value && (IsNextToSameColumn(square1) || IsNexToSameRow(square1));
     }
 
     private void InvertedSquare(Square squareHasValue, Square squareEmpty)
