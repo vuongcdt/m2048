@@ -84,7 +84,6 @@ public class BoardManager : Singleton<BoardManager>
             .ToList();
 
         var countSquare = squaresSame.Count;
-        var squarePrevRow = squaresSame.FirstOrDefault(s => s.Row == processingSquare.Row - 1);
         if (countSquare == 0)
         {
             return;
@@ -94,29 +93,21 @@ public class BoardManager : Singleton<BoardManager>
 
         squaresSame.ForEach(squareSameValue => squareSameValue.Value = 0);
 
-        // CheckEmptySquareInBoard();
-        
-        // var squarePrevRow = _listSquare
-        //     .Where(s => IsEntryPassSquare(processingSquare, s))
-        //     .FirstOrDefault(s => s.Row == processingSquare.Row - 1);
-        
-        if (squarePrevRow is not null)
-        {
-            InvertedSquare(processingSquare, squarePrevRow);
-        }
+        FillBoard();
     }
 
-    private void CheckEmptySquareInBoard()
+    private void FillBoard()
     {
-        Square SquareNextRow(Square s) => _listSquare.FirstOrDefault(e => e.Row == s.Row + 1 && e.Value != 0);
+        Square SquareHasValueSameColumnNextRow(Square s) => _listSquare
+            .FirstOrDefault(e => e.Column == s.Column && e.Value != 0 && e.Row == s.Row + 1);
 
         var emptySquares = _listSquare
-            .Where(s => s.Value == 0 && SquareNextRow(s))
+            .Where(s => s.Value == 0 && SquareHasValueSameColumnNextRow(s))
             .ToList();
 
-        emptySquares.ForEach(e => { InvertedSquare(e, SquareNextRow(e)); });
+        emptySquares.ForEach(squareEmpty => InvertedSquare(SquareHasValueSameColumnNextRow(squareEmpty), squareEmpty));
     }
-    
+
     private static bool IsEntryPassSquare(Square squareCheck, Square square1)
     {
         bool IsNextToSameColumn(Square s) =>
@@ -132,6 +123,7 @@ public class BoardManager : Singleton<BoardManager>
     {
         squareEmpty.Value = squareHasValue.Value;
         squareHasValue.Value = 0;
+
         CompareSquare(squareEmpty);
     }
 
