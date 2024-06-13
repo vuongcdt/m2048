@@ -16,13 +16,13 @@ public class BoardManager : Singleton<BoardManager>
 
     private int _randomNum;
     private int _squareNextValue;
-    private bool _isCheckSquare;
     private StoreManager _storeManager;
+    private bool _isMergeSquare;
+
 
     public bool isTouchLine;
     public int columnSelect;
     public int SquareNextValue => _squareNextValue;
-    public SquareData processingSquareData;
     public Square processingSquare;
 
     private void Start()
@@ -41,73 +41,55 @@ public class BoardManager : Singleton<BoardManager>
     {
         var emptySquare = _storeManager.GetSquareEmptyByColumn(columnSelect);
         var targetPos = Utils.GridToPos(emptySquare.row, emptySquare.column);
-        var newBlock = Instantiate(square, Utils.GridToPos(6, columnSelect), Quaternion.identity, parentTransform);
 
+        var newBlock = Instantiate(square, Utils.GridToPos(6, columnSelect), Quaternion.identity, parentTransform);
         newBlock.value = _squareNextValue;
 
-        processingSquareData = emptySquare;
+        _isMergeSquare = true;
         processingSquare = newBlock;
-
-        newBlock.MoveY(targetPos.y, MergeSquare);
+        processingSquare.MoveY(targetPos.y, MergeSquare);
     }
 
     private void MergeSquare()
     {
-        processingSquare.Init(_squareNextValue);
         _storeManager.ListSquare.Add(processingSquare);
-        processingSquareData.value = _squareNextValue;
-
-        var squaresSame = _storeManager.GetSquaresNextToSameValue(processingSquareData);
-        // var squaresDataSame = _storeManager.GetSquaresDataNextToSameValue(processingSquareData);
+        var squaresSame = _storeManager.GetSquaresNextToSameValue(processingSquare);
         var countSquare = squaresSame.Count;
 
+        // Debug.Log($"countSquare: {countSquare}");
         if (countSquare == 0)
         {
+            _isMergeSquare = false;
             SetRandomSquareValue();
-            _isCheckSquare = false;
             return;
         }
 
+        processingSquare.value *= (int)Mathf.Pow(2, countSquare);
+
         squaresSame.ForEach(block =>
         {
-            block.MoveToPos(processingSquareData.Position, () => block.value = 0);
+            block.MoveToPos(
+                processingSquare.transform.position,
+                () =>
+                {
+                    block.value = 0;
+                    FillBoard();
+                    SetRandomSquareValue();
+                });
         });
-
-        StartCoroutine(SetTime(countSquare));
-    }
-
-    private IEnumerator SetTime(float countSquare)
-    {
-        yield return new WaitForSeconds(0.3f);
-        // squaresDataSame.ForEach(squareData => squareData.value = 0);
-
-        processingSquare.value *= (int)Mathf.Pow(2, countSquare);
-        processingSquare.Init(processingSquare.value);
-        _storeManager.SetListSquareDataBylistSquare(true);
-        // processingSquareData.value *= (int)Mathf.Pow(2, countSquare);
-
-        FillBoard();
-        SetRandomSquareValue();
     }
 
     private void FillBoard()
     {
-        var emptySquares = _storeManager.GetEmptySquarePrevRow(processingSquareData);
+        var emptySquares = _storeManager.GetEmptySquarePrevRow(new SquareData(processingSquare));
 
-        print($"emptySquares: {emptySquares}");
         if (emptySquares is null)
         {
+            // Debug.Log("emptySquares null roi");
+            MergeSquare();
             return;
         }
 
-        processingSquare.MoveY(emptySquares.Position.y, () =>
-        {
-            // emptySquares.value = processingSquareData.value;
-            // processingSquareData.value = 0;
-            
-            processingSquare.SetCell();
-            _storeManager.SetListSquareDataBylistSquare();
-            // processingSquareData = emptySquares;
-        });
+        processingSquare.MoveToPos(emptySquares.Position, MergeSquare, false);
     }
 }

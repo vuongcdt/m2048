@@ -27,21 +27,18 @@ public class Square : MonoBehaviour
 
         SetTextAndColor();
     }
-    
-    public void SetCell()
-    {
-        var cell = Utils.PosToGrid(transform.position);
-        this.row = cell.Row;
-        this.column = cell.Column;
-        this.index = cell.Row + (_storeManager.rowTotal - cell.Column) * _storeManager.columnTotal;
-    }
 
-    public void MoveToPos(Vector2 pos,TweenCallback onComplete = null)
+    public void MoveToPos(Vector2 pos, TweenCallback onComplete = null, bool isDeActive = true)
     {
         transform.DOMove(pos, TIME_MERGE_SQUARE)
             .OnComplete(() =>
             {
-                gameObject.SetActive(false);
+                if (isDeActive)
+                {
+                    // gameObject.SetActive(false);
+                    Destroy(gameObject);
+                }
+                this.SetCell();
                 onComplete?.Invoke();
             });
     }
@@ -53,7 +50,19 @@ public class Square : MonoBehaviour
         this.transform
             .DOMoveY(posY, duration)
             .SetEase(Ease.Linear)
-            .OnComplete(onComplete);
+            .OnComplete(() =>
+            {
+                this.SetCell();
+                onComplete?.Invoke();
+            });
+    }
+
+    private void SetCell()
+    {
+        var cell = Utils.PosToGrid(transform.position);
+        this.row = cell.Row;
+        this.column = cell.Column;
+        this.index = cell.Row + (_storeManager.rowTotal - cell.Column) * _storeManager.columnTotal;
     }
 
     public void MergeSquareX(float posX, TweenCallback onComplete = null)
