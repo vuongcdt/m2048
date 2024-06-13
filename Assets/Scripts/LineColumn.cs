@@ -1,12 +1,10 @@
-﻿using System;
-using System.Linq;
-using DG.Tweening;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class LineColumn : MonoBehaviour
 {
     [SerializeField] private GameObject square;
-
+    [SerializeField] private SpriteRenderer bg;
+    
     private Square _squareScript;
     private BoardManager _boardManager;
     private PlayerManager _playerManager;
@@ -21,31 +19,38 @@ public class LineColumn : MonoBehaviour
 
     private void Awake()
     {
-        _squareScript = square.GetComponent<Square>();
         _boardManager = BoardManager.Instance;
         _playerManager = PlayerManager.Instance;
     }
 
-    private void OnEnable()
+    private void OnMouseDown()
     {
-        SquareMoveToPoint();
+        SetActiveLine(true);
+        _boardManager.columnSelect = Column;
+        _boardManager.isTouchLine = true;
     }
 
-    private void SquareMoveToPoint()
+    private void OnMouseUp()
     {
-        _squareScript.Value = _boardManager.SquareNextValue;
-
-        square.transform
-            .DOMoveY(_playerManager.EndValueSquareToPoint, _playerManager.DurationSquareToPoint)
-            .SetEase(Ease.Linear)
-            // .OnComplete(() => { Debug.Log("square.transform.position: " + square.transform.position); })
-            ;
+        _playerManager.DeActiveLines();
+        _boardManager.isTouchLine = false;
+        _boardManager.ShootBlock();
     }
 
-    private void OnDisable()
+    public void SetActiveLine(bool value)
     {
-        square.transform.position = new Vector2(square.transform.position.x, -5);
-        _squareScript.Color = Constants.SquareColor.White;
-        _squareScript.Value = 0;
+        bg.color = value ? Color.red : new Color(0.27f, 0.27f, 0.27f, 0.35f);
+    }
+
+    private void OnMouseEnter()
+    {
+        if (!_boardManager.isTouchLine) return;
+        _boardManager.columnSelect = Column;
+        SetActiveLine(true);
+    }
+
+    private void OnMouseExit()
+    {
+        SetActiveLine(false);
     }
 }

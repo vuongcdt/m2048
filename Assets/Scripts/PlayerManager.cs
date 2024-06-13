@@ -8,8 +8,8 @@ public class PlayerManager : Singleton<PlayerManager>
 {
     [SerializeField] private Camera cameraMain;
     [SerializeField] private GameObject lineColumn;
-    [SerializeField] private Transform parentTransform;
-
+    [SerializeField] private Transform lineParentTransform;
+    
     private BoardManager _boardManager;
     private int _columnIndex;
 
@@ -33,15 +33,15 @@ public class PlayerManager : Singleton<PlayerManager>
         for (int i = 0; i < _boardManager.Column; i++)
         {
             var posLine = new Vector2(i * 2 - _boardManager.Row, 0);
-            lineColumn.SetActive(false);
-            lineColumn.GetComponent<LineColumn>().Column = i;
-            _listLineColumn.Add(Instantiate(lineColumn, posLine, Quaternion.identity, parentTransform));
+            var line = Instantiate(lineColumn, posLine, Quaternion.identity, lineParentTransform);
+            line.GetComponent<LineColumn>().Column = i;
+            _listLineColumn.Add(line);
         }
     }
 
     private void Update()
     {
-        CheckPointClick();
+        // CheckPointClick();
     }
 
     private void CheckPointClick()
@@ -91,6 +91,7 @@ public class PlayerManager : Singleton<PlayerManager>
         _isRunToPoint = true;
         _endValueSquareToPoint = (squareEmpty.Count - 3) * 2;
         _boardManager.ProcessingSquare = squareEmpty.FirstOrDefault();
+        
         _durationSquareToPoint = Constants.TimeMove.TimeSquareMoveToPoint * squareEmpty.Count / 5;
 
         _columnIndex = index;
@@ -109,12 +110,17 @@ public class PlayerManager : Singleton<PlayerManager>
     {
         _listLineColumn[_columnIndex].SetActive(false);
 
-        if (!_boardManager.ProcessingSquare)
+        if (_boardManager.ProcessingSquare == null)
         {
             return;
         }
 
         _boardManager.SetSquare();
         _isRunToPoint = false;
+    }
+
+    public void DeActiveLines()
+    {
+        _listLineColumn.ForEach(l=>l.GetComponent<LineColumn>().SetActiveLine(false));
     }
 }

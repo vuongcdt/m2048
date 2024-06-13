@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class BoardManager : Singleton<BoardManager>
@@ -10,69 +12,47 @@ public class BoardManager : Singleton<BoardManager>
     [SerializeField] private int row;
     [SerializeField] private int column;
 
-    private readonly List<Square> _listSquare = new();
-    private readonly List<int> _listSquareValue = new() { 2, 8 };
+    [SerializeField] List<SquareData> _listSquareData = new();
+
+    private readonly List<int> _listSquareValue = new() { 2, 4 };
     // private readonly List<int> _listSquareValue = new() { 2, 4, 8, 16, 32, 64, 128 };
 
-    private int _columnIndex;
     private int _randomNum;
     private int _squareNextValue;
-    private int _endValueSquareToPoint;
-    private float _durationSquareToPoint;
-    private bool _isRunToPoint;
     private bool _isCheckSquare;
+    public bool isTouchLine;
+    public int columnSelect;
 
-    // public List<Square> ListSquare => _listSquare;
     public int SquareNextValue => _squareNextValue;
     public int Row => row;
     public int Column => column;
 
-    public Square ProcessingSquare { get; set; }
+    public SquareData ProcessingSquare { get; set; }
 
     private void Start()
-    {
-        RenderSquareBoard();
-    }
-
-    private void RenderSquareBoard()
     {
         for (var y = row; y > 0; y--)
         {
             for (var x = 0; x < column; x++)
             {
-                square.Value = 0;
-                square.Column = x;
-                square.Row = row - y;
-                square.Index = x + (row - y) * column;
-
-                _listSquare.Add(Instantiate(square,
-                    new Vector2(x * 2 - row, y * 2 - column),
-                    Quaternion.identity,
-                    parentTransform
-                ));
+                _listSquareData.Add(new SquareData(row - y, x, x + (row - y) * column, 0));
             }
         }
+
+        SetRandomSquareValue();
     }
 
-    private void FixedUpdate()
+    public List<SquareData> GetSquareEmptyByColumn(int index)
     {
-        if (_squareNextValue == 0)
-        {
-            SetRandomSquareValue();
-        }
-    }
-
-    public List<Square> GetSquareEmptyByColumn(int index)
-    {
-        return _listSquare
-            .Where(s => s.Column == index && s.Value == 0)
-            .OrderBy(s => s.Index)
+        return _listSquareData
+            .Where(s => s.column == index && s.value == 0)
+            .OrderBy(s => s.index)
             .ToList();
     }
 
     public void SetSquare()
     {
-        ProcessingSquare.Value = _squareNextValue;
+        ProcessingSquare.value = _squareNextValue;
 
         _isCheckSquare = true;
         CompareSquare(ProcessingSquare);
@@ -81,14 +61,13 @@ public class BoardManager : Singleton<BoardManager>
         SetRandomSquareValue();
     }
 
-    private void CompareSquare(Square processingSquare)
+    private void CompareSquare(SquareData processingSquare)
     {
-        var squaresSame = _listSquare
+        var squaresSame = _listSquareData
             .Where(s => IsEntryPassSquare(processingSquare, s))
             .ToList();
 
         var countSquare = squaresSame.Count;
-        Debug.Log("countSquare: " + countSquare);
 
         if (countSquare == 0)
         {
@@ -96,8 +75,8 @@ public class BoardManager : Singleton<BoardManager>
             return;
         }
 
-        processingSquare.Value *= (int)Mathf.Pow(2, countSquare);
-        squaresSame.ForEach(squareSameValue => squareSameValue.Value = 0);
+        processingSquare.value *= (int)Mathf.Pow(2, countSquare);
+        squaresSame.ForEach(squareSameValue => squareSameValue.value = 0);
 
         FillBoard();
 
@@ -109,8 +88,8 @@ public class BoardManager : Singleton<BoardManager>
 
     private void FillBoard()
     {
-        var emptySquares = _listSquare
-            .Where(s => s.Value == 0 && SquareHasValueSameColumnNextRow(s))
+        var emptySquares = _listSquareData
+            .Where(s => s.value == 0 && SquareHasValueSameColumnNextRow(s) != null)
             .ToList();
 
         if (emptySquares.Count == 0)
@@ -122,27 +101,27 @@ public class BoardManager : Singleton<BoardManager>
 
         return;
 
-        Square SquareHasValueSameColumnNextRow(Square s) => _listSquare
-            .FirstOrDefault(e => e.Column == s.Column && e.Value != 0 && e.Row == s.Row + 1);
+        SquareData SquareHasValueSameColumnNextRow(SquareData s) => _listSquareData
+            .FirstOrDefault(e => e.column == s.column && e.value != 0 && e.row == s.row + 1);
     }
 
-    private static bool IsEntryPassSquare(Square squareCheck, Square squareMap)
+    private static bool IsEntryPassSquare(SquareData squareCheck, SquareData squareMap)
     {
         return IsSameValue() && (IsNextToSameColumn(squareMap) || IsNexToSameRow(squareMap));
 
-        bool IsNextToSameColumn(Square s) =>
-            (s.Column == squareCheck.Column + 1 || s.Column == squareCheck.Column - 1)
-            && s.Row == squareCheck.Row;
+        bool IsNextToSameColumn(SquareData s) =>
+            (s.column == squareCheck.column + 1 || s.column == squareCheck.column - 1)
+            && s.row == squareCheck.row;
 
-        bool IsNexToSameRow(Square s) => s.Row == squareCheck.Row - 1 && s.Column == squareCheck.Column;
+        bool IsNexToSameRow(SquareData s) => s.row == squareCheck.row - 1 && s.column == squareCheck.column;
 
-        bool IsSameValue() => squareCheck.Value > 0 && squareMap.Value == squareCheck.Value;
+        bool IsSameValue() => squareCheck.value > 0 && squareMap.value == squareCheck.value;
     }
 
-    private void InvertedSquare(Square squareHasValue, Square squareEmpty)
+    private void InvertedSquare(SquareData squareHasValue, SquareData squareEmpty)
     {
-        squareEmpty.Value = squareHasValue.Value;
-        squareHasValue.Value = 0;
+        squareEmpty.value = squareHasValue.value;
+        squareHasValue.value = 0;
 
         CompareSquare(squareEmpty);
     }
@@ -152,5 +131,48 @@ public class BoardManager : Singleton<BoardManager>
     {
         _randomNum = Random.Range(0, _listSquareValue.Count);
         _squareNextValue = _listSquareValue[_randomNum];
+    }
+
+    public void ShootBlock()
+    {
+        var emptySquare = GetSquareEmptyByColumn(columnSelect).First();
+        var targetPos = GridToPos(emptySquare.row, emptySquare.column);
+        var newBlock = Instantiate(square, GridToPos(6, columnSelect), Quaternion.identity, parentTransform);
+
+        newBlock.Value = _squareNextValue;
+        var duration = (targetPos.y / 2 + 3) / 10;
+
+        newBlock.transform
+            .DOMoveY(targetPos.y, duration)
+            .SetEase(Ease.Linear)
+            .OnComplete(() => { MergeSquare(emptySquare); });
+    }
+
+    private void MergeSquare(SquareData emptySquare)
+    {
+        emptySquare.value = _squareNextValue;
+        SetRandomSquareValue();
+    }
+
+    private Vector2 GridToPos(int row, int col)
+    {
+        return new Vector2(-5 + col * 2, 4 - row * 2);
+    }
+
+    private Cell PosToGrid(Vector2 pos)
+    {
+        return new Cell((int)(pos.y + 10) / 2, (int)(8 - pos.x) / 2);
+    }
+
+    private class Cell
+    {
+        public int Row { get; set; }
+        public int Column { get; set; }
+
+        public Cell(int row, int column)
+        {
+            Row = row;
+            Column = column;
+        }
     }
 }
