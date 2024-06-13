@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 
-public class LineColumn : MonoBehaviour
+public class LineColumn : MonoCache
 {
     [SerializeField] private GameObject square;
     [SerializeField] private SpriteRenderer bg;
-    
+
     private Square _squareScript;
-    private BoardManager _boardManager;
-    private StoreManager _storeManager;
+    // private BoardManager _boardManager;
+    // private StoreManager _storeManager;
 
     private int _column;
 
@@ -19,22 +19,22 @@ public class LineColumn : MonoBehaviour
 
     private void Awake()
     {
-        _boardManager = BoardManager.Instance;
-        _storeManager = StoreManager.Instance;
+        boardManager = BoardManager.Instance;
+        // _storeManager = StoreManager.Instance;
     }
 
     private void OnMouseDown()
     {
         SetActiveLine(true);
-        _boardManager.columnSelect = Column;
-        _boardManager.isTouchLine = true;
+        // boardManager.columnSelect = Column;
+        // boardManager.isTouchLine = true;
     }
 
     private void OnMouseUp()
     {
-        _storeManager.DeActiveLines();
-        _boardManager.isTouchLine = false;
-        _boardManager.ShootBlock();
+        // _storeManager.DeActiveLines();
+        // boardManager.isTouchLine = false;
+        // boardManager.ShootBlock();
     }
 
     public void SetActiveLine(bool value)
@@ -44,8 +44,8 @@ public class LineColumn : MonoBehaviour
 
     private void OnMouseEnter()
     {
-        if (!_boardManager.isTouchLine) return;
-        _boardManager.columnSelect = Column;
+        // if (!boardManager.isTouchLine) return;
+        // boardManager.columnSelect = Column;
         SetActiveLine(true);
     }
 

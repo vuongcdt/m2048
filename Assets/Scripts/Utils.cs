@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public static class Utils
 {
@@ -12,10 +13,11 @@ public static class Utils
         return new Cell((int)((pos.x + 5) / 2), (int)((4- pos.y) / 2));
     }
 
+    [Serializable]
     public class Cell
     {
-        public int Row { get; set; }
-        public int Column { get; set; }
+        public int Row;
+        public int Column;
 
         public Cell(int column, int row)
         {
