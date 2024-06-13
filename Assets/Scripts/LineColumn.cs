@@ -7,7 +7,7 @@ public class LineColumn : MonoBehaviour
     
     private Square _squareScript;
     private BoardManager _boardManager;
-    private PlayerManager _playerManager;
+    private StoreManager _storeManager;
 
     private int _column;
 
@@ -20,7 +20,7 @@ public class LineColumn : MonoBehaviour
     private void Awake()
     {
         _boardManager = BoardManager.Instance;
-        _playerManager = PlayerManager.Instance;
+        _storeManager = StoreManager.Instance;
     }
 
     private void OnMouseDown()
@@ -32,7 +32,7 @@ public class LineColumn : MonoBehaviour
 
     private void OnMouseUp()
     {
-        _playerManager.DeActiveLines();
+        _storeManager.DeActiveLines();
         _boardManager.isTouchLine = false;
         _boardManager.ShootBlock();
     }

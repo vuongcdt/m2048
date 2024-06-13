@@ -186,11 +186,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   square: {fileID: 2905904490840614441, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
   parentTransform: {fileID: 386745771}
-  row: 5
-  column: 6
-  _listSquareData: []
   isTouchLine: 0
   columnSelect: 0
+  processingSquareData:
+    row: 0
+    column: 0
+    index: 0
+    value: 0
+  processingSquare: {fileID: 0}
 --- !u!4 &457360940
 Transform:
   m_ObjectHideFlags: 0
@@ -324,13 +327,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: Square
       objectReference: {fileID: 0}
+    - target: {fileID: 3067245507963805546, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    - target: {fileID: 7992268602358549578, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 8274783866398326369, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 6.34
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 8274783866398326369, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.29
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8274783866398326369, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
       propertyPath: m_LocalPosition.z
@@ -587,7 +598,7 @@ GameObject:
   - component: {fileID: 959501677}
   - component: {fileID: 959501678}
   m_Layer: 0
-  m_Name: PlayerManager
+  m_Name: StoreManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -620,9 +631,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99034e205d6c4871a7e10c23b40583b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraMain: {fileID: 519420031}
   lineColumn: {fileID: 5260937453536865864, guid: cf7e610a94cbff54b9f5025cf4c4f629, type: 3}
   lineParentTransform: {fileID: 1166859083}
+  listSquareData: []
+  rowTotal: 5
+  columnTotal: 6
 --- !u!1 &1166859082
 GameObject:
   m_ObjectHideFlags: 0

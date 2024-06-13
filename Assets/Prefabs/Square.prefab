@@ -47,11 +47,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: {fileID: 8874836035955344884}
+  sprintRendererBg: {fileID: 4873276811926528708}
   value: 0
   index: 0
-  column: 5
-  row: 1
-  sprintRendererBg: {fileID: 4873276811926528708}
+  column: 0
+  row: 0
   color: {r: 0, g: 0, b: 0, a: 0}
 --- !u!1 &5590175882689458384
 GameObject:

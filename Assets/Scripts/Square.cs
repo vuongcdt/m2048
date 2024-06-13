@@ -1,54 +1,80 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.Serialization;
-using Random = UnityEngine.Random;
 
 public class Square : MonoBehaviour
 {
     [SerializeField] private TextMesh text;
-    [SerializeField] private int value;
-    [SerializeField] private int index;
-    [SerializeField] private int column;
-    [SerializeField] private int row;
     [SerializeField] private SpriteRenderer sprintRendererBg;
-    [SerializeField] private Color color;
+
+    public int value;
+    public int index;
+    public int column;
+    public int row;
+    public Color color;
 
     private List<Color> _colors;
+    private const float TIME_MERGE_SQUARE = 0.2f;
+    private StoreManager _storeManager;
 
-    public Color Color
+    public void Init(int numValue)
     {
-        get => color;
-        set => color = value;
+        var cell = Utils.PosToGrid(transform.position);
+        this.row = cell.Row;
+        this.column = cell.Column;
+        this.index = cell.Row + (_storeManager.rowTotal - cell.Column) * _storeManager.columnTotal;
+        this.value = numValue;
+
+        SetTextAndColor();
+    }
+    
+    public void SetCell()
+    {
+        var cell = Utils.PosToGrid(transform.position);
+        this.row = cell.Row;
+        this.column = cell.Column;
+        this.index = cell.Row + (_storeManager.rowTotal - cell.Column) * _storeManager.columnTotal;
     }
 
-    public int Row
+    public void MoveToPos(Vector2 pos,TweenCallback onComplete = null)
     {
-        get => row;
-        set => row = value;
+        transform.DOMove(pos, TIME_MERGE_SQUARE)
+            .OnComplete(() =>
+            {
+                gameObject.SetActive(false);
+                onComplete?.Invoke();
+            });
     }
 
-    public int Column
+    public void MoveY(float posY, TweenCallback onComplete = null)
     {
-        get => column;
-        set => column = value;
+        var duration = (posY / 2 + 3) / 10;
+
+        this.transform
+            .DOMoveY(posY, duration)
+            .SetEase(Ease.Linear)
+            .OnComplete(onComplete);
     }
 
-    public int Value
+    public void MergeSquareX(float posX, TweenCallback onComplete = null)
     {
-        get => value;
-        set => this.value = value;
+        this.transform
+            .DOMoveX(posX, TIME_MERGE_SQUARE)
+            .SetEase(Ease.Linear)
+            .OnComplete(onComplete);
     }
 
-    public int Index
+    public void MergeSquareY(float posY, TweenCallback onComplete = null)
     {
-        get => index;
-        set => index = value;
+        this.transform
+            .DOMoveY(posY, TIME_MERGE_SQUARE)
+            .SetEase(Ease.Linear)
+            .OnComplete(onComplete);
     }
 
     private void Awake()
     {
+        _storeManager = StoreManager.Instance;
         _colors = new List<Color>(new[]
         {
             Constants.SquareColor.White,
@@ -59,7 +85,6 @@ public class Square : MonoBehaviour
             Constants.SquareColor.Magenta,
             Constants.SquareColor.Cyan,
             Constants.SquareColor.Grey,
-            
         });
         SetTextAndColor();
     }
@@ -72,7 +97,7 @@ public class Square : MonoBehaviour
     private void SetTextAndColor()
     {
         text.text = value == 0 ? "" : value.ToString();
-        var random = value % 7;//TODO
+        var random = value % 7; //TODO
         sprintRendererBg.color = _colors[random];
     }
 }
