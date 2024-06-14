@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 public class SquareData
 {
     public Utils.Cell cell;
-    [FormerlySerializedAs("indexOOOO")] public int index;
+    public int index;
     public int value;
 
     public Vector2 Position => Utils.GridToPos(cell.Row,cell.Column);
