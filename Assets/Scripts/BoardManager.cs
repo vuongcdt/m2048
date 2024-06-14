@@ -97,7 +97,7 @@ public class BoardManager : Singleton<BoardManager>
     private void MergeAllBlock()
     {
         var squareMergeOrderByCountSameValueList = squareDatas
-            .FindAll(block => block.value > 0)
+            .Where(block => block.value > 0)
             .Select(block => new MyClass
             {
                 block = block,
@@ -109,7 +109,6 @@ public class BoardManager : Singleton<BoardManager>
                          squareData.index == block.index + _boardCol ||
                          squareData.index == block.index - _boardCol))
                     .Count
-                    
             })
             .Where(data => data.countSquareSameValue > 0)
             .OrderByDescending(data => data.countSquareSameValue)
@@ -117,19 +116,66 @@ public class BoardManager : Singleton<BoardManager>
 
         squareMergeOrderByCountSameValueList.ForEach(data =>
         {
-            if (data.countSquareSameValue == 1 && data.block != _processingSquare)
+            if (data.countSquareSameValue == 1)
             {
-                MergeBlock(_processingSquare);
                 MergeBlock(data.block);
             }
             else
             {
-                MergeBlock(data.block);
+                MergeMultiBlock(data.block);
             }
         });
     }
 
-    private void MergeBlock(SquareData cellCheck)
+    private void MergeBlock(SquareData dataBlock)
+    {
+        SquareData squareFrom;
+        SquareData squareTo;
+        var action = new MergerAction();
+
+        SquareData squareDataSameValue = squareDatas
+            .Find(squareData =>
+                dataBlock.value == squareData.value &&
+                (squareData.index == dataBlock.index + 1 ||
+                 squareData.index == dataBlock.index - 1 ||
+                 squareData.index == dataBlock.index + _boardCol ||
+                 squareData.index == dataBlock.index - _boardCol));
+
+        if (squareDataSameValue is null)
+        {
+            return;
+        }
+
+        var newValue = dataBlock.value * 2;
+        var isSameColumn = squareDataSameValue.cell.Row == dataBlock.cell.Row - 1;
+        var isSameRowRight = dataBlock.cell.Column >= squareDataSameValue.cell.Column &&
+                             squareDataSameValue.cell.Column >= _processingSquare.cell.Column;
+        var isSameRowLeft = dataBlock.cell.Column <= squareDataSameValue.cell.Column &&
+                            squareDataSameValue.cell.Column <= _processingSquare.cell.Column;
+
+        if (isSameColumn || isSameRowRight || isSameRowLeft)
+        {
+            squareFrom = dataBlock;
+            squareTo = squareDataSameValue;
+        }
+        else
+        {
+            squareFrom = squareDataSameValue;
+            squareTo = dataBlock;
+        }
+
+        action.squareSources.Add(squareFrom);
+        action.squareTarget = new SquareData(squareTo.cell, squareTo.index,
+            squareTo.value);
+        action.newSquareValue = newValue;
+        action.type = ActionType.MergeBlock.ToString();
+
+        _actionsList.Add(action);
+        squareTo.value = newValue;
+        squareFrom.value = 0;
+    }
+
+    private void MergeMultiBlock(SquareData cellCheck)
     {
         _count++;
         if (_count > 50)
@@ -156,15 +202,15 @@ public class BoardManager : Singleton<BoardManager>
             return;
         }
 
-        var powSquares = cellCheck.value * (int)Mathf.Pow(2, countBlockSameValue);
+        var newValue = cellCheck.value * (int)Mathf.Pow(2, countBlockSameValue);
 
         action.squareTarget = new SquareData(cellCheck.cell, cellCheck.index, cellCheck.value);
-        action.newSquareValue = powSquares;
+        action.newSquareValue = newValue;
         action.type = ActionType.MergeBlock.ToString();
 
         _actionsList.Add(action);
 
-        cellCheck.value = powSquares;
+        cellCheck.value = newValue;
     }
 
     private SquareData GetSquareDataByCell(Utils.Cell cell)
@@ -192,9 +238,9 @@ public class BoardManager : Singleton<BoardManager>
     {
         var emptyBlocksUpRowList = squareDatas
             .FindAll(item => item.value == 0 &&
-                           squareDatas.Any(squareDownRow =>
-                               squareDownRow.index == item.index + _boardCol &&
-                               squareDownRow.value > 0));
+                             squareDatas.Any(squareDownRow =>
+                                 squareDownRow.index == item.index + _boardCol &&
+                                 squareDownRow.value > 0));
 
         if (!emptyBlocksUpRowList.Any())
         {
