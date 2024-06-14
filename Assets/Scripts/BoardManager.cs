@@ -69,7 +69,7 @@ public class BoardManager : Singleton<BoardManager>
     {
         // Debug.Log(JsonUtility.ToJson(MergeBlock(new Utils.Cell(1, 1))));
 
-        // _squareDatas.FindAll().ForEach(MergeBlock(new Utils.Cell(1, 1));
+        // squareDatas.FindAll().ForEach(MergeBlock(new Utils.Cell(1, 1));
 
         // Debug.Log(JsonUtility.ToJson(SortBlock(new Utils.Cell(1, 1))));
         //   List<MergerAction>  
@@ -97,26 +97,27 @@ public class BoardManager : Singleton<BoardManager>
     private void MergeAllBlock()
     {
         var squareMergeOrderByCountSameValueList = squareDatas
-            .Where(block => block.value > 0)
+            .FindAll(block => block.value > 0)
             .Select(block => new MyClass
             {
                 block = block,
-                squareSameValueList = squareDatas
-                    .Where(squareData =>
+                countSquareSameValue = squareDatas
+                    .FindAll(squareData =>
                         block.value == squareData.value &&
                         (squareData.index == block.index + 1 ||
                          squareData.index == block.index - 1 ||
                          squareData.index == block.index + _boardCol ||
                          squareData.index == block.index - _boardCol))
-                    .ToList(),
+                    .Count
+                    
             })
-            .Where(data => data.squareSameValueList.Any())
-            .OrderByDescending(data => data.squareSameValueList.Count)
+            .Where(data => data.countSquareSameValue > 0)
+            .OrderByDescending(data => data.countSquareSameValue)
             .ToList();
 
         squareMergeOrderByCountSameValueList.ForEach(data =>
         {
-            if (data.squareSameValueList.Count == 1 && data.block != _processingSquare)
+            if (data.countSquareSameValue == 1 && data.block != _processingSquare)
             {
                 MergeBlock(_processingSquare);
                 MergeBlock(data.block);
@@ -190,11 +191,10 @@ public class BoardManager : Singleton<BoardManager>
     private void SortAllBlock()
     {
         var emptyBlocksUpRowList = squareDatas
-            .Where(item => item.value == 0 &&
+            .FindAll(item => item.value == 0 &&
                            squareDatas.Any(squareDownRow =>
                                squareDownRow.index == item.index + _boardCol &&
-                               squareDownRow.value > 0))
-            .ToList();
+                               squareDownRow.value > 0));
 
         if (!emptyBlocksUpRowList.Any())
         {
@@ -257,9 +257,9 @@ public class BoardManager : Singleton<BoardManager>
 
     private List<SquareData> GetSquaresDataHasValueDownRowByCell(SquareData squareEmptyUpRow)
     {
-        return squareDatas.Where(squareData => squareData.cell.Column == squareEmptyUpRow.cell.Column &&
-                                               squareData.value > 0 &&
-                                               squareData.cell.Row > squareEmptyUpRow.cell.Row)
+        return squareDatas.FindAll(squareData => squareData.cell.Column == squareEmptyUpRow.cell.Column &&
+                                                 squareData.value > 0 &&
+                                                 squareData.cell.Row > squareEmptyUpRow.cell.Row)
             .OrderBy(squareData => squareData.index)
             .ToList();
     }
@@ -287,8 +287,7 @@ public class BoardManager : Singleton<BoardManager>
     {
         print("__________");
         squareDatas
-            .Where(e => e.value > 0)
-            .ToList()
+            .FindAll(e => e.value > 0)
             .ForEach(e => { Debug.Log(JsonUtility.ToJson(e)); });
     }
 
@@ -297,7 +296,6 @@ public class BoardManager : Singleton<BoardManager>
 
 public class MyClass
 {
-    public int count;
+    public int countSquareSameValue;
     public SquareData block;
-    public List<SquareData> squareSameValueList;
 }
