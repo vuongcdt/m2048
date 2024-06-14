@@ -54,10 +54,9 @@ public class BoardManager : Singleton<BoardManager>
         {
             countActionsList = _actionsList.Count;
 
-            PrinterSquaresData();
+            // PrinterSquaresData();
             MergeAllBlock();
             SortAllBlock();
-            Debug.Log($"countActionsList: {countActionsList}  _actionsList.Count: {_actionsList.Count}");
         } while (countActionsList < _actionsList.Count);
 
         // MergeBlock(cellCheck);
@@ -97,8 +96,6 @@ public class BoardManager : Singleton<BoardManager>
 
     private void MergeAllBlock()
     {
-        Debug.Log("MergeAllBlock");
-
         var squareMergeOrderByCountSameValueList = squareDatas
             .Where(block => block.value > 0)
             .Select(block => new MyClass
@@ -116,12 +113,6 @@ public class BoardManager : Singleton<BoardManager>
             .Where(data => data.squareSameValueList.Any())
             .OrderByDescending(data => data.squareSameValueList.Count)
             .ToList();
-        Debug.Log($"squareMergeOrderByCountSameValueList: {squareMergeOrderByCountSameValueList.Count} ////");
-
-        squareMergeOrderByCountSameValueList.ForEach(e =>
-        {
-            Debug.Log($"squareSameValueList.Count: {e.squareSameValueList.Count}");
-        });
 
         squareMergeOrderByCountSameValueList.ForEach(data =>
         {
