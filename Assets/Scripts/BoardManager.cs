@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class BoardManager : Singleton<BoardManager>
 {
@@ -31,21 +30,38 @@ public class BoardManager : Singleton<BoardManager>
         // squareDatas[2].value = 16;
         //
         // squareDatas[12].value = 64;
-        //
-        // MergeBlock(new Utils.Cell(1, 1));
-        
+        // var cellCheck = GetSquareDataByCell(new Utils.Cell(1, 1));
+
         squareDatas[0].value = 2;
         squareDatas[1].value = 8;
-        squareDatas[2].value = 2; 
-        // squareDatas[2].value = 4; 
+        squareDatas[2].value = 2;
+
         squareDatas[6].value = 8;
         squareDatas[7].value = 2;
         squareDatas[8].value = 2;
+
         squareDatas[12].value = 4;
         squareDatas[13].value = 8;
+
         squareDatas[19].value = 4;
-        
-        MergeBlock(new Utils.Cell(2, 1));
+
+        var cellCheck = GetSquareDataByCell(new Utils.Cell(2, 1));
+        _processingSquare = cellCheck;
+
+        int countActionsList = 0;
+
+        do
+        {
+            countActionsList = _actionsList.Count;
+
+            PrinterSquaresData();
+            MergeAllBlock();
+            SortAllBlock();
+            Debug.Log($"countActionsList: {countActionsList}  _actionsList.Count: {_actionsList.Count}");
+        } while (countActionsList < _actionsList.Count);
+
+        // MergeBlock(cellCheck);
+        // MergeAllBlock();
 
         _actionsList.ForEach(e => { Debug.Log(JsonUtility.ToJson(e)); });
     }
@@ -79,61 +95,91 @@ public class BoardManager : Singleton<BoardManager>
         }
     }
 
-    private void MergeBlock(Utils.Cell cell)
+    private void MergeAllBlock()
+    {
+        Debug.Log("MergeAllBlock");
+
+        var squareMergeOrderByCountSameValueList = squareDatas
+            .Where(block => block.value > 0)
+            .Select(block => new MyClass
+            {
+                block = block,
+                squareSameValueList = squareDatas
+                    .Where(squareData =>
+                        block.value == squareData.value &&
+                        (squareData.index == block.index + 1 ||
+                         squareData.index == block.index - 1 ||
+                         squareData.index == block.index + _boardCol ||
+                         squareData.index == block.index - _boardCol))
+                    .ToList(),
+            })
+            .Where(data => data.squareSameValueList.Any())
+            .OrderByDescending(data => data.squareSameValueList.Count)
+            .ToList();
+        Debug.Log($"squareMergeOrderByCountSameValueList: {squareMergeOrderByCountSameValueList.Count} ////");
+
+        squareMergeOrderByCountSameValueList.ForEach(e =>
+        {
+            Debug.Log($"squareSameValueList.Count: {e.squareSameValueList.Count}");
+        });
+
+        squareMergeOrderByCountSameValueList.ForEach(data =>
+        {
+            if (data.squareSameValueList.Count == 1 && data.block != _processingSquare)
+            {
+                MergeBlock(_processingSquare);
+                MergeBlock(data.block);
+            }
+            else
+            {
+                MergeBlock(data.block);
+            }
+        });
+    }
+
+    private void MergeBlock(SquareData cellCheck)
     {
         _count++;
-        if (_count > 8)
+        if (_count > 50)
         {
-            Debug.Log("stack overflow");
+            print("STACK OVERFLOW");
             return;
         }
 
         var action = new MergerAction();
         var countBlockSameValue = 0;
 
-        var cellCheck = GetSquareDataByCell(new Utils.Cell(cell.Column, cell.Row));
-        _processingSquare = cellCheck;
-
-        var squareLeft = GetSquareDataByCell(new Utils.Cell(cell.Column - 1, cell.Row));
-        var squareUp = GetSquareDataByCell(new Utils.Cell(cell.Column, cell.Row - 1));
-        var squareRight = GetSquareDataByCell(new Utils.Cell(cell.Column + 1, cell.Row));
+        var squareLeft = GetSquareDataByCell(new Utils.Cell(cellCheck.cell.Column - 1, cellCheck.cell.Row));
+        var squareUp = GetSquareDataByCell(new Utils.Cell(cellCheck.cell.Column, cellCheck.cell.Row - 1));
+        var squareRight = GetSquareDataByCell(new Utils.Cell(cellCheck.cell.Column + 1, cellCheck.cell.Row));
+        var squareDown = GetSquareDataByCell(new Utils.Cell(cellCheck.cell.Column, cellCheck.cell.Row + 1));
 
         countBlockSameValue = CountBlockSameValue(squareLeft, cellCheck, countBlockSameValue, action);
         countBlockSameValue = CountBlockSameValue(squareUp, cellCheck, countBlockSameValue, action);
         countBlockSameValue = CountBlockSameValue(squareRight, cellCheck, countBlockSameValue, action);
+        countBlockSameValue = CountBlockSameValue(squareDown, cellCheck, countBlockSameValue, action);
 
         if (countBlockSameValue == 0)
         {
-            SortAllBlock();
             return;
         }
 
-        action.squareTarget = new SquareData(cellCheck.cell, cellCheck.index, cellCheck.value);
-
         var powSquares = cellCheck.value * (int)Mathf.Pow(2, countBlockSameValue);
 
+        action.squareTarget = new SquareData(cellCheck.cell, cellCheck.index, cellCheck.value);
         action.newSquareValue = powSquares;
         action.type = ActionType.MergeBlock.ToString();
 
         _actionsList.Add(action);
 
         cellCheck.value = powSquares;
-        
-        MergeAllBlock();
-        
-        if (squareUp != null)
-        {
-            SortBlock(cellCheck, squareUp);
-        }
-
-        SortAllBlock();
     }
-    
+
     private SquareData GetSquareDataByCell(Utils.Cell cell)
     {
         return squareDatas.Find(item => item.cell.Row == cell.Row && item.cell.Column == cell.Column);
     }
-    
+
     private static int CountBlockSameValue(
         SquareData squareData,
         SquareData cellCheck,
@@ -150,33 +196,32 @@ public class BoardManager : Singleton<BoardManager>
         return countBlockSameValue;
     }
 
-    private void SortBlock(SquareData cellCheck, SquareData squareUp)
+    private void SortAllBlock()
     {
-        var action = new MergerAction();
+        var emptyBlocksUpRowList = squareDatas
+            .Where(item => item.value == 0 &&
+                           squareDatas.Any(squareDownRow =>
+                               squareDownRow.index == item.index + _boardCol &&
+                               squareDownRow.value > 0))
+            .ToList();
 
-        action.squareSources.Add(new SquareData(cellCheck.cell, cellCheck.index, cellCheck.value));
-        action.squareTarget = new SquareData(squareUp.cell, squareUp.index, squareUp.value);
-        action.newSquareValue = cellCheck.value;
-        action.type = ActionType.SortBlock.ToString();
-
-        _actionsList.Add(action);
-
-        squareUp.value = cellCheck.value;
-        cellCheck.value = 0;
-        
-        if (cellCheck == _processingSquare)
+        if (!emptyBlocksUpRowList.Any())
         {
-            _processingSquare = squareUp;
+            return;
         }
-        else
+
+        emptyBlocksUpRowList.ForEach(emptyBlocksUpRow =>
         {
-            MergeBlock(_processingSquare.cell);
-        }
-        
-        MergeBlock(squareUp.cell);
+            var squareHasValueDownRowList = GetSquaresDataHasValueDownRowByCell(emptyBlocksUpRow);
+            squareHasValueDownRowList.ForEach(squareHasValueDownRow =>
+            {
+                SortBlock(squareHasValueDownRow.cell,
+                    new Utils.Cell(squareHasValueDownRow.cell.Column, squareHasValueDownRow.cell.Row - 1));
+            });
+        });
     }
 
-    private void SortAllBlock()
+    private void SortAllBlock2()
     {
         var squareHasEmptyBlocksUpRow = squareDatas.Find(item =>
             item.value > 0 && squareDatas.Any(squareDownRow =>
@@ -194,7 +239,38 @@ public class BoardManager : Singleton<BoardManager>
             return;
         }
 
-        SortBlock(squareHasEmptyBlocksUpRow, squareEmptyUpRow);
+        SortBlock(squareHasEmptyBlocksUpRow.cell, squareEmptyUpRow.cell);
+    }
+
+    private void SortBlock(Utils.Cell cellCheck, Utils.Cell cellUp)
+    {
+        var action = new MergerAction();
+        var squareUp = GetSquareDataByCell(cellUp);
+        var squareCheck = GetSquareDataByCell(cellCheck);
+
+        action.squareSources.Add(new SquareData(squareCheck.cell, squareCheck.index, squareCheck.value));
+        action.squareTarget = new SquareData(squareUp.cell, squareUp.index, squareUp.value);
+        action.newSquareValue = squareCheck.value;
+        action.type = ActionType.SortBlock.ToString();
+
+        _actionsList.Add(action);
+
+        squareUp.value = squareCheck.value;
+        squareCheck.value = 0;
+
+        if (squareCheck == _processingSquare)
+        {
+            _processingSquare = squareUp;
+        }
+    }
+
+    private List<SquareData> GetSquaresDataHasValueDownRowByCell(SquareData squareEmptyUpRow)
+    {
+        return squareDatas.Where(squareData => squareData.cell.Column == squareEmptyUpRow.cell.Column &&
+                                               squareData.value > 0 &&
+                                               squareData.cell.Row > squareEmptyUpRow.cell.Row)
+            .OrderBy(squareData => squareData.index)
+            .ToList();
     }
 
     private SquareData GetSquareDataEmptyUpRowByCell(Utils.Cell cell)
@@ -204,19 +280,33 @@ public class BoardManager : Singleton<BoardManager>
         {
             var squareDataEmpty = squareDatas.Find(item =>
                 item.cell.Row == cellRow && item.cell.Column == cell.Column && item.value == 0);
-            
+
             if (squareDataEmpty == null)
             {
                 return result;
             }
+
             result = squareDataEmpty;
         }
+
         return result;
     }
 
-    private void MergeAllBlock()
+    private void PrinterSquaresData()
     {
-        
+        print("__________");
+        squareDatas
+            .Where(e => e.value > 0)
+            .ToList()
+            .ForEach(e => { Debug.Log(JsonUtility.ToJson(e)); });
     }
+
     #endregion
+}
+
+public class MyClass
+{
+    public int count;
+    public SquareData block;
+    public List<SquareData> squareSameValueList;
 }

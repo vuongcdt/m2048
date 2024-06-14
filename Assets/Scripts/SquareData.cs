@@ -1,11 +1,12 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [Serializable]
 public class SquareData
 {
     public Utils.Cell cell;
-    public int index;
+    [FormerlySerializedAs("indexOOOO")] public int index;
     public int value;
 
     public Vector2 Position => Utils.GridToPos(cell.Row,cell.Column);
