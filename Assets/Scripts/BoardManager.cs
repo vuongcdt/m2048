@@ -32,23 +32,28 @@ public class BoardManager : Singleton<BoardManager>
         // squareDatas[12].value = 64;
         // var cellCheck = GetSquareDataByCell(new Utils.Cell(1, 1));
 
-        squareDatas[0].value = 2;
-        squareDatas[1].value = 8;
+        ////
+        // squareDatas[0].value = 2;
+        // squareDatas[1].value = 8;
+        // squareDatas[2].value = 2;
+        //
+        // squareDatas[6].value = 8;
+        // squareDatas[7].value = 2;
+        // squareDatas[8].value = 2;
+        //
+        // squareDatas[12].value = 4;
+        // squareDatas[13].value = 8;
+        //
+        // squareDatas[19].value = 4;
+
+        ////
         squareDatas[2].value = 2;
-
-        squareDatas[6].value = 8;
-        squareDatas[7].value = 2;
         squareDatas[8].value = 2;
-
-        squareDatas[12].value = 4;
-        squareDatas[13].value = 8;
-
-        squareDatas[19].value = 4;
 
         var cellCheck = GetSquareDataByCell(new Utils.Cell(2, 1));
         _processingSquare = cellCheck;
 
-        int countActionsList = 0;
+        int countActionsList;
 
         do
         {
@@ -59,9 +64,7 @@ public class BoardManager : Singleton<BoardManager>
             SortAllBlock();
         } while (countActionsList < _actionsList.Count);
 
-        // MergeBlock(cellCheck);
-        // MergeAllBlock();
-
+        Debug.Log("_processingSquare: " + JsonUtility.ToJson(_processingSquare));
         _actionsList.ForEach(e => { Debug.Log(JsonUtility.ToJson(e)); });
     }
 
@@ -129,13 +132,14 @@ public class BoardManager : Singleton<BoardManager>
 
     private void MergeBlock(SquareData dataBlock)
     {
-        SquareData squareFrom;
-        SquareData squareTo;
+        SquareData squareSource;
+        SquareData squareTarget;
         var action = new MergerAction();
 
         SquareData squareDataSameValue = squareDatas
             .Find(squareData =>
                 dataBlock.value == squareData.value &&
+                dataBlock.value > 0 &&
                 (squareData.index == dataBlock.index + 1 ||
                  squareData.index == dataBlock.index - 1 ||
                  squareData.index == dataBlock.index + _boardCol ||
@@ -148,31 +152,31 @@ public class BoardManager : Singleton<BoardManager>
 
         var newValue = dataBlock.value * 2;
         var isSameColumn = squareDataSameValue.cell.Row == dataBlock.cell.Row - 1;
-        var isSameRowRight = dataBlock.cell.Column >= squareDataSameValue.cell.Column &&
+        var isSameRowRight = dataBlock.cell.Column > squareDataSameValue.cell.Column &&
                              squareDataSameValue.cell.Column >= _processingSquare.cell.Column;
-        var isSameRowLeft = dataBlock.cell.Column <= squareDataSameValue.cell.Column &&
+        var isSameRowLeft = dataBlock.cell.Column < squareDataSameValue.cell.Column &&
                             squareDataSameValue.cell.Column <= _processingSquare.cell.Column;
 
         if (isSameColumn || isSameRowRight || isSameRowLeft)
         {
-            squareFrom = dataBlock;
-            squareTo = squareDataSameValue;
+            squareSource = dataBlock;
+            squareTarget = squareDataSameValue;
         }
         else
         {
-            squareFrom = squareDataSameValue;
-            squareTo = dataBlock;
+            squareSource = squareDataSameValue;
+            squareTarget = dataBlock;
         }
 
-        action.squareSources.Add(squareFrom);
-        action.squareTarget = new SquareData(squareTo.cell, squareTo.index,
-            squareTo.value);
+        action.squareSources.Add(squareSource);
+        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.index,
+            squareTarget.value);
         action.newSquareValue = newValue;
         action.type = ActionType.MergeBlock.ToString();
 
         _actionsList.Add(action);
-        squareTo.value = newValue;
-        squareFrom.value = 0;
+        squareTarget.value = newValue;
+        squareSource.value = 0;
     }
 
     private void MergeMultiBlock(SquareData cellCheck)
@@ -206,7 +210,7 @@ public class BoardManager : Singleton<BoardManager>
 
         action.squareTarget = new SquareData(cellCheck.cell, cellCheck.index, cellCheck.value);
         action.newSquareValue = newValue;
-        action.type = ActionType.MergeBlock.ToString();
+        action.type = ActionType.MergeMultiBlock.ToString();
 
         _actionsList.Add(action);
 

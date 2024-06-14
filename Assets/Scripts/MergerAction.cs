@@ -13,5 +13,6 @@ public class MergerAction
 public enum ActionType
 {
     MergeBlock,
+    MergeMultiBlock,
     SortBlock
 }
