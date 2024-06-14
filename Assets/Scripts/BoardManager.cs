@@ -22,17 +22,30 @@ public class BoardManager : Singleton<BoardManager>
     {
         ResetBoard();
 
-        squareDatas[1].value = 2;
-        squareDatas[6].value = 2;
+        // squareDatas[1].value = 2;
+        // squareDatas[6].value = 2;
+        // squareDatas[7].value = 2;
+        // squareDatas[8].value = 2;
+        //
+        // squareDatas[0].value = 16;
+        // squareDatas[2].value = 16;
+        //
+        // squareDatas[12].value = 64;
+        //
+        // MergeBlock(new Utils.Cell(1, 1));
+        
+        squareDatas[0].value = 2;
+        squareDatas[1].value = 8;
+        squareDatas[2].value = 2; 
+        // squareDatas[2].value = 4; 
+        squareDatas[6].value = 8;
         squareDatas[7].value = 2;
         squareDatas[8].value = 2;
-
-        squareDatas[0].value = 16;
-        squareDatas[2].value = 16;
-
-        squareDatas[12].value = 64;
-
-        MergeBlock(new Utils.Cell(1, 1));
+        squareDatas[12].value = 4;
+        squareDatas[13].value = 8;
+        squareDatas[19].value = 4;
+        
+        MergeBlock(new Utils.Cell(2, 1));
 
         _actionsList.ForEach(e => { Debug.Log(JsonUtility.ToJson(e)); });
     }
@@ -105,7 +118,9 @@ public class BoardManager : Singleton<BoardManager>
         _actionsList.Add(action);
 
         cellCheck.value = powSquares;
-
+        
+        MergeAllBlock();
+        
         if (squareUp != null)
         {
             SortBlock(cellCheck, squareUp);
@@ -113,7 +128,12 @@ public class BoardManager : Singleton<BoardManager>
 
         SortAllBlock();
     }
-
+    
+    private SquareData GetSquareDataByCell(Utils.Cell cell)
+    {
+        return squareDatas.Find(item => item.cell.Row == cell.Row && item.cell.Column == cell.Column);
+    }
+    
     private static int CountBlockSameValue(
         SquareData squareData,
         SquareData cellCheck,
@@ -194,10 +214,9 @@ public class BoardManager : Singleton<BoardManager>
         return result;
     }
 
-    private SquareData GetSquareDataByCell(Utils.Cell cell)
+    private void MergeAllBlock()
     {
-        return squareDatas.Find(item => item.cell.Row == cell.Row && item.cell.Column == cell.Column);
+        
     }
-
     #endregion
 }
