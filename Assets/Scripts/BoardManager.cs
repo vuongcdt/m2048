@@ -202,10 +202,10 @@ public class BoardManager : Singleton<BoardManager>
             // Debug.Log($"Sort {JsonUtility.ToJson(mergerAction)}");
             //
             // Debug.Log($"mergerAction.squareSources[0].index {mergerAction.squareSources[0].index}");
-            
+
             var squareSourceGameObject = FindSquareGameObjectActiveByIndex(mergerAction.squareSources[0].index);
             // Debug.Log($"mergerAction.squareTarget.Position.y {mergerAction.squareTarget.Position.y}");
-            
+
             sequence.Append(squareSourceGameObject.transform
                 .DOMoveY(mergerAction.squareTarget.Position.y, MERGE_DURATION)
                 .SetEase(Ease.Linear)
@@ -305,20 +305,20 @@ public class BoardManager : Singleton<BoardManager>
             .Select(block => new
             {
                 block,
-                countSquareSameValue = squareDatas.Count(squareData => IsBlockCanMerge(squareData, block))
+                SquareSameValueList = squareDatas.Where(squareData => IsBlockCanMerge(squareData, block))
             })
-            .Where(data => data.countSquareSameValue > 0)
-            .OrderByDescending(data => data.countSquareSameValue);
+            .Where(data => data.SquareSameValueList.Any())
+            .OrderByDescending(data => data.SquareSameValueList.Count());
 
         foreach (var data in squareMergeOrderByCountSameValueList)
         {
-            if (data.countSquareSameValue == 1)
+            if (data.SquareSameValueList.Count() == 1)
             {
-                MergeBlock(data.block);
+                MergeBlock(data.block, data.SquareSameValueList.First());
             }
             else
             {
-                MergeMultiBlock(data.block);
+                MergeMultiBlock(data.block, data.SquareSameValueList);
             }
         }
 
@@ -326,6 +326,7 @@ public class BoardManager : Singleton<BoardManager>
         {
             return;
         }
+
         _actionsWrapList.Add(new MergerActionWrap(_actionsList, ActionType.MergeAllBlock));
     }
 
@@ -340,18 +341,16 @@ public class BoardManager : Singleton<BoardManager>
         return isHasValue && isSameValue && (isSquareRight || isSquareLeft || isSquareDown || isSquareUp);
     }
 
-    private void MergeBlock(SquareData block)
+    private void MergeBlock(SquareData block, SquareData squareDataSameValue)
     {
-        SquareData squareSource;
-        SquareData squareTarget;
-        var action = new MergerAction();
-
-        SquareData squareDataSameValue = squareDatas.Find(squareData => IsBlockCanMerge(squareData, block));
-
-        if (squareDataSameValue is null)
+        if (squareDataSameValue.value != block.value)
         {
             return;
         }
+
+        SquareData squareSource;
+        SquareData squareTarget;
+        var action = new MergerAction();
 
         var newValue = block.value * 2;
         var isSameColumn = squareDataSameValue.cell.Row == block.cell.Row - 1;
@@ -384,56 +383,41 @@ public class BoardManager : Singleton<BoardManager>
         }
     }
 
-    private void MergeMultiBlock(SquareData cellCheck)
+    private void MergeMultiBlock(SquareData squareTarget, IEnumerable<SquareData> squareSourceList)
     {
-        var action = new MergerAction();
-        var countBlockSameValue = 0;
-
-        var squareLeft = GetSquareDataByCell(new Utils.Cell(cellCheck.cell.Column - 1, cellCheck.cell.Row));
-        var squareUp = GetSquareDataByCell(new Utils.Cell(cellCheck.cell.Column, cellCheck.cell.Row - 1));
-        var squareRight = GetSquareDataByCell(new Utils.Cell(cellCheck.cell.Column + 1, cellCheck.cell.Row));
-        var squareDown = GetSquareDataByCell(new Utils.Cell(cellCheck.cell.Column, cellCheck.cell.Row + 1));
-
-        countBlockSameValue = CountBlockSameValue(squareLeft, cellCheck, countBlockSameValue, action);
-        countBlockSameValue = CountBlockSameValue(squareUp, cellCheck, countBlockSameValue, action);
-        countBlockSameValue = CountBlockSameValue(squareRight, cellCheck, countBlockSameValue, action);
-        countBlockSameValue = CountBlockSameValue(squareDown, cellCheck, countBlockSameValue, action);
-
-        if (countBlockSameValue == 0)
+        var squareDataSourceList = squareSourceList as SquareData[] ?? squareSourceList.ToArray();
+        var isCompareAllValue =
+            squareDataSourceList.All(squareDataSameValue => squareDataSameValue.value == squareTarget.value);
+        if (!isCompareAllValue)
         {
             return;
         }
+        var countBlockSameValue = squareDataSourceList.Count();
+        var action = new MergerAction();
 
-        var newValue = cellCheck.value * (int)Mathf.Pow(2, countBlockSameValue);
+        var newValue = squareTarget.value * (int)Mathf.Pow(2, countBlockSameValue);
 
-        action.squareTarget = new SquareData(cellCheck.cell, cellCheck.index, cellCheck.value);
+        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.index, squareTarget.value);
         action.newSquareValue = newValue;
-
+        
+        foreach (var squareData in squareDataSourceList)
+        {
+            action.squareSources.Add(new SquareData(squareData.cell, squareData.index, squareData.value));
+            squareData.value = 0;
+            if (squareData == _processingSquare)
+            {
+                _processingSquare = squareTarget;
+            }
+        }
+        
         _actionsList.Add(action);
 
-        cellCheck.value = newValue;
+        squareTarget.value = newValue;
     }
 
     private SquareData GetSquareDataByCell(Utils.Cell cell)
     {
         return squareDatas.Find(item => item.cell.Row == cell.Row && item.cell.Column == cell.Column);
-    }
-
-    private int CountBlockSameValue(SquareData squareData, SquareData cellCheck, int countBlockSameValue,
-        MergerAction action)
-    {
-        if (squareData != null && squareData.value == cellCheck.value && squareData.value > 0)
-        {
-            action.squareSources.Add(new SquareData(squareData.cell, squareData.index, squareData.value));
-            squareData.value = 0;
-            countBlockSameValue++;
-            if (squareData == _processingSquare)
-            {
-                _processingSquare = cellCheck;
-            }
-        }
-
-        return countBlockSameValue;
     }
 
     private void SortAllBlock()
