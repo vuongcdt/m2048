@@ -27,6 +27,12 @@ public class BoardManager : Singleton<BoardManager>
     private List<int> _squareValueList = new() { 2 };
     // private readonly List<int> _listSquareValue = new() { 2, 4, 8, 16, 32, 64, 128 };
 
+    public List<SquareData> SquareDatas
+    {
+        get => squareDatas;
+        set => squareDatas = value;
+    }
+
     private void Start()
     {
         _uiManager = UIManager.Instance;
@@ -34,7 +40,7 @@ public class BoardManager : Singleton<BoardManager>
         RenderLineColumn();
         SetRandomSquareValue();
 
-        _uiManager.RenderStartUI(squareDatas);
+        _uiManager.StartUI(squareDatas);
     }
 
     public void ShootBlock()

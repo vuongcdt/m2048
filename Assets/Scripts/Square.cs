@@ -27,24 +27,6 @@ public class Square : MonoCache
         });
         SetTextAndColor();
     }
-    
-    public void MoveToPos(Vector2 pos)
-    {
-        transform.DOMove(pos, TIME_MERGE_SQUARE)
-            .OnComplete(() =>
-            {
-                gameObject.SetActive(false);
-            });
-    }
-
-    public void MoveY(float posY)
-    {
-        var duration = (posY / 2 + 3) / 10;
-
-        this.transform
-            .DOMoveY(posY, duration)
-            .SetEase(Ease.Linear);
-    }
 
     public void SetIndex(int index)
     {
@@ -62,8 +44,4 @@ public class Square : MonoCache
         sprintRendererBg.color = _colors[random];
     }
 
-    public void DeActive()
-    {
-        gameObject.SetActive(false);
-    }
 }
