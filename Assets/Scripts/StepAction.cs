@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 
 [Serializable]
-public class MergerAction
+public class StepAction
 {
     public List<SquareData> squareSources = new();
     public SquareData squareTarget;
     public int newSquareValue;
 }
-public class MergerActionWrap
+public class BoardAction
 {
-    public List<MergerAction> mergerActionList;
     public ActionType actionType;
+    public List<StepAction> stepActionList;
 
-    public MergerActionWrap(List<MergerAction> mergerActionList, ActionType actionType)
+    public BoardAction(List<StepAction> stepActionList, ActionType actionType)
     {
-        this.mergerActionList = mergerActionList;
+        this.stepActionList = stepActionList;
         this.actionType = actionType;
     }
 }
