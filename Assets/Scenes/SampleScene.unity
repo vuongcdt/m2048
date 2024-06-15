@@ -185,12 +185,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   squareDatas: []
-  square: {fileID: 2905904490840614441, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
   lineColumn: {fileID: 5260937453536865864, guid: cf7e610a94cbff54b9f5025cf4c4f629, type: 3}
   lineParentTransform: {fileID: 1166859083}
-  squareParentTransform: {fileID: 386745771}
   nextSquare: {fileID: 599894687}
-  nextSquareTextMesh: {fileID: 1462948106}
   boardRow: 5
   boardCol: 6
   isTouchLine: 0
@@ -599,7 +596,7 @@ GameObject:
   - component: {fileID: 959501677}
   - component: {fileID: 959501678}
   m_Layer: 0
-  m_Name: StoreManager
+  m_Name: UIManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -629,9 +626,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 959501676}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99034e205d6c4871a7e10c23b40583b7, type: 3}
+  m_Script: {fileID: 11500000, guid: aaf0e2d513814bc2a73b3513d246a137, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  square: {fileID: 2905904490840614441, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
+  squareParentTransform: {fileID: 386745771}
 --- !u!1 &1166859082
 GameObject:
   m_ObjectHideFlags: 0
@@ -663,11 +662,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 696407773}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!102 &1462948106 stripped
-TextMesh:
-  m_CorrespondingSourceObject: {fileID: 8874836035955344884, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
-  m_PrefabInstance: {fileID: 599894685}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1549756567
 GameObject:
   m_ObjectHideFlags: 0

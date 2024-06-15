@@ -4,25 +4,19 @@ public class LineColumn : MonoCache
 {
     [SerializeField] private SpriteRenderer bg;
     
-    private int _column;
-
-    public int Column
-    {
-        get => _column;
-        set => _column = value;
-    }
+    public int column;
     
     private void OnMouseDown()
     {
         SetActiveLine(true);
-        boardManager.columnSelect = Column;
+        boardManager.columnSelect = column;
         boardManager.isTouchLine = true;
     }
 
     private void OnMouseUp()
     {
         boardManager.isTouchLine = false;
-        boardManager.ShootBlock(_column);
+        boardManager.ShootBlock();
     }
 
     private void SetActiveLine(bool value)
@@ -33,7 +27,7 @@ public class LineColumn : MonoCache
     private void OnMouseEnter()
     {
         if (!boardManager.isTouchLine) return;
-        boardManager.columnSelect = Column;
+        boardManager.columnSelect = column;
         SetActiveLine(true);
     }
 
