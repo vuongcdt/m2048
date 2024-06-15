@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 public class Square : MonoCache
@@ -9,6 +10,7 @@ public class Square : MonoCache
     private List<Color> _colors;
 
     public SquareData squareData;
+    private const float TIME_MERGE_SQUARE = 0.1f;
 
     private void Awake()
     {
@@ -25,11 +27,43 @@ public class Square : MonoCache
         });
         SetTextAndColor();
     }
+    
+    public void MoveToPos(Vector2 pos)
+    {
+        transform.DOMove(pos, TIME_MERGE_SQUARE)
+            .OnComplete(() =>
+            {
+                gameObject.SetActive(false);
+            });
+    }
 
+    public void MoveY(float posY)
+    {
+        var duration = (posY / 2 + 3) / 10;
+
+        this.transform
+            .DOMoveY(posY, duration)
+            .SetEase(Ease.Linear);
+    }
+
+    public void SetIndex(int index)
+    {
+        squareData.index = index;
+    }
+    public void SetValue( int newValue)
+    {
+        squareData.value = newValue;
+        SetTextAndColor();
+    }
     private void SetTextAndColor()
     {
         text.text = squareData.value == 0 ? "" : squareData.value.ToString();
         var random = squareData.value % 7; //TODO
         sprintRendererBg.color = _colors[random];
+    }
+
+    public void DeActive()
+    {
+        gameObject.SetActive(false);
     }
 }

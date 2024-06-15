@@ -22,8 +22,7 @@ public class LineColumn : MonoCache
     private void OnMouseUp()
     {
         boardManager.isTouchLine = false;
-        Debug.Log($"Shoot {_column}");
-        boardManager.Shoot(_column);
+        boardManager.ShootBlock(_column);
     }
 
     private void SetActiveLine(bool value)

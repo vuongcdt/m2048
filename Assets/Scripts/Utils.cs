@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public static class Utils
@@ -23,6 +24,18 @@ public static class Utils
         {
             Row = row;
             Column = column;
+        }
+    }
+    
+    public class MergerActionListWrap
+    {
+        public List<MergerAction> mergerActionList;
+        public ActionType actionType;
+
+        public MergerActionListWrap(List<MergerAction> mergerActionList, ActionType actionType)
+        {
+            this.mergerActionList = mergerActionList;
+            this.actionType = actionType;
         }
     }
 }
