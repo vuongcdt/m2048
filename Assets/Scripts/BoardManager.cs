@@ -34,55 +34,7 @@ public class BoardManager : Singleton<BoardManager>
         RenderLineColumn();
         SetRandomSquareValue();
 
-        // ShootBlock(1);
-        // TestData();
-    }
-
-    private void TestData()
-    {
-        // squareDatas[0].value = 2;
-        // squareDatas[6].value = 4;
-
-        squareDatas[0].value = 16;
-        squareDatas[1].value = 2;
-        squareDatas[2].value = 16;
-
-        squareDatas[6].value = 2;
-        // squareDatas[7].value = 2;
-        squareDatas[8].value = 2;
-
-        squareDatas[12].value = 64;
-        // var cellCheck = GetSquareDataByCell(new Utils.Cell(1, 1));
-
-
-        // Shoot(1);
-
-        ////
-
-        // squareDatas[2].value = 2;
-        // // squareDatas[8].value = 2;
-        // Shoot(3);
-
-        // var cellCheck = GetSquareDataByCell(new Utils.Cell(2, 1));
-        // _processingSquare = cellCheck;
-
-        // squareDatas[0].value = 2;
-        // squareDatas[1].value = 8;
-
-
-        // squareDatas[2].value = 2;
-        //
-        // squareDatas[6].value = 8;
-        // squareDatas[7].value = 2;
-        // // squareDatas[8].value = 2;
-        //
-        // squareDatas[12].value = 4;
-        // squareDatas[13].value = 8;
-        //
-        // squareDatas[19].value = 4;
-        // // var cellCheck = GetSquareDataByCell(new Utils.Cell(2, 1));
-        // ////
-        // Shoot(2);
+        _uiManager.RenderStartUI(squareDatas);
     }
 
     public void ShootBlock()
