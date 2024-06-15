@@ -26,16 +26,4 @@ public static class Utils
             Column = column;
         }
     }
-    
-    public class MergerActionListWrap
-    {
-        public List<MergerAction> mergerActionList;
-        public ActionType actionType;
-
-        public MergerActionListWrap(List<MergerAction> mergerActionList, ActionType actionType)
-        {
-            this.mergerActionList = mergerActionList;
-            this.actionType = actionType;
-        }
-    }
 }

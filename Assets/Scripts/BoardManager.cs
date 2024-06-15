@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
-using DG.Tweening.Core;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class BoardManager : Singleton<BoardManager>
 {
@@ -21,12 +19,14 @@ public class BoardManager : Singleton<BoardManager>
     public bool isTouchLine;
     public int columnSelect;
 
+    private const float MERGE_DURATION = 0.5f;
     private int _randomNum;
     private int _newSquareValue;
     private SquareData _processingSquare;
     private List<Square> _squaresList = new();
     private List<GameObject> _lineColumnList = new();
     private List<MergerAction> _actionsList = new();
+    private List<MergerActionWrap> _actionsWrapList = new();
     private List<int> _squareValueList = new() { 2, 4 };
     // private readonly List<int> _listSquareValue = new() { 2, 4, 8, 16, 32, 64, 128 };
 
@@ -89,36 +89,36 @@ public class BoardManager : Singleton<BoardManager>
 
     public void ShootBlock(int column)
     {
-        _actionsList = new();
+        _actionsWrapList = new();
         ProcessingData(column);
         RenderUI();
 
-        Debug.Log("------");
+        // Debug.Log("------");
+        // foreach (var actionListWrap in _actionsWrapList)
+        // {
+        //     Debug.Log(JsonUtility.ToJson(actionListWrap));
+        // }
+        // Debug.Log("......");
 
-        foreach (var mergerAction in _actionsList)
-        {
-            Debug.Log(JsonUtility.ToJson(mergerAction));
-        }
-
-        Debug.Log("......");
+        SetRandomSquareValue();
     }
 
     private void RenderUI()
     {
         Sequence sequence = DOTween.Sequence();
-        var combineMergeActionList = CombineMergeActionList();
+        // var combineMergeActionList = CombineMergeActionList();
 
-        foreach (var actionListWrap in combineMergeActionList)
+        foreach (var actionListWrap in _actionsWrapList)
         {
             switch (actionListWrap.actionType)
             {
                 case ActionType.Shoot:
                     ShotUI(sequence, actionListWrap.mergerActionList.First());
                     break;
-                case ActionType.MergeBlock or ActionType.MergeMultiBlock:
+                case ActionType.MergeAllBlock:
                     MergeUI(sequence, actionListWrap.mergerActionList);
                     break;
-                case ActionType.SortBlock:
+                case ActionType.SortAllBlock:
                     SortUI(sequence, actionListWrap.mergerActionList);
                     break;
             }
@@ -127,8 +127,8 @@ public class BoardManager : Singleton<BoardManager>
 
     private void ShotUI(Sequence sequence, MergerAction mergerAction)
     {
-        var duration = GetDurationMove(mergerAction.squareSources[0].Position,mergerAction.squareTarget.Position);
-        
+        var duration = GetDurationMove(mergerAction.squareSources[0].Position, mergerAction.squareTarget.Position);
+
         var newSquare = Instantiate(square,
             mergerAction.squareSources[0].Position,
             Quaternion.identity,
@@ -144,40 +144,43 @@ public class BoardManager : Singleton<BoardManager>
 
     private void MergeUI(Sequence sequence, List<MergerAction> mergerActionList)
     {
+        Debug.Log("Merger BLOCK");
         ChangeAction(sequence);
 
         foreach (var mergerAction in mergerActionList)
         {
-            // Debug.Log($"mergerAction: {JsonUtility.ToJson(mergerAction)}");
+            Debug.Log($"Merger {JsonUtility.ToJson(mergerAction)}");
+            var squareSourceGameObjectsList = FindAllSquareGameObjectsSameValueActive(mergerAction);
+            var squareTargetGameObject = FindSquareGameObjectActiveByIndex(mergerAction.squareTarget.index);
 
-            // foreach (var squareSource in mergerAction.squareSources)
-            // {
-            //     Debug.Log($"squareSource: {JsonUtility.ToJson(squareSource.Position)}");
-            // }
-            // foreach (var squareGameObj in _squaresList)
-            // {
-            //     Debug.Log($"squareGameObj: {JsonUtility.ToJson(squareGameObj.transform.position)}");
-            // }
-
-            var squareSourceGameObjects =
-                _squaresList.FindAll(squareGameObj => IsSquareSameIndex(mergerAction.squareSources, squareGameObj));
-            var squareTargetGameObject =
-                _squaresList.Find(squareGameObj => mergerAction.squareTarget.index == squareGameObj.squareData.index);
-
-            foreach (var squareSourceGameObj in squareSourceGameObjects)
+            foreach (var squareSourceGameObject in squareSourceGameObjectsList)
             {
-                var duration = GetDurationMove(squareSourceGameObj.transform.position,mergerAction.squareTarget.Position);
-                sequence.Join(squareSourceGameObj.transform
-                    .DOMove(mergerAction.squareTarget.Position, duration)
+                sequence.Join(squareSourceGameObject.transform
+                    .DOMove(mergerAction.squareTarget.Position, MERGE_DURATION)
                     .SetEase(Ease.Linear)
                     .OnComplete(() =>
                     {
-                        squareSourceGameObj.DeActive();
                         squareTargetGameObject.SetValue(mergerAction.newSquareValue);
+                        squareSourceGameObject.squareData.value = 0;
+                        squareSourceGameObject.squareData.index = -1;
+                        squareSourceGameObject.DeActive();
                     })
                 );
             }
         }
+    }
+
+    private List<Square> FindAllSquareGameObjectsSameValueActive(MergerAction mergerAction)
+    {
+        return _squaresList.FindAll(squareGameObj =>
+            squareGameObj.gameObject.activeSelf &&
+            IsCompareSquareSameIndex(mergerAction.squareSources, squareGameObj));
+    }
+
+    private Square FindSquareGameObjectActiveByIndex(int index)
+    {
+        return _squaresList.Find(squareGameObj =>
+            squareGameObj.squareData.index == index && squareGameObj.gameObject.activeSelf);
     }
 
     private void ChangeAction(Sequence sequence)
@@ -185,7 +188,7 @@ public class BoardManager : Singleton<BoardManager>
         sequence.Append(nextSquare.transform.DOMove(nextSquare.transform.position, 0));
     }
 
-    private bool IsSquareSameIndex(List<SquareData> squareSources, Square squareGameObj)
+    private bool IsCompareSquareSameIndex(List<SquareData> squareSources, Square squareGameObj)
     {
         var isSquareSamePosition = squareSources.Any(squareData => squareData.index == squareGameObj.squareData.index);
         return isSquareSamePosition;
@@ -196,96 +199,72 @@ public class BoardManager : Singleton<BoardManager>
         ChangeAction(sequence);
         foreach (var mergerAction in mergerActionList)
         {
+            // Debug.Log($"Sort {JsonUtility.ToJson(mergerAction)}");
+            //
+            // Debug.Log($"mergerAction.squareSources[0].index {mergerAction.squareSources[0].index}");
             
-            var squareSourceGameObjects =
-                _squaresList.Find(squareGameObj => mergerAction.squareTarget.index == squareGameObj.squareData.index);
-            var duration = GetDurationMove(squareSourceGameObjects.transform.position,mergerAction.squareTarget.Position);
-
-            sequence.Join(squareSourceGameObjects.transform
-                .DOMoveY(mergerAction.squareTarget.Position.y, duration)
+            var squareSourceGameObject = FindSquareGameObjectActiveByIndex(mergerAction.squareSources[0].index);
+            // Debug.Log($"mergerAction.squareTarget.Position.y {mergerAction.squareTarget.Position.y}");
+            
+            sequence.Append(squareSourceGameObject.transform
+                .DOMoveY(mergerAction.squareTarget.Position.y, MERGE_DURATION)
                 .SetEase(Ease.Linear)
-                .OnComplete(() => { squareSourceGameObjects.SetIndex(mergerAction.squareTarget.index); })
+                .OnComplete(() =>
+                {
+                    squareSourceGameObject.SetValue(mergerAction.newSquareValue);
+                    squareSourceGameObject.SetIndex(mergerAction.squareTarget.index);
+                    // Debug.Log($"squareSourceGameObject2.index {squareSourceGameObject.squareData.index}");
+                })
             );
         }
     }
 
-    private float GetDurationMove(Vector2 posSource,Vector2 posTarget)
+    private float GetDurationMove(Vector2 posSource, Vector2 posTarget)
     {
-        var distance = Vector2.Distance(posSource , posTarget);
-        return (distance / 2 + 3) / 10;
-    }
-
-
-    private List<Utils.MergerActionListWrap> CombineMergeActionList()
-    {
-        ActionType typeMergeAction = new();
-        List<Utils.MergerActionListWrap> combineMergeActionsList = new();
-        List<MergerAction> newMergeActionsList = new();
-        foreach (var mergerAction in _actionsList)
-        {
-            if (mergerAction.type == typeMergeAction)
-            {
-                newMergeActionsList.Add(mergerAction);
-                continue;
-            }
-
-            typeMergeAction = mergerAction.type;
-            newMergeActionsList = new();
-            combineMergeActionsList.Add(new Utils.MergerActionListWrap(newMergeActionsList, typeMergeAction));
-            newMergeActionsList.Add(mergerAction);
-        }
-
-
-        // foreach (Utils.MergerActionListWrap mergerActionsListWrap in combineMergeActionsList)
-        // {
-        //     Debug.Log($"newMergeActionsList: {mergerActionsListWrap.mergerActionList.Count}");
-        //     // Debug.Log($"newMergeActionsList: {JsonUtility.ToJson(mergerActionsListWrap)}");
-        // }
-
-        return combineMergeActionsList;
+        var distance = Vector2.Distance(posSource, posTarget);
+        return (distance / 4 + 3) / 10;
     }
 
     private void ProcessingData(int column)
     {
         int countActionsList;
         Shoot(column);
+
         do
         {
-            countActionsList = _actionsList.Count;
+            countActionsList = _actionsWrapList.Count;
 
             MergeAllBlock();
-            if (countActionsList == _actionsList.Count)
+            if (countActionsList == _actionsWrapList.Count)
             {
                 break;
             }
 
             SortAllBlock();
-        } while (countActionsList < _actionsList.Count);
+        } while (countActionsList < _actionsWrapList.Count);
     }
 
     private void Shoot(int column)
     {
+        _actionsList = new();
         var action = new MergerAction();
         var squareTarget = GetEmptySquareDataTargetByColumn(column);
         var squareSource = new SquareData(
             new Utils.Cell(column, boardRow),
-            squareTarget.index,
+            boardRow * boardCol + column,
             _newSquareValue
         );
 
         action.squareTarget = squareTarget;
         action.squareSources.Add(squareSource);
         action.newSquareValue = _newSquareValue;
-        action.type = ActionType.Shoot;
 
         _actionsList.Add(action);
 
+        _actionsWrapList.Add(new MergerActionWrap(_actionsList, ActionType.Shoot));
+
         squareTarget.value = _newSquareValue;
         _processingSquare = squareTarget;
-
-        // Sequence mySequence = DOTween.Sequence();
-        // mySequence.Append(transform.DOMoveX(45, 1))
-        // mySequence.Append(transform.DOMoveX(45, 1))
     }
 
     private SquareData GetEmptySquareDataTargetByColumn(int column)
@@ -320,6 +299,7 @@ public class BoardManager : Singleton<BoardManager>
 
     private void MergeAllBlock()
     {
+        _actionsList = new();
         var squareMergeOrderByCountSameValueList = squareDatas
             .Where(block => block.value > 0)
             .Select(block => new
@@ -341,16 +321,23 @@ public class BoardManager : Singleton<BoardManager>
                 MergeMultiBlock(data.block);
             }
         }
+
+        if (!_actionsList.Any())
+        {
+            return;
+        }
+
+        _actionsWrapList.Add(new MergerActionWrap(_actionsList, ActionType.MergeAllBlock));
     }
 
     private bool IsBlockCanMerge(SquareData squareData, SquareData block)
     {
         var isHasValue = squareData.value > 0;
         var isSameValue = block.value == squareData.value;
-        var isSquareRight = squareData.index == block.index + 1;
-        var isSquareLeft = squareData.index == block.index - 1;
-        var isSquareDown = squareData.index == block.index + boardCol;
-        var isSquareUp = squareData.index == block.index - boardCol;
+        var isSquareRight = squareData.cell.Column == block.cell.Column + 1 && squareData.cell.Row == block.cell.Row;
+        var isSquareLeft = squareData.cell.Column == block.cell.Column - 1 && squareData.cell.Row == block.cell.Row;
+        var isSquareDown = squareData.cell.Row == block.cell.Row + 1 && squareData.cell.Column == block.cell.Column;
+        var isSquareUp = squareData.cell.Row == block.cell.Row - 1 && squareData.cell.Column == block.cell.Column;
         return isHasValue && isSameValue && (isSquareRight || isSquareLeft || isSquareDown || isSquareUp);
     }
 
@@ -385,10 +372,9 @@ public class BoardManager : Singleton<BoardManager>
             squareTarget = block;
         }
 
-        action.squareSources.Add(squareSource);
+        action.squareSources.Add(new SquareData(squareSource.cell, squareSource.index, squareSource.value));
         action.squareTarget = new SquareData(squareTarget.cell, squareTarget.index, squareTarget.value);
         action.newSquareValue = newValue;
-        action.type = ActionType.MergeBlock;
 
         _actionsList.Add(action);
         squareTarget.value = newValue;
@@ -423,7 +409,6 @@ public class BoardManager : Singleton<BoardManager>
 
         action.squareTarget = new SquareData(cellCheck.cell, cellCheck.index, cellCheck.value);
         action.newSquareValue = newValue;
-        action.type = ActionType.MergeMultiBlock;
 
         _actionsList.Add(action);
 
@@ -435,10 +420,7 @@ public class BoardManager : Singleton<BoardManager>
         return squareDatas.Find(item => item.cell.Row == cell.Row && item.cell.Column == cell.Column);
     }
 
-    private int CountBlockSameValue(
-        SquareData squareData,
-        SquareData cellCheck,
-        int countBlockSameValue,
+    private int CountBlockSameValue(SquareData squareData, SquareData cellCheck, int countBlockSameValue,
         MergerAction action)
     {
         if (squareData != null && squareData.value == cellCheck.value && squareData.value > 0)
@@ -457,6 +439,7 @@ public class BoardManager : Singleton<BoardManager>
 
     private void SortAllBlock()
     {
+        _actionsList = new();
         var emptyBlocksUpRowList = squareDatas
             .FindAll(item => item.value == 0 &&
                              squareDatas.Any(squareDownRow =>
@@ -478,6 +461,13 @@ public class BoardManager : Singleton<BoardManager>
                     new Utils.Cell(squareHasValueDownRow.cell.Column, squareHasValueDownRow.cell.Row - 1));
             }
         }
+
+        if (!_actionsList.Any())
+        {
+            return;
+        }
+
+        _actionsWrapList.Add(new MergerActionWrap(_actionsList, ActionType.SortAllBlock));
     }
 
     private void SortBlock(Utils.Cell cellCheck, Utils.Cell cellUp)
@@ -489,7 +479,6 @@ public class BoardManager : Singleton<BoardManager>
         action.squareSources.Add(new SquareData(squareCheck.cell, squareCheck.index, squareCheck.value));
         action.squareTarget = new SquareData(squareUp.cell, squareUp.index, squareUp.value);
         action.newSquareValue = squareCheck.value;
-        action.type = ActionType.SortBlock;
 
         _actionsList.Add(action);
 
@@ -509,11 +498,6 @@ public class BoardManager : Singleton<BoardManager>
                                                squareData.cell.Row > squareEmptyUpRow.cell.Row)
                 .OrderBy(squareData => squareData.index)
             ;
-    }
-
-    public int GetIndexByCell(Utils.Cell cell)
-    {
-        return cell.Column + cell.Row * boardCol;
     }
 
     private void PrinterSquaresData()
