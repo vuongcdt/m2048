@@ -326,7 +326,6 @@ public class BoardManager : Singleton<BoardManager>
         {
             return;
         }
-
         _actionsWrapList.Add(new MergerActionWrap(_actionsList, ActionType.MergeAllBlock));
     }
 
