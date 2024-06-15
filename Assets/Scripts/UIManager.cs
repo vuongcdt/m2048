@@ -3,12 +3,12 @@ using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
-public class UIManager:Singleton<UIManager>
+public class UIManager : Singleton<UIManager>
 {
     [SerializeField] private Square square;
     [SerializeField] private Transform squareParentTransform;
-    
-    private const float MERGE_DURATION = 0.5f;
+
+    private const float MERGE_DURATION = 0.2f;
     private List<Square> _squaresList = new();
     private List<BoardAction> _actionsWrapList = new();
 
@@ -17,29 +17,20 @@ public class UIManager:Singleton<UIManager>
         // squaresData[0].value = 2;
         // squaresData[6].value = 4;
 
-        squaresData[0].value = 16;
-        squaresData[1].value = 2;
-        squaresData[2].value = 16;
-
-        squaresData[6].value = 2;
-        // squaresData[7].value = 2;
-        squaresData[8].value = 2;
-
-        squaresData[12].value = 64;
-        // var cellCheck = GetSquareDataByCell(new Utils.Cell(1, 1));
-
-
-        // Shoot(1);
+        ////
+        // squaresData[0].value = 16;
+        // squaresData[1].value = 2;
+        // squaresData[2].value = 16;
+        //
+        // squaresData[6].value = 2;
+        // squaresData[8].value = 2;
+        //
+        // squaresData[12].value = 64;
 
         ////
-
         // squaresData[2].value = 2;
-        // // squaresData[8].value = 2;
-        // Shoot(3);
 
-        // var cellCheck = GetSquareDataByCell(new Utils.Cell(2, 1));
-        // _processingSquare = cellCheck;
-
+        ////
         // squaresData[0].value = 2;
         // squaresData[1].value = 8;
 
@@ -48,31 +39,34 @@ public class UIManager:Singleton<UIManager>
         //
         // squaresData[6].value = 8;
         // squaresData[7].value = 2;
-        // // squaresData[8].value = 2;
         //
         // squaresData[12].value = 4;
         // squaresData[13].value = 8;
         //
         // squaresData[19].value = 4;
-        // // var cellCheck = GetSquareDataByCell(new Utils.Cell(2, 1));
-        // ////
-        // Shoot(2);
-        
-        squaresData.FindAll(squareData => squareData.value > 0)
+
+        ////
+        squaresData[0].value = 2;
+        squaresData[6].value = 4;
+        squaresData[12].value = 2;
+
+        squaresData
+            .FindAll(squareData => squareData.value > 0)
             .ForEach(squareData =>
             {
-                var newSquareData = Instantiate(square, squareData.Position, Quaternion.identity);
+                var newSquareData =
+                    Instantiate(square, squareData.Position, Quaternion.identity, squareParentTransform);
                 newSquareData.SetValue(squareData.value);
                 newSquareData.SetIndex(squareData.index);
-                
+
                 _squaresList.Add(newSquareData);
             });
     }
-    
+
     public void RenderUI(List<BoardAction> actionsWrapList)
     {
         _actionsWrapList = actionsWrapList;
-        
+
         Sequence sequence = DOTween.Sequence().Pause();
 
         foreach (var actionListWrap in _actionsWrapList)
@@ -146,18 +140,23 @@ public class UIManager:Singleton<UIManager>
     private void SortUI(Sequence sequence, List<StepAction> mergerActionList)
     {
         Sequence sortSequence = DOTween.Sequence();
-        
+
         foreach (var mergerAction in mergerActionList)
         {
             Debug.Log($"SortUI_  {JsonUtility.ToJson(mergerAction)}");
 
             var squareSourceGameObject = FindSquareGameObjectActiveByIndex(mergerAction.squareSources[0].index);
 
+            Debug.Log($"squareSourceGameObject {squareSourceGameObject.transform.position}");
+            Debug.Log($"Position {mergerAction.squareTarget.Position}");
+
             sortSequence.Join(squareSourceGameObject.transform
-                .DOMoveY(mergerAction.squareTarget.Position.y, MERGE_DURATION)
+                .DOMove(mergerAction.squareTarget.Position, MERGE_DURATION)
                 .SetEase(Ease.Linear)
                 .OnComplete(() =>
                 {
+                    Debug.Log($"squareSourceGameObject 2 {squareSourceGameObject.transform.position}");
+                    Debug.Log($"Position 2 {mergerAction.squareTarget.Position}");
                     squareSourceGameObject.SetValue(mergerAction.newSquareValue);
                     squareSourceGameObject.SetIndex(mergerAction.squareTarget.index);
                 })
@@ -192,5 +191,4 @@ public class UIManager:Singleton<UIManager>
         var distance = Vector2.Distance(posSource, posTarget);
         return (distance / 4 + 3) / 10;
     }
-
 }

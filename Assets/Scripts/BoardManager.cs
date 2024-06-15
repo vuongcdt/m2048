@@ -24,7 +24,7 @@ public class BoardManager : Singleton<BoardManager>
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
-    private List<int> _squareValueList = new() { 2, 4 };
+    private List<int> _squareValueList = new() { 2 };
     // private readonly List<int> _listSquareValue = new() { 2, 4, 8, 16, 32, 64, 128 };
 
     private void Start()
@@ -47,8 +47,6 @@ public class BoardManager : Singleton<BoardManager>
         {
             Debug.Log("actionListWrap: " + JsonUtility.ToJson(actionListWrap));
         }
-
-        Debug.Log("......");
 
         _uiManager.RenderUI(_actionsWrapList);
 
@@ -84,8 +82,8 @@ public class BoardManager : Singleton<BoardManager>
             _newSquareValue
         );
 
-        action.squareTarget = new SquareData(squareTarget.cell,squareTarget.index,squareTarget.value);
-        action.squareSources.Add(new SquareData(squareSource.cell,squareSource.index,squareSource.value));
+        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.index, squareTarget.value);
+        action.squareSources.Add(new SquareData(squareSource.cell, squareSource.index, squareSource.value));
         action.newSquareValue = _newSquareValue;
 
         _actionsList.Add(action);
@@ -163,10 +161,17 @@ public class BoardManager : Singleton<BoardManager>
     {
         var isHasValue = squareData.value > 0;
         var isSameValue = block.value == squareData.value;
-        var isSquareRight = squareData.cell.Column == block.cell.Column + 1 && squareData.cell.Row == block.cell.Row;
-        var isSquareLeft = squareData.cell.Column == block.cell.Column - 1 && squareData.cell.Row == block.cell.Row;
-        var isSquareDown = squareData.cell.Row == block.cell.Row + 1 && squareData.cell.Column == block.cell.Column;
-        var isSquareUp = squareData.cell.Row == block.cell.Row - 1 && squareData.cell.Column == block.cell.Column;
+        
+        var squareColumn = squareData.cell.Column;
+        var squareRow = squareData.cell.Row;
+        var blockColumn = block.cell.Column;
+        var blockRow = block.cell.Row;
+        
+        var isSquareRight = squareColumn == blockColumn + 1 && squareRow == blockRow;
+        var isSquareLeft = squareColumn == blockColumn - 1 && squareRow == blockRow;
+        var isSquareDown = squareRow == blockRow + 1 && squareColumn == blockColumn;
+        var isSquareUp = squareRow == blockRow - 1 && squareColumn == blockColumn;
+        
         return isHasValue && isSameValue && (isSquareRight || isSquareLeft || isSquareDown || isSquareUp);
     }
 
@@ -221,7 +226,7 @@ public class BoardManager : Singleton<BoardManager>
         {
             return;
         }
-        
+
         var countBlockSameValue = squareDataSourceList.Count();
 
         var action = new StepAction();
