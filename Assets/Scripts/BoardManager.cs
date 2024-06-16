@@ -93,6 +93,7 @@ public class BoardManager : Singleton<BoardManager>
         var item = new BoardAction(new List<StepAction>(_actionsList), ActionType.Shoot);
         _actionsWrapList.Add(item);
 
+        squareTarget.id = squareSource.id;
         squareTarget.value = _newSquareValue;
         _processingSquare = squareTarget;
     }

@@ -12,6 +12,7 @@ public class UIManager : Singleton<UIManager>
     private List<Square> _squaresList = new();
     private List<BoardAction> _actionsWrapList = new();
     private Tween _sequence;
+    private int _idCount = 30;
 
     public void ToggleSequence()
     {
@@ -70,6 +71,8 @@ public class UIManager : Singleton<UIManager>
     {
         _actionsWrapList = actionsWrapList;
 
+        InitSquare();
+
         Sequence sequence = DOTween.Sequence();
         _sequence = sequence;
 
@@ -111,32 +114,38 @@ public class UIManager : Singleton<UIManager>
 
         var duration = GetDurationMove(stepAction.squareSources[0].Position, stepAction.squareTarget.Position);
 
-        var squarePool = _squaresList.Find(square => !square.gameObject.activeSelf);
-        if (squarePool != null)
-        {
-            squarePool.SetId(stepAction.squareTarget.id);
-
-            squarePool.SetValue(stepAction.newSquareValue);
-            squarePool.transform.position = stepAction.squareSources[0].Position;
-            squarePool.SetActive(true);
-        }
-        else
-        {
-            squarePool = Instantiate(square,
-                stepAction.squareSources[0].Position,
-                Quaternion.identity,
-                squareParentTransform);
-
-            squarePool.SetId(stepAction.squareTarget.id);
-            squarePool.SetValue(stepAction.newSquareValue);
-
-            _squaresList.Add(squarePool);
-        }
-
+        var squarePool = _squaresList.Find(squareGameObject =>
+            squareGameObject.squareData.id == stepAction.squareSources[0].id);
+        
+        squarePool.SetValue(stepAction.newSquareValue);
+        squarePool.transform.position = stepAction.squareSources[0].Position;
 
         sequence.Append(squarePool.transform
             .DOMoveY(stepAction.squareTarget.Position.y, duration)
             .SetEase(Ease.Linear));
+    }
+
+    private void InitSquare()
+    {
+        var squarePool = _squaresList.Find(square => !square.gameObject.activeSelf);
+        _idCount++;
+        var newSquarePos = new Vector3(0, 6, 0);
+        if (squarePool != null)
+        {
+            squarePool.SetId(_idCount);
+            squarePool.SetActive(true);
+            squarePool.transform.position = newSquarePos;
+        }
+        else
+        {
+            squarePool = Instantiate(square,
+                newSquarePos,
+                Quaternion.identity,
+                squareParentTransform);
+
+            squarePool.SetId(_idCount);
+            _squaresList.Add(squarePool);
+        }
     }
 
     private void MergeUI(Sequence sequence, List<StepAction> mergerActionList)
