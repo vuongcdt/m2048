@@ -11,6 +11,7 @@ public class UIManager : Singleton<UIManager>
     private const float MERGE_DURATION = 0.2f;
     private List<Square> _squaresList = new();
     private List<BoardAction> _actionsWrapList = new();
+    private Tween _sequence;
 
     public void StartUI(List<SquareData> squaresData)
     {
@@ -18,35 +19,39 @@ public class UIManager : Singleton<UIManager>
         // squaresData[6].value = 4;
 
         ////
-        // squaresData[0].value = 16;
-        // squaresData[1].value = 2;
-        // squaresData[2].value = 16;
-        //
-        // squaresData[6].value = 2;
-        // squaresData[8].value = 2;
-        //
-        // squaresData[12].value = 64;
+        squaresData[0].value = 16;
+        squaresData[1].value = 2;
+        squaresData[2].value = 16;
+
+        squaresData[6].value = 2;
+        squaresData[8].value = 2;
+
+        squaresData[12].value = 64;
 
         ////
         // squaresData[2].value = 2;
 
         ////
-        squaresData[0].value = 2;
-        squaresData[1].value = 8;
-        squaresData[2].value = 2;
-
-        squaresData[6].value = 8;
-        squaresData[7].value = 2;
-
-        squaresData[12].value = 4;
-        squaresData[13].value = 8;
-
-        squaresData[19].value = 4;
+        // squaresData[0].value = 2;
+        // squaresData[1].value = 8;
+        // squaresData[2].value = 2;
+        //
+        // squaresData[6].value = 8;
+        // squaresData[7].value = 2;
+        //
+        // squaresData[12].value = 4;
+        // squaresData[13].value = 8;
+        //
+        // squaresData[19].value = 4;
 
         ////
         // squaresData[0].value = 2;
         // squaresData[6].value = 4;
         // squaresData[12].value = 2;
+
+        ////
+        // squaresData[6].value = 8;
+        // squaresData[7].value = 2;
 
         ResetUI(squaresData);
     }
@@ -70,10 +75,12 @@ public class UIManager : Singleton<UIManager>
     {
         _actionsWrapList = actionsWrapList;
 
-        Sequence sequence = DOTween.Sequence().Pause();
+        Sequence sequence = DOTween.Sequence();
+        _sequence = sequence;
 
         foreach (var actionListWrap in _actionsWrapList)
         {
+            
             switch (actionListWrap.actionType)
             {
                 case ActionType.Shoot:
@@ -88,7 +95,6 @@ public class UIManager : Singleton<UIManager>
             }
         }
 
-        sequence.Play();
     }
 
 
@@ -112,6 +118,7 @@ public class UIManager : Singleton<UIManager>
                 stepAction.squareSources[0].Position,
                 Quaternion.identity,
                 squareParentTransform);
+        
             squarePool.SetIndex(stepAction.squareTarget.index);
             squarePool.SetValue(stepAction.newSquareValue);
 
@@ -131,21 +138,23 @@ public class UIManager : Singleton<UIManager>
         foreach (var mergerAction in mergerActionList)
         {
             Debug.Log($"MergeUI  {JsonUtility.ToJson(mergerAction)}");
-            var squareSourceGameObjectsList = FindAllSquareGameObjectsSameValueActive(mergerAction);
+            var squareSourceGameObjectsList = FindAllSquareGameObjectsActiveSameValue(mergerAction);
             var squareTargetGameObject = FindSquareGameObjectActiveByIndex(mergerAction.squareTarget.index);
 
             foreach (var squareSourceGameObject in squareSourceGameObjectsList)
             {
                 mergerSequence.Join(squareSourceGameObject.transform
-                    .DOMove(mergerAction.squareTarget.Position, MERGE_DURATION)
-                    .SetEase(Ease.Linear)
-                    .OnComplete(() =>
-                    {
-                        squareTargetGameObject.SetValue(mergerAction.newSquareValue);
-                        squareSourceGameObject.squareData.value = 0;
-                        squareSourceGameObject.squareData.index = -1;
-                        squareSourceGameObject.gameObject.SetActive(false);
-                    })
+                        .DOMove(mergerAction.squareTarget.Position, MERGE_DURATION)
+                        .SetEase(Ease.Linear)
+                        .OnComplete(() =>
+                        {
+                            squareTargetGameObject.SetValue(mergerAction.newSquareValue);
+                            squareSourceGameObject.squareData.value = 0;
+                            squareSourceGameObject.squareData.index = -1;
+                            squareSourceGameObject.gameObject.SetActive(false);
+                            
+                            sequence.Pause();
+                        })
                 );
             }
         }
@@ -170,6 +179,7 @@ public class UIManager : Singleton<UIManager>
                 {
                     squareSourceGameObject.SetValue(mergerAction.newSquareValue);
                     squareSourceGameObject.SetIndex(mergerAction.squareTarget.index);
+                    sequence.Pause();
                 })
             );
         }
@@ -177,11 +187,20 @@ public class UIManager : Singleton<UIManager>
         sequence.Append(sortSequence);
     }
 
-    private List<Square> FindAllSquareGameObjectsSameValueActive(StepAction stepAction)
+    public void ToggleSequence()
+    {
+        _sequence.TogglePause();
+    }
+    public void RewindSequence()
+    {
+        _sequence.Rewind();
+    }
+    
+    private List<Square> FindAllSquareGameObjectsActiveSameValue(StepAction stepAction)
     {
         return _squaresList.FindAll(squareGameObj =>
             squareGameObj.gameObject.activeSelf &&
-            IsCompareSquareSameIndex(stepAction.squareSources, squareGameObj));
+            IsCompareSquareActiveSameIndex(stepAction.squareSources, squareGameObj));
     }
 
     private Square FindSquareGameObjectActiveByIndex(int index)
@@ -190,10 +209,11 @@ public class UIManager : Singleton<UIManager>
             squareGameObj.squareData.index == index && squareGameObj.gameObject.activeSelf);
     }
 
-    private bool IsCompareSquareSameIndex(List<SquareData> squareSources, Square squareGameObj)
+    private bool IsCompareSquareActiveSameIndex(List<SquareData> squareSources, Square squareGameObj)
     {
-        var isSquareSamePosition = squareSources.Any(squareData => squareData.index == squareGameObj.squareData.index);
-        return isSquareSamePosition;
+        var isSquareActiveSameIndex = squareSources.Any(squareData =>
+            squareData.index == squareGameObj.squareData.index && squareGameObj.gameObject.activeSelf);
+        return isSquareActiveSameIndex;
     }
 
 

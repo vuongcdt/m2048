@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using DG.Tweening;
 using UnityEngine;
 
 public class BoardManager : Singleton<BoardManager>
@@ -68,11 +67,6 @@ public class BoardManager : Singleton<BoardManager>
             countActionsList = _actionsWrapList.Count;
 
             MergeAllBlock();
-            if (countActionsList == _actionsWrapList.Count)
-            {
-                break;
-            }
-
             SortAllBlock();
         } while (countActionsList < _actionsWrapList.Count);
     }
@@ -236,25 +230,6 @@ public class BoardManager : Singleton<BoardManager>
         var countBlockSameValue = squareDataSourceList.Count();
 
         var action = new StepAction();
-
-        //
-        // var countBlockSameValue = 0;
-        //
-        // var squareLeft = GetSquareDataByCell(new Utils.Cell(squareTarget.cell.Column - 1, squareTarget.cell.Row));
-        // var squareUp = GetSquareDataByCell(new Utils.Cell(squareTarget.cell.Column, squareTarget.cell.Row - 1));
-        // var squareRight = GetSquareDataByCell(new Utils.Cell(squareTarget.cell.Column + 1, squareTarget.cell.Row));
-        // var squareDown = GetSquareDataByCell(new Utils.Cell(squareTarget.cell.Column, squareTarget.cell.Row + 1));
-        //
-        // countBlockSameValue = CountBlockSameValue(squareLeft, squareTarget, countBlockSameValue, action);
-        // countBlockSameValue = CountBlockSameValue(squareUp, squareTarget, countBlockSameValue, action);
-        // countBlockSameValue = CountBlockSameValue(squareRight, squareTarget, countBlockSameValue, action);
-        // countBlockSameValue = CountBlockSameValue(squareDown, squareTarget, countBlockSameValue, action);
-        //
-        // if (countBlockSameValue == 0)
-        // {
-        //     return;
-        // }
-
 
         var newValue = squareTarget.value * (int)Mathf.Pow(2, countBlockSameValue);
 
