@@ -13,6 +13,16 @@ public class UIManager : Singleton<UIManager>
     private List<BoardAction> _actionsWrapList = new();
     private Tween _sequence;
 
+    public void ToggleSequence()
+    {
+        _sequence.TogglePause();
+    }
+
+    public void RewindSequence()
+    {
+        _sequence.Rewind();
+    }
+
     public void StartUI(List<SquareData> squaresData)
     {
         // squaresData[0].value = 2;
@@ -56,21 +66,6 @@ public class UIManager : Singleton<UIManager>
         ResetUI(squaresData);
     }
 
-    private void ResetUI(List<SquareData> squaresData)
-    {
-        squaresData
-            .FindAll(squareData => squareData.value > 0)
-            .ForEach(squareData =>
-            {
-                var newSquareData =
-                    Instantiate(square, squareData.Position, Quaternion.identity, squareParentTransform);
-                newSquareData.SetValue(squareData.value);
-                newSquareData.SetIndex(squareData.index);
-
-                _squaresList.Add(newSquareData);
-            });
-    }
-
     public void RenderUI(List<BoardAction> actionsWrapList)
     {
         _actionsWrapList = actionsWrapList;
@@ -80,7 +75,6 @@ public class UIManager : Singleton<UIManager>
 
         foreach (var actionListWrap in _actionsWrapList)
         {
-            
             switch (actionListWrap.actionType)
             {
                 case ActionType.Shoot:
@@ -94,9 +88,22 @@ public class UIManager : Singleton<UIManager>
                     break;
             }
         }
-
     }
 
+    private void ResetUI(List<SquareData> squaresData)
+    {
+        squaresData
+            .FindAll(squareData => squareData.value > 0)
+            .ForEach(squareData =>
+            {
+                var newSquareData =
+                    Instantiate(square, squareData.Position, Quaternion.identity, squareParentTransform);
+                newSquareData.SetValue(squareData.value);
+                newSquareData.SetId(squareData.cell.Column + 1 + squareData.cell.Row * 6); // todo
+
+                _squaresList.Add(newSquareData);
+            });
+    }
 
     private void ShootUI(Sequence sequence, StepAction stepAction)
     {
@@ -107,10 +114,11 @@ public class UIManager : Singleton<UIManager>
         var squarePool = _squaresList.Find(square => !square.gameObject.activeSelf);
         if (squarePool != null)
         {
-            squarePool.SetIndex(stepAction.squareTarget.index);
+            squarePool.SetId(stepAction.squareTarget.id);
+
             squarePool.SetValue(stepAction.newSquareValue);
             squarePool.transform.position = stepAction.squareSources[0].Position;
-            squarePool.gameObject.SetActive(true);
+            squarePool.SetActive(true);
         }
         else
         {
@@ -118,8 +126,8 @@ public class UIManager : Singleton<UIManager>
                 stepAction.squareSources[0].Position,
                 Quaternion.identity,
                 squareParentTransform);
-        
-            squarePool.SetIndex(stepAction.squareTarget.index);
+
+            squarePool.SetId(stepAction.squareTarget.id);
             squarePool.SetValue(stepAction.newSquareValue);
 
             _squaresList.Add(squarePool);
@@ -139,22 +147,21 @@ public class UIManager : Singleton<UIManager>
         {
             Debug.Log($"MergeUI  {JsonUtility.ToJson(mergerAction)}");
             var squareSourceGameObjectsList = FindAllSquareGameObjectsActiveSameValue(mergerAction);
-            var squareTargetGameObject = FindSquareGameObjectActiveByIndex(mergerAction.squareTarget.index);
+            var squareTargetGameObject = FindSquareGameObjectActiveById(mergerAction.squareTarget.id);
 
             foreach (var squareSourceGameObject in squareSourceGameObjectsList)
             {
                 mergerSequence.Join(squareSourceGameObject.transform
-                        .DOMove(mergerAction.squareTarget.Position, MERGE_DURATION)
-                        .SetEase(Ease.Linear)
-                        .OnComplete(() =>
-                        {
-                            squareTargetGameObject.SetValue(mergerAction.newSquareValue);
-                            squareSourceGameObject.squareData.value = 0;
-                            squareSourceGameObject.squareData.index = -1;
-                            squareSourceGameObject.gameObject.SetActive(false);
-                            
-                            sequence.Pause();
-                        })
+                    .DOMove(mergerAction.squareTarget.Position, MERGE_DURATION)
+                    .SetEase(Ease.Linear)
+                    .OnComplete(() =>
+                    {
+                        squareTargetGameObject.SetValue(mergerAction.newSquareValue);
+                        squareSourceGameObject.SetValue(0);
+                        squareSourceGameObject.SetActive(false);
+
+                        sequence.Pause();
+                    })
                 );
             }
         }
@@ -170,7 +177,7 @@ public class UIManager : Singleton<UIManager>
         {
             Debug.Log($"SortUI_  {JsonUtility.ToJson(mergerAction)}");
 
-            var squareSourceGameObject = FindSquareGameObjectActiveByIndex(mergerAction.squareSources[0].index);
+            var squareSourceGameObject = FindSquareGameObjectActiveById(mergerAction.squareSources[0].id);
 
             sortSequence.Join(squareSourceGameObject.transform
                 .DOMove(mergerAction.squareTarget.Position, MERGE_DURATION)
@@ -178,7 +185,6 @@ public class UIManager : Singleton<UIManager>
                 .OnComplete(() =>
                 {
                     squareSourceGameObject.SetValue(mergerAction.newSquareValue);
-                    squareSourceGameObject.SetIndex(mergerAction.squareTarget.index);
                     sequence.Pause();
                 })
             );
@@ -187,32 +193,23 @@ public class UIManager : Singleton<UIManager>
         sequence.Append(sortSequence);
     }
 
-    public void ToggleSequence()
-    {
-        _sequence.TogglePause();
-    }
-    public void RewindSequence()
-    {
-        _sequence.Rewind();
-    }
-    
-    private List<Square> FindAllSquareGameObjectsActiveSameValue(StepAction stepAction)
+    private List<Square> FindAllSquareGameObjectsActiveSameValue(StepAction stepAction) // check lai
     {
         return _squaresList.FindAll(squareGameObj =>
             squareGameObj.gameObject.activeSelf &&
-            IsCompareSquareActiveSameIndex(stepAction.squareSources, squareGameObj));
+            IsCompareSquareActiveSameId(stepAction.squareSources, squareGameObj));
     }
 
-    private Square FindSquareGameObjectActiveByIndex(int index)
+    private Square FindSquareGameObjectActiveById(int id)
     {
         return _squaresList.Find(squareGameObj =>
-            squareGameObj.squareData.index == index && squareGameObj.gameObject.activeSelf);
+            squareGameObj.squareData.id == id && squareGameObj.gameObject.activeSelf);
     }
 
-    private bool IsCompareSquareActiveSameIndex(List<SquareData> squareSources, Square squareGameObj)
+    private bool IsCompareSquareActiveSameId(List<SquareData> squareSources, Square squareGameObj)
     {
         var isSquareActiveSameIndex = squareSources.Any(squareData =>
-            squareData.index == squareGameObj.squareData.index && squareGameObj.gameObject.activeSelf);
+            squareData.id == squareGameObj.squareData.id && squareGameObj.gameObject.activeSelf);
         return isSquareActiveSameIndex;
     }
 

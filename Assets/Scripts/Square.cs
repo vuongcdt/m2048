@@ -6,11 +6,10 @@ public class Square : MonoCache
 {
     [SerializeField] private TextMesh text;
     [SerializeField] private SpriteRenderer sprintRendererBg;
-    
+
     private List<Color> _colors;
 
     public SquareData squareData;
-    private const float TIME_MERGE_SQUARE = 0.1f;
 
     private void Awake()
     {
@@ -28,20 +27,26 @@ public class Square : MonoCache
         SetTextAndColor();
     }
 
-    public void SetIndex(int index)
+    public void SetId(int id)
     {
-        squareData.index = index;
+        squareData.id = id;
     }
-    public void SetValue( int newValue)
+
+    public void SetValue(int newValue)
     {
         squareData.value = newValue;
         SetTextAndColor();
     }
+
+    public void SetActive(bool isActive)
+    {
+        gameObject.SetActive(isActive);
+    }
+
     private void SetTextAndColor()
     {
         text.text = squareData.value == 0 ? "" : squareData.value.ToString();
         var random = squareData.value % 7; //TODO
         sprintRendererBg.color = _colors[random];
     }
-
 }

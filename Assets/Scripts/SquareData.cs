@@ -1,20 +1,19 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [Serializable]
 public class SquareData
 {
     public Utils.Cell cell;
-    public int index;
+    public int id;
     public int value;
 
-    public Vector2 Position => Utils.GridToPos(cell.Row,cell.Column);
+    public Vector2 Position => Utils.GridToPos(cell.Row, cell.Column);
 
-    public SquareData(Utils.Cell cell, int index, int value)
+    public SquareData(Utils.Cell cell, int id, int value)
     {
         this.cell = cell;
-        this.index = index;
+        this.id = id;
         this.value = value;
     }
 }

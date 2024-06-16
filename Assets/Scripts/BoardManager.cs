@@ -17,8 +17,9 @@ public class BoardManager : Singleton<BoardManager>
     public int columnSelect;
 
     private UIManager _uiManager;
-    private int _randomNum;
     private int _newSquareValue;
+    private int _randomNum;
+    private int _idCount;
     private SquareData _processingSquare;
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
@@ -76,14 +77,16 @@ public class BoardManager : Singleton<BoardManager>
         _actionsList.Clear();
         var action = new StepAction();
         var squareTarget = GetEmptySquareDataTargetByColumn(column);
+        _idCount++;
+
         var squareSource = new SquareData(
             new Utils.Cell(column, boardRow),
-            boardRow * boardCol + column,
+            _idCount,
             _newSquareValue
         );
 
-        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.index, squareTarget.value);
-        action.squareSources.Add(new SquareData(squareSource.cell, squareSource.index, squareSource.value));
+        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.id, squareTarget.value);
+        action.squareSources.Add(new SquareData(squareSource.cell, squareSource.id, squareSource.value));
         action.newSquareValue = _newSquareValue;
 
         _actionsList.Add(action);
@@ -105,9 +108,10 @@ public class BoardManager : Singleton<BoardManager>
         {
             for (var x = 0; x < boardCol; x++)
             {
+                _idCount++;
                 squareDatas.Add(new SquareData(
                     new Utils.Cell(x, boardRow - y),
-                    x + (boardRow - y) * boardCol,
+                    _idCount,
                     0));
             }
         }
@@ -161,17 +165,17 @@ public class BoardManager : Singleton<BoardManager>
     {
         var isHasValue = squareData.value > 0;
         var isSameValue = block.value == squareData.value;
-        
+
         var squareColumn = squareData.cell.Column;
         var squareRow = squareData.cell.Row;
         var blockColumn = block.cell.Column;
         var blockRow = block.cell.Row;
-        
+
         var isSquareRight = squareColumn == blockColumn + 1 && squareRow == blockRow;
         var isSquareLeft = squareColumn == blockColumn - 1 && squareRow == blockRow;
         var isSquareDown = squareRow == blockRow + 1 && squareColumn == blockColumn;
         var isSquareUp = squareRow == blockRow - 1 && squareColumn == blockColumn;
-        
+
         return isHasValue && isSameValue && (isSquareRight || isSquareLeft || isSquareDown || isSquareUp);
     }
 
@@ -204,8 +208,8 @@ public class BoardManager : Singleton<BoardManager>
             squareTarget = squareDataTarget;
         }
 
-        action.squareSources.Add(new SquareData(squareSource.cell, squareSource.index, squareSource.value));
-        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.index, squareTarget.value);
+        action.squareSources.Add(new SquareData(squareSource.cell, squareSource.id, squareSource.value));
+        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.id, squareTarget.value);
         action.newSquareValue = newValue;
 
         _actionsList.Add(action);
@@ -233,12 +237,12 @@ public class BoardManager : Singleton<BoardManager>
 
         var newValue = squareTarget.value * (int)Mathf.Pow(2, countBlockSameValue);
 
-        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.index, squareTarget.value);
+        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.id, squareTarget.value);
         action.newSquareValue = newValue;
 
         foreach (var squareData in squareDataSourceList)
         {
-            action.squareSources.Add(new SquareData(squareData.cell, squareData.index, squareData.value));
+            action.squareSources.Add(new SquareData(squareData.cell, squareData.id, squareData.value));
             squareData.value = 0;
             if (squareData == _processingSquare)
             {
@@ -256,30 +260,14 @@ public class BoardManager : Singleton<BoardManager>
         return squareDatas.Find(item => item.cell.Row == cell.Row && item.cell.Column == cell.Column);
     }
 
-    private int CountBlockSameValue(SquareData squareData, SquareData cellCheck, int countBlockSameValue,
-        StepAction action)
-    {
-        if (squareData != null && squareData.value == cellCheck.value && squareData.value > 0)
-        {
-            action.squareSources.Add(new SquareData(squareData.cell, squareData.index, squareData.value));
-            squareData.value = 0;
-            countBlockSameValue++;
-            if (squareData == _processingSquare)
-            {
-                _processingSquare = cellCheck;
-            }
-        }
-
-        return countBlockSameValue;
-    }
-
     private void SortAllBlock()
     {
         _actionsList.Clear();
         var emptyBlocksUpRowList = squareDatas
             .FindAll(item => item.value == 0 &&
                              squareDatas.Any(squareDownRow =>
-                                 squareDownRow.index == item.index + boardCol &&
+                                 squareDownRow.cell.Row == item.cell.Row + 1 &&
+                                 squareDownRow.cell.Column == item.cell.Column &&
                                  squareDownRow.value > 0));
 
         if (!emptyBlocksUpRowList.Any())
@@ -312,8 +300,8 @@ public class BoardManager : Singleton<BoardManager>
         var squareUp = GetSquareDataByCell(cellUp);
         var squareCheck = GetSquareDataByCell(cellCheck);
 
-        action.squareSources.Add(new SquareData(squareCheck.cell, squareCheck.index, squareCheck.value));
-        action.squareTarget = new SquareData(squareUp.cell, squareUp.index, squareUp.value);
+        action.squareSources.Add(new SquareData(squareCheck.cell, squareCheck.id, squareCheck.value));
+        action.squareTarget = new SquareData(squareUp.cell, squareUp.id, squareUp.value);
         action.newSquareValue = squareCheck.value;
 
         _actionsList.Add(action);
@@ -332,7 +320,7 @@ public class BoardManager : Singleton<BoardManager>
         return squareDatas.Where(squareData => squareData.cell.Column == squareEmptyUpRow.cell.Column &&
                                                squareData.value > 0 &&
                                                squareData.cell.Row > squareEmptyUpRow.cell.Row)
-                .OrderBy(squareData => squareData.index)
+                .OrderBy(squareData => squareData.cell.Row)
             ;
     }
 
