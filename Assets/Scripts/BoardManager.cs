@@ -94,6 +94,7 @@ public class BoardManager : Singleton<BoardManager>
         _actionsWrapList.Add(item);
 
         squareTarget.id = squareSource.id;
+        squareSource.id = 0;
         squareTarget.value = _newSquareValue;
         _processingSquare = squareTarget;
     }
@@ -146,7 +147,7 @@ public class BoardManager : Singleton<BoardManager>
         {
             if (data.SquareSameValueList.Count() == 1)
             {
-                MergeBlock(data.block, data.SquareSameValueList.First());
+                MergeSingleBlock(data.block, data.SquareSameValueList.First());
             }
             else
             {
@@ -180,7 +181,7 @@ public class BoardManager : Singleton<BoardManager>
         return isHasValue && isSameValue && (isSquareRight || isSquareLeft || isSquareDown || isSquareUp);
     }
 
-    private void MergeBlock(SquareData squareDataTarget, SquareData squareDataSource)
+    private void MergeSingleBlock(SquareData squareDataTarget, SquareData squareDataSource)
     {
         if (squareDataSource.value != squareDataTarget.value)
         {
@@ -216,6 +217,7 @@ public class BoardManager : Singleton<BoardManager>
         _actionsList.Add(action);
         squareTarget.value = newValue;
         squareSource.value = 0;
+        // squareSource.id = GetSquareSourceID(squareSource);
         if (squareSource == _processingSquare)
         {
             _processingSquare = squareTarget;
@@ -295,25 +297,32 @@ public class BoardManager : Singleton<BoardManager>
         _actionsWrapList.Add(new BoardAction(new List<StepAction>(_actionsList), ActionType.SortAllBlock));
     }
 
-    private void SortBlock(Utils.Cell cellCheck, Utils.Cell cellUp)
+    private void SortBlock(Utils.Cell cellSource, Utils.Cell cellTarget)
     {
         var action = new StepAction();
-        var squareUp = GetSquareDataByCell(cellUp);
-        var squareCheck = GetSquareDataByCell(cellCheck);
+        var squareTarget = GetSquareDataByCell(cellTarget);
+        var squareSource = GetSquareDataByCell(cellSource);
 
-        action.squareSources.Add(new SquareData(squareCheck.cell, squareCheck.id, squareCheck.value));
-        action.squareTarget = new SquareData(squareUp.cell, squareUp.id, squareUp.value);
-        action.newSquareValue = squareCheck.value;
+        action.squareSources.Add(new SquareData(squareSource.cell, squareSource.id, squareSource.value));
+        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.id, squareTarget.value);
+        action.newSquareValue = squareSource.value;
 
         _actionsList.Add(action);
 
-        squareUp.value = squareCheck.value;
-        squareCheck.value = 0;
+        squareTarget.value = squareSource.value;
+        squareSource.value = 0;
+        squareTarget.id = squareSource.id;
+        squareSource.id = GetSquareSourceID(squareSource);
 
-        if (squareCheck == _processingSquare)
+        if (squareSource == _processingSquare)
         {
-            _processingSquare = squareUp;
+            _processingSquare = squareTarget;
         }
+    }
+
+    private int GetSquareSourceID(SquareData squareSource)
+    {
+        return squareSource.cell.Column + squareSource.cell.Row * boardCol + 1;
     }
 
     private IEnumerable<SquareData> GetSquaresDataHasValueDownRowByCell(SquareData squareEmptyUpRow)

@@ -78,6 +78,7 @@ public class UIManager : Singleton<UIManager>
 
         foreach (var actionListWrap in _actionsWrapList)
         {
+            sequence.Pause();
             switch (actionListWrap.actionType)
             {
                 case ActionType.Shoot:
@@ -127,7 +128,7 @@ public class UIManager : Singleton<UIManager>
 
     private void InitSquare()
     {
-        var squarePool = _squaresList.Find(square => !square.gameObject.activeSelf);
+        var squarePool = _squaresList.Find(squareGameObject => !squareGameObject.gameObject.activeSelf);
         _idCount++;
         var newSquarePos = new Vector3(0, 6, 0);
         if (squarePool != null)
@@ -194,7 +195,6 @@ public class UIManager : Singleton<UIManager>
                 .OnComplete(() =>
                 {
                     squareSourceGameObject.SetValue(mergerAction.newSquareValue);
-                    sequence.Pause();
                 })
             );
         }
