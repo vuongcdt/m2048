@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.Profiling;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 using uPools;
 
 public class BoardManager : Singleton<BoardManager>
@@ -19,17 +20,20 @@ public class BoardManager : Singleton<BoardManager>
     public int boardCol = 6;
     public bool isTouchLine;
     public int columnSelect;
+    public bool isProcessing;
+    public int score;
 
     private UIManager _uiManager;
-    private int _newSquareValue;
-    private int _randomNum;
-    private int _idCount;
     private SquareData _processingSquare;
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
     private List<int> _squareValueList = new() { 2, 4 };
     // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
+    private int _newSquareValue;
+    private int _randomNum;
+    private int _idCount;
+    private const int MAX_COUNT_QUARE_VALUE_LIST = 3;
 
     private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
     private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
@@ -39,6 +43,14 @@ public class BoardManager : Singleton<BoardManager>
     {
         get => squareDatas;
         set => squareDatas = value;
+    }
+
+    public void SetActiveTouch(bool isActive)
+    {
+        foreach (var line in _lineColumnList)
+        {
+            line.SetActive(isActive);
+        }
     }
 
     private void Start()
@@ -51,10 +63,10 @@ public class BoardManager : Singleton<BoardManager>
 
         _uiManager.StartUI(squareDatas);
     }
-
-
+    
     public IEnumerator ShootBlock()
     {
+        isProcessing = true;
         _actionsWrapList.Clear();
         yield return new WaitForNextFrameUnit();
 
@@ -63,10 +75,10 @@ public class BoardManager : Singleton<BoardManager>
         ProcessingDataMaker.End();
 
         yield return new WaitForNextFrameUnit();
-        Debug.Log("------");
+        
         foreach (var actionListWrap in _actionsWrapList)
         {
-            Debug.Log("actionListWrap: " + JsonUtility.ToJson(actionListWrap));
+            Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
         }
 
         yield return new WaitForNextFrameUnit();
@@ -413,14 +425,6 @@ public class BoardManager : Singleton<BoardManager>
             ;
     }
 
-    private void PrinterSquaresData()
-    {
-        print("__________");
-        squareDatas
-            .FindAll(e => e.value > 0)
-            .ForEach(e => { Debug.Log(JsonUtility.ToJson(e)); });
-    }
-
     private void SetRandomSquareValue()
     {
         SetNewSquareValue();
@@ -433,26 +437,22 @@ public class BoardManager : Singleton<BoardManager>
     private void SetNewSquareValue()
     {
         var maxValueInBoard = GetMaxValueSquareInBoard();
-        var maxValueInSquareValueList = _squareValueList[_squareValueList.Count];
+        var maxValueInSquareValueList = _squareValueList[^1];
+        
         if (maxValueInBoard > maxValueInSquareValueList / 2)
         {
             _squareValueList.Add(maxValueInSquareValueList * 2);
         }
 
-        if (_squareValueList.Count > 9)
+        if (_squareValueList.Count > MAX_COUNT_QUARE_VALUE_LIST)
         {
+            Debug.Log("_squareValueList1"+string.Join(" - ",_squareValueList));
+            
             var minValueInBoard = GetMinValueSquareInBoard(maxValueInBoard);
             _squareValueList.Remove(minValueInBoard);
-            RemoveSquareMinValueInSquareDatas(minValueInBoard);
-        }
-    }
+            squareDatas.RemoveAll(square => square.value == minValueInBoard);
 
-    private void RemoveSquareMinValueInSquareDatas(int minValueInBoard)
-    {
-        // squareDatas.Remove()
-        for (var i = 0; i < squareDatas.Count; i++)
-        {
-            
+            Debug.Log("_squareValueList2"+string.Join(" - ",_squareValueList));
         }
     }
 

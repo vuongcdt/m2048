@@ -16,12 +16,12 @@ public class LineColumn : MonoCache
     private void OnMouseUp()
     {
         boardManager.isTouchLine = false;
+        
+        if (boardManager.isProcessing)
+        {
+            return;
+        }
         StartCoroutine(boardManager.ShootBlock());
-    }
-
-    private void SetActiveLine(bool value)
-    {
-        bg.color = value ? new Color(0.47f, 0.47f, 0.47f, 0.35f) : new Color(0.27f, 0.27f, 0.27f, 0.35f);
     }
 
     private void OnMouseEnter()
@@ -34,5 +34,10 @@ public class LineColumn : MonoCache
     private void OnMouseExit()
     {
         SetActiveLine(false);
+    }
+    
+    private void SetActiveLine(bool value)
+    {
+        bg.color = value ? new Color(0.47f, 0.47f, 0.47f, 0.35f) : new Color(0.27f, 0.27f, 0.27f, 0.35f);
     }
 }
