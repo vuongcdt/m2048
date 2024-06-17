@@ -16,7 +16,7 @@ public class LineColumn : MonoCache
     private void OnMouseUp()
     {
         boardManager.isTouchLine = false;
-        boardManager.ShootBlock();
+        StartCoroutine(boardManager.ShootBlock());
     }
 
     private void SetActiveLine(bool value)

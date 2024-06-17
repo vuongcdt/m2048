@@ -1,6 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Profiling;
+using Unity.VisualScripting;
 using UnityEngine;
+using uPools;
 
 public class BoardManager : Singleton<BoardManager>
 {
@@ -24,8 +28,12 @@ public class BoardManager : Singleton<BoardManager>
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
-    private List<int> _squareValueList = new() { 2 };
-    // private readonly List<int> _listSquareValue = new() { 2, 4, 8, 16, 32, 64, 128 };
+    private List<int> _squareValueList = new() { 2, 4 };
+    // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
+
+    private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
+    private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
+
 
     public List<SquareData> SquareDatas
     {
@@ -35,6 +43,7 @@ public class BoardManager : Singleton<BoardManager>
 
     private void Start()
     {
+        // Application.targetFrameRate = 60;
         _uiManager = UIManager.Instance;
         ResetBoard();
         RenderLineColumn();
@@ -43,19 +52,30 @@ public class BoardManager : Singleton<BoardManager>
         _uiManager.StartUI(squareDatas);
     }
 
-    public void ShootBlock()
+
+    public IEnumerator ShootBlock()
     {
         _actionsWrapList.Clear();
-        ProcessingData(columnSelect);
+        yield return new WaitForNextFrameUnit();
 
+        ProcessingDataMaker.Begin();
+        ProcessingData(columnSelect);
+        ProcessingDataMaker.End();
+
+        yield return new WaitForNextFrameUnit();
         Debug.Log("------");
         foreach (var actionListWrap in _actionsWrapList)
         {
             Debug.Log("actionListWrap: " + JsonUtility.ToJson(actionListWrap));
         }
 
-        _uiManager.RenderUI(_actionsWrapList);
+        yield return new WaitForNextFrameUnit();
 
+        RenderUIMaker.Begin();
+        _uiManager.RenderUI(_actionsWrapList);
+        RenderUIMaker.End();
+
+        yield return new WaitForNextFrameUnit();
         SetRandomSquareValue();
     }
 
@@ -77,6 +97,11 @@ public class BoardManager : Singleton<BoardManager>
         _actionsList.Clear();
         var action = new StepAction();
         var squareTarget = GetEmptySquareDataTargetByColumn(column);
+        if (squareTarget == null)
+        {
+            return;
+        }
+
         _idCount++;
 
         var squareSource = new SquareData(
@@ -133,6 +158,46 @@ public class BoardManager : Singleton<BoardManager>
     private void MergeAllBlock()
     {
         _actionsList.Clear();
+
+        // foreach (var squareData in squareDatas)
+        // {
+        //     if (squareData.value == 0)
+        //     {
+        //         continue;
+        //     }
+        //
+        //     var squareSameValueList = new List<SquareData>();
+        //     foreach (var square in squareDatas)
+        //     {
+        //         if (IsBlockCanMerge(square, squareData))
+        //         {
+        //             squareSameValueList.Add(square);
+        //         }
+        //     }
+        //     
+        //
+        // }
+
+        // for(int j = 0; j < squareDatas.Count -1;j++)
+        // {
+        //     for(int i = 0;i < squareDatas.Count-1;i++ )
+        //     {
+        //         var squareSameValueList = GetSquareSamevalue(i);
+        //         if (squareSameValueList.Count == 0)
+        //         {
+        //             continue;
+        //         }
+        //         
+        //         // int swap = 0;
+        //         // if(squareDatas[i] > squareDatas[ i+1])
+        //         // {
+        //         //     swap  = squareDatas[i+1];
+        //         //     squareDatas[i+1] = squareDatas[i];
+        //         //     squareDatas[i] = swap;
+        //         // }
+        //     }
+        // }
+
         var squareMergeOrderByCountSameValueList = squareDatas
             .Where(block => block.value > 0)
             .Select(block => new
@@ -161,6 +226,20 @@ public class BoardManager : Singleton<BoardManager>
         }
 
         _actionsWrapList.Add(new BoardAction(new List<StepAction>(_actionsList), ActionType.MergeAllBlock));
+    }
+
+    private List<SquareData> GetSquareSamevalue(int i)
+    {
+        var squareSameValueList = new List<SquareData>();
+        foreach (var square in squareDatas)
+        {
+            if (IsBlockCanMerge(square, squareDatas[i]))
+            {
+                squareSameValueList.Add(square);
+            }
+        }
+
+        return squareSameValueList;
     }
 
     private bool IsBlockCanMerge(SquareData squareData, SquareData block)
@@ -344,9 +423,65 @@ public class BoardManager : Singleton<BoardManager>
 
     private void SetRandomSquareValue()
     {
+        SetNewSquareValue();
+
         _randomNum = Random.Range(0, _squareValueList.Count);
         _newSquareValue = _squareValueList[_randomNum];
         nextSquare.SetValue(_newSquareValue);
+    }
+
+    private void SetNewSquareValue()
+    {
+        var maxValueInBoard = GetMaxValueSquareInBoard();
+        var maxValueInSquareValueList = _squareValueList[_squareValueList.Count];
+        if (maxValueInBoard > maxValueInSquareValueList / 2)
+        {
+            _squareValueList.Add(maxValueInSquareValueList * 2);
+        }
+
+        if (_squareValueList.Count > 9)
+        {
+            var minValueInBoard = GetMinValueSquareInBoard(maxValueInBoard);
+            _squareValueList.Remove(minValueInBoard);
+            RemoveSquareMinValueInSquareDatas(minValueInBoard);
+        }
+    }
+
+    private void RemoveSquareMinValueInSquareDatas(int minValueInBoard)
+    {
+        // squareDatas.Remove()
+        for (var i = 0; i < squareDatas.Count; i++)
+        {
+            
+        }
+    }
+
+    private int GetMaxValueSquareInBoard()
+    {
+        int maxValue = 0;
+        foreach (var squareData in squareDatas)
+        {
+            if (squareData.value > maxValue)
+            {
+                maxValue = squareData.value;
+            }
+        }
+
+        return maxValue;
+    }
+
+    private int GetMinValueSquareInBoard(int maxValue)
+    {
+        int minValue = maxValue;
+        foreach (var squareData in squareDatas)
+        {
+            if (squareData.value < minValue)
+            {
+                minValue = squareData.value;
+            }
+        }
+
+        return minValue;
     }
 
     #endregion

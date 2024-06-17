@@ -843,8 +843,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aaf0e2d513814bc2a73b3513d246a137, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  square: {fileID: 2905904490840614441, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
+  squarePrefab: {fileID: 1501351254502025820, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
   squareParentTransform: {fileID: 386745771}
+  isPause: 0
 --- !u!1 &1166859082
 GameObject:
   m_ObjectHideFlags: 0
@@ -935,7 +936,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 38
+    m_FontSize: 29
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -946,7 +947,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Rewind
+  m_Text: Unset Pause
 --- !u!222 &1513947746
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1036,7 +1037,7 @@ GameObject:
   - component: {fileID: 1920673527}
   - component: {fileID: 1920673526}
   m_Layer: 5
-  m_Name: Button Rewind
+  m_Name: Button Unset Pause
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1108,7 +1109,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 959501678}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: RewindSequence
+        m_MethodName: UnsetPause
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
