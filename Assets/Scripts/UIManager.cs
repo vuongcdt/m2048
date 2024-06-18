@@ -46,10 +46,10 @@ public class UIManager : Singleton<UIManager>
         squaresData[0].value = 16;
         squaresData[1].value = 2;
         squaresData[2].value = 16;
-        
+
         squaresData[6].value = 2;
         squaresData[8].value = 2;
-        
+
         squaresData[12].value = 64;
 
         ////
@@ -89,7 +89,7 @@ public class UIManager : Singleton<UIManager>
         _sequence = DOTween.Sequence();
 
         _actionsWrapList = actionsWrapList;
-        
+
         foreach (var actionListWrap in _actionsWrapList)
         {
             Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
@@ -127,32 +127,6 @@ public class UIManager : Singleton<UIManager>
         }
     }
 
-    private void ClearMinBlockUI(Sequence sequence, List<StepAction> stepActionList)
-    {
-        Sequence clearSequence = DOTween.Sequence();
-        foreach (var stepAction in stepActionList)
-        {
-            Debug.Log($"ClearMinBlockUI {JsonUtility.ToJson(stepAction)}");
-
-        }
-
-        // _squaresList.FindAll()
-        
-        // _squaresList.FindAll(squareGameObject =>
-        //         stepActionList.First().squareSources
-        //             .Any(sourceSquare => squareGameObject.squareData.id == sourceSquare.id))
-        //     .ForEach(squareGameObject =>
-        //     {
-        //         clearSequence.Join(squareGameObject.transform.DOMove(Vector3.one, 0)
-        //             .OnComplete(() =>
-        //             {
-        //                 squareGameObject.gameObject.SetActive(false);
-        //                 squareGameObject.SetValue(0);
-        //             }));
-        //     });
-        sequence.Append(clearSequence);
-    }
-
     private void Start()
     {
         _boardManager = BoardManager.Instance;
@@ -188,7 +162,7 @@ public class UIManager : Singleton<UIManager>
 
         var squarePool = _squaresList.Find(squareGameObject =>
             squareGameObject.squareData.id == stepAction.singleSquareSources.id);
-        
+
         squarePool.SetValue(stepAction.newSquareValue);
         squarePool.transform.position = stepAction.singleSquareSources.Position;
 
@@ -276,6 +250,36 @@ public class UIManager : Singleton<UIManager>
 
         sequence.Append(sortSequence);
         sequence.AppendInterval(TIME_DELAY);
+    }
+
+    private void ClearMinBlockUI(Sequence sequence, List<StepAction> stepActionList)
+    {
+        Sequence clearMinValueSequence = DOTween.Sequence();
+        // foreach (var stepAction in stepActionList)
+        // {
+        //     Debug.Log($"ClearMinBlockUI {JsonUtility.ToJson(stepAction)}");
+        // }
+
+        foreach (var squareGameObject in _squaresList)
+        {
+            foreach (var stepAction in stepActionList)
+            {
+                if (stepAction.squareTarget.id == squareGameObject.squareData.id)
+                {
+                    // Debug.Log($"squareGameObject.squareData.id {squareGameObject.squareData.id}");
+                    clearMinValueSequence.Join(squareGameObject.transform
+                        .DOMove(stepAction.squareTarget.Position, 0)
+                        .OnComplete(() =>
+                        {
+                            // Debug.Log("CLEAR GAME OBJECT");
+                            squareGameObject.SetValue(0);
+                            squareGameObject.ReturnPool();
+                        }));
+                }
+            }
+        }
+
+        sequence.Append(clearMinValueSequence);
     }
 
     private List<Square> FindAllSquareGameObjectsActiveSameValue(StepAction stepAction)

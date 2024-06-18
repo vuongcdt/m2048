@@ -34,6 +34,7 @@ public class BoardManager : Singleton<BoardManager>
     private int _randomNum;
     private int _idCount;
     private const int MAX_COUNT_QUARE_VALUE_LIST = 6;
+    private readonly int[] _probabilityList = { 1, 3, 6, 10, 15, 21 };
 
     private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
     private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
@@ -436,12 +437,8 @@ public class BoardManager : Singleton<BoardManager>
         SetNewSquareValue();
 
         SetRandomValue();
-        // _randomNum = Random.Range(0, _squareValueList.Count);
-        // _newSquareValue = _squareValueList[_randomNum];
-        // nextSquare.SetValue(_newSquareValue);
     }
 
-    private readonly int[] _probabilityList = { 1, 3, 6, 10, 15, 21 };
 
     private void SetRandomValue()
     {
@@ -477,39 +474,43 @@ public class BoardManager : Singleton<BoardManager>
 
         if (_squareValueList.Count > MAX_COUNT_QUARE_VALUE_LIST - 3) //todo
         {
-            // Debug.Log("DEL MIN VALUE");
-            // var minValueInBoard = _squareValueList[0];
-            // _squareValueList.RemoveAt(0);
-            //
-            // ClearMinBlock(minValueInBoard);
+            Debug.Log("DEL MIN VALUE");
+            var minValueInBoard = _squareValueList[0];
+            _squareValueList.RemoveAt(0);
+
+            ClearMinBlock(minValueInBoard);
         }
 
-        Debug.Log("_squareValueList  " + string.Join(" - ", _squareValueList));
+        // Debug.Log("_squareValueList  " + string.Join(" - ", _squareValueList));
     }
 
     private void ClearMinBlock(int minValueInBoard)
     {
         _actionsList.Clear();
 
-        StepAction action = new();
         foreach (var squareData in squareDatas)
         {
             // Debug.Log($"squareData.value {squareData.value} minValueInBoard {minValueInBoard}");
             if (squareData.value == minValueInBoard)
             {
+                StepAction action = new()
+                {
+                    squareTarget = new SquareData(squareData.cell, squareData.id, squareData.value)
+                };
+
                 squareData.value = 0;
-                action.multiSquareSources.Add(squareData);
+                _actionsList.Add(action);
             }
         }
 
-        _actionsList.Add(action);
-        foreach (var stepAction in _actionsList)
-        {
-            Debug.Log($"_actionsList {JsonUtility.ToJson(stepAction)}");
-        }
+        // foreach (var stepAction in _actionsList)
+        // {
+        //     Debug.Log($"_actionsList {JsonUtility.ToJson(stepAction)}");
+        // }
+
         var item = new BoardAction(new List<StepAction>(_actionsList), ActionType.ClearMinBlock);
         _actionsWrapList.Add(item);
-        
+
         ProcessingLoop();
     }
 
