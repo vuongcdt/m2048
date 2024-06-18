@@ -888,7 +888,7 @@ MonoBehaviour:
   squareParentTransform: {fileID: 386745771}
   scoreText: {fileID: 1222888634}
   comboPrefab: {fileID: 1016378124}
-  comboText: {fileID: 1016378123}
+  comboText: {fileID: 1661538697}
   isPause: 0
 --- !u!1001 &1016378122
 PrefabInstance:
@@ -898,6 +898,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 602357207}
     m_Modifications:
+    - target: {fileID: 375918972780172821, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
+      propertyPath: m_Text
+      value: Combo x1
+      objectReference: {fileID: 0}
+    - target: {fileID: 375918972780172821, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
+      propertyPath: m_FontSize
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 375918972780172821, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
+      propertyPath: m_Color.rgba
+      value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: 3179176387601843055, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
+      propertyPath: m_Name
+      value: ComboText
+      objectReference: {fileID: 0}
     - target: {fileID: 3812463973005103234, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -978,6 +994,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4111331310874743686, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
+      propertyPath: m_DrawMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4111331310874743686, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
+      propertyPath: m_SortingOrder
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4111331310874743686, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
+      propertyPath: m_MaskInteraction
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4494302327381197955, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 29.999998
+      objectReference: {fileID: 0}
+    - target: {fileID: 4737523788931693500, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
+      propertyPath: m_SortingOrder
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 7382506540676682945, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
       propertyPath: m_Name
       value: Combo
@@ -986,22 +1022,13 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedComponents:
+    - {fileID: 1585550718846165765, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
+    m_RemovedGameObjects:
+    - {fileID: 4904357251734863027, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
---- !u!114 &1016378123 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2229051610907834496, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
-  m_PrefabInstance: {fileID: 1016378122}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1016378124 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7382506540676682945, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
@@ -1348,6 +1375,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!102 &1661538697 stripped
+TextMesh:
+  m_CorrespondingSourceObject: {fileID: 7792178968633152202, guid: 26b300bafbbf8554988c2221136b99a5, type: 3}
+  m_PrefabInstance: {fileID: 1016378122}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1920673524
 GameObject:
   m_ObjectHideFlags: 0

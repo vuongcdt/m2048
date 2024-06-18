@@ -32,6 +32,7 @@ public class BoardManager : Singleton<BoardManager>
     // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
     private int _newSquareValue;
     private int _randomNum;
+    private bool _isMaxItemColumn;
     private int _idCount;
     private const int MAX_COUNT_QUARE_VALUE_LIST = 6;
     private readonly int[] _probabilityList = { 1, 3, 6, 10, 15, 21 };
@@ -58,10 +59,14 @@ public class BoardManager : Singleton<BoardManager>
 
         ProcessingDataMaker.Begin();
         ProcessingData(columnSelect);
+
         ProcessingDataMaker.End();
 
         yield return new WaitForNextFrameUnit();
-        SetRandomSquareValue();
+        if (!_isMaxItemColumn)
+        {
+            SetRandomSquareValue();
+        }
 
         yield return new WaitForNextFrameUnit();
 
@@ -80,6 +85,12 @@ public class BoardManager : Singleton<BoardManager>
     private void ProcessingData(int column)
     {
         Shoot(column);
+        
+        if (_isMaxItemColumn)
+        {
+            return;
+        }
+        
         ProcessingLoop();
     }
 
@@ -98,10 +109,12 @@ public class BoardManager : Singleton<BoardManager>
     private void Shoot(int column)
     {
         _actionsList.Clear();
+        _isMaxItemColumn = false;
         var action = new StepAction();
         var squareTarget = GetEmptySquareDataTargetByColumn(column);
         if (squareTarget == null)
         {
+            _isMaxItemColumn = true;
             return;
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
@@ -13,7 +14,7 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private Transform squareParentTransform;
     [SerializeField] private Text scoreText;
     [SerializeField] private GameObject comboPrefab;
-    [SerializeField] private Text comboText;
+    [SerializeField] private TextMesh comboText;
 
     private BoardManager _boardManager;
     private const float MERGE_DURATION = 0.1f;
@@ -129,12 +130,19 @@ public class UIManager : Singleton<UIManager>
             _boardManager.isProcessing = false;
             if (_comboCount > 2)
             {
-                comboPrefab.SetActive(true);
-                comboPrefab.transform.position = new Vector2(_comboPos.x,_comboPos.y);
                 comboText.text = $"Combo x{_comboCount}";
-                Debug.Log("_comboCount " + _comboCount);
+                comboPrefab.transform.position = new Vector2(_comboPos.x, _comboPos.y - 1.5f);
+                comboPrefab.SetActive(true);
+                
+                StartCoroutine(DeActiveComboIE());
             }
         });
+    }
+
+    private IEnumerator DeActiveComboIE()
+    {
+        yield return new WaitForSeconds(1f);
+        comboPrefab.SetActive(false);
     }
 
     private void Start()
