@@ -6,28 +6,30 @@ using uPools;
 public class Square : MonoCache
 {
     [SerializeField] private TextMesh text;
+
     [SerializeField] private SpriteRenderer sprintRendererBg;
-    public GameObject instantPool;
+
+    // public GameObject instantPool;
     private List<Color32> _colors;
 
     public SquareData squareData;
 
-    private void Awake()
+    protected override void AwakeCustom()
     {
         _colors = new List<Color32>
         {
             // new (255, 255, 255,255), 
-            
-            new (22, 160, 133,255),
-            new (41, 128, 185,255),
-            new (142, 68, 173,255),
-            new (243, 156, 18,255),
-            new (211, 84, 0,255),
-            new (192, 57, 43,255),
-            new (39, 174, 96,255),
-            new (232, 67, 147,255),
-            new (116, 185, 255,255),
-            new (162, 155, 254,255),
+
+            new(22, 160, 133, 255),
+            new(41, 128, 185, 255),
+            new(142, 68, 173, 255),
+            new(243, 156, 18, 255),
+            new(211, 84, 0, 255),
+            new(192, 57, 43, 255),
+            new(39, 174, 96, 255),
+            new(232, 67, 147, 255),
+            new(116, 185, 255, 255),
+            new(162, 155, 254, 255),
 
             // new (210, 245, 60,255),
             // new (70, 240, 240,255),
@@ -57,7 +59,8 @@ public class Square : MonoCache
     public void ReturnPool()
     {
         // gameObject.SetActive(isActive);
-        SharedGameObjectPool.Return(instantPool);
+        // Debug.Log($"gameObjectCache {JsonUtility.ToJson(gameObjectCache.GetComponent<Square>().squareData)}");
+        UIManager.Instance.ReturnPool(gameObjectCache);
     }
 
     private void SetTextAndColor()
@@ -66,15 +69,16 @@ public class Square : MonoCache
         switch (squareData.value)
         {
             case >= 1024 * 1024 * 1024:
-                valueFormat = squareData.value / (1024 * 1024 * 1024)  + "B";
+                valueFormat = squareData.value / (1024 * 1024 * 1024) + "B";
                 break;
             case >= 1024 * 1024:
-                valueFormat = squareData.value / (1024 * 1024)  + "M";
+                valueFormat = squareData.value / (1024 * 1024) + "M";
                 break;
             case >= 1024 * 16:
-                valueFormat = squareData.value / 1024  + "K";
+                valueFormat = squareData.value / 1024 + "K";
                 break;
         }
+
         text.text = squareData.value == 0 ? "" : valueFormat;
         if (squareData.value == 0)
         {

@@ -5,6 +5,7 @@ using System.Linq;
 using DG.Tweening;
 using Unity.Profiling;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.UI;
 using uPools;
 
@@ -28,6 +29,8 @@ public class UIManager : Singleton<UIManager>
     private Vector2 _comboPos;
     private static readonly ProfilerMarker ProcessingTweenMaker = new("MyMaker.DOTweenSequence");
 
+    private GameObjectPool blockPool;
+
     public bool isPause;
 
     public void ToggleSequence()
@@ -43,28 +46,28 @@ public class UIManager : Singleton<UIManager>
 
     public void StartUI(List<SquareData> squaresData)
     {
-        SharedGameObjectPool.Prewarm(squarePrefab.gameObject, 30);
-
+        blockPool = new GameObjectPool(squarePrefab.gameObject);
+        blockPool.Prewarm(30);
         // squaresData[0].value = 2;
         // squaresData[6].value = 4;
 
         ////
-        squaresData[0].value = 16;
-        squaresData[1].value = 2;
-        squaresData[2].value = 16;
-
-        squaresData[6].value = 2;
-        squaresData[8].value = 2;
-
-        squaresData[12].value = 64;
-        // squaresData[18].value = 549755813888;
-        // squaresData[18].value = 8589934592;
-        // squaresData[18].value = 512 * 1024 * 1024 * 1024;
-
-        ////
-        squaresData[4].value = 8;
-        squaresData[5].value = 2;
-        squaresData[11].value = 4;
+        // squaresData[0].value = 16;
+        // squaresData[1].value = 2;
+        // squaresData[2].value = 16;
+        //
+        // squaresData[6].value = 2;
+        // squaresData[8].value = 2;
+        //
+        // squaresData[12].value = 64;
+        // // squaresData[18].value = 549755813888;
+        // // squaresData[18].value = 8589934592;
+        // // squaresData[18].value = 512 * 1024 * 1024 * 1024;
+        //
+        // ////
+        // squaresData[4].value = 8;
+        // squaresData[5].value = 2;
+        // squaresData[11].value = 4;
 
         ////
         // squaresData[0].value = 2;
@@ -99,10 +102,10 @@ public class UIManager : Singleton<UIManager>
 
         _actionsWrapList = actionsWrapList;
 
-        // foreach (var actionListWrap in _actionsWrapList)
-        // {
-        //     Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
-        // }
+        foreach (var actionListWrap in _actionsWrapList)
+        {
+            Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
+        }
 
         foreach (var actionListWrap in _actionsWrapList)
         {
@@ -126,14 +129,14 @@ public class UIManager : Singleton<UIManager>
 
         _sequence.OnComplete(() =>
         {
-            Debug.Log("OnComplete");
+            // Debug.Log("OnComplete");
             _boardManager.isProcessing = false;
             if (_comboCount > 2)
             {
                 comboText.text = $"Combo x{_comboCount}";
-                comboPrefab.transform.position = new Vector2(_comboPos.x, _comboPos.y - 1.5f);
+                comboPrefab.transform.position = new Vector2(_comboPos.x, _comboPos.y - 1.2f);
                 comboPrefab.SetActive(true);
-                
+
                 StartCoroutine(DeActiveComboIE());
             }
         });
@@ -165,12 +168,11 @@ public class UIManager : Singleton<UIManager>
             .FindAll(squareData => squareData.value > 0)
             .ForEach(squareData =>
             {
-                var newSquareData = SharedGameObjectPool.Rent(squarePrefab, squareData.Position, Quaternion.identity,
-                    squareParentTransform);
+                var newSquareData = blockPool.Rent(squareData.Position, Quaternion.identity, squareParentTransform);
                 var newSquareComp = newSquareData.GetComponent<Square>();
                 newSquareComp.SetValue(squareData.value);
                 newSquareComp.SetId(squareData.cell.Column + 1 + squareData.cell.Row * 6); // todo
-                newSquareComp.instantPool = newSquareData;
+                // newSquareComp.instantPool = newSquareData;
                 _squaresList.Add(newSquareComp);
             });
     }
@@ -202,13 +204,18 @@ public class UIManager : Singleton<UIManager>
         _idCount++;
         var newSquarePos = new Vector3(0, 6, 0);
 
-        var squarePool =
-            SharedGameObjectPool.Rent(squarePrefab, newSquarePos, Quaternion.identity, squareParentTransform);
+        var squarePool = blockPool.Rent(newSquarePos, Quaternion.identity, squareParentTransform);
         var newSquareComp = squarePool.GetComponent<Square>();
-        newSquareComp.instantPool = squarePool;
+        Debug.Log($"squarePool {newSquareComp.squareData.id}");
+        // newSquareComp.instantPool = squarePool;
 
         newSquareComp.SetId(_idCount);
         _squaresList.Add(newSquareComp);
+    }
+
+    public void ReturnPool(GameObject insObj)
+    {
+        blockPool.Return(insObj);
     }
 
     private void MergeUI(Sequence sequence, List<StepAction> mergerActionList)
@@ -220,6 +227,7 @@ public class UIManager : Singleton<UIManager>
         {
             // Debug.Log($"MergeUI  {JsonUtility.ToJson(mergerAction)}");
             var squareSourceGameObjectsList = FindAllSquareGameObjectsActiveSameValue(mergerAction);
+            // Debug.Log($"Check id find {mergerAction.squareTarget.id}");
             var squareTargetGameObject = FindSquareGameObjectActiveById(mergerAction.squareTarget.id);
 
             foreach (var squareSourceGameObject in squareSourceGameObjectsList)
@@ -230,8 +238,10 @@ public class UIManager : Singleton<UIManager>
                     .OnComplete(() =>
                     {
                         // Debug.Log("MERGE");
+                        // Debug.Log($"Check squareTargetGameObject {squareTargetGameObject == null} {squareTargetGameObject.squareData.id}");
                         squareTargetGameObject.SetValue(mergerAction.newSquareValue);
                         squareSourceGameObject.SetValue(0);
+                        // Debug.Log($"retun pool {JsonUtility.ToJson(squareSourceGameObject)}");
                         squareSourceGameObject.ReturnPool();
                         SetPause();
                     })
@@ -265,6 +275,7 @@ public class UIManager : Singleton<UIManager>
 
             var squareSourceGameObject = FindSquareGameObjectActiveById(mergerAction.singleSquareSources.id);
 
+            // Debug.Log($"mergerAction.singleSquareSources.id {mergerAction.singleSquareSources.id}");
             sortSequence.Join(squareSourceGameObject.transform
                 .DOMove(mergerAction.squareTarget.Position, MERGE_DURATION)
                 .SetEase(Ease.Linear)
@@ -302,6 +313,7 @@ public class UIManager : Singleton<UIManager>
                         {
                             // Debug.Log("CLEAR GAME OBJECT");
                             squareGameObject.SetValue(0);
+                            // Debug.Log($"retun pool {JsonUtility.ToJson(squareGameObject)}");
                             squareGameObject.ReturnPool();
                         }));
                 }
@@ -313,15 +325,12 @@ public class UIManager : Singleton<UIManager>
 
     private List<Square> FindAllSquareGameObjectsActiveSameValue(StepAction stepAction)
     {
-        return _squaresList.FindAll(squareGameObj =>
-            squareGameObj.gameObject.activeSelf &&
-            IsCompareSquareActiveSameId(stepAction.multiSquareSources, squareGameObj));
+        return _squaresList.FindAll(squareGameObj => IsCompareSquareActiveSameId(stepAction.multiSquareSources, squareGameObj));
     }
 
     private Square FindSquareGameObjectActiveById(int id)
     {
-        return _squaresList.Find(squareGameObj =>
-            squareGameObj.squareData.id == id && squareGameObj.gameObject.activeSelf);
+        return _squaresList.Find(squareGameObj => squareGameObj.squareData.id == id);
     }
 
     private bool IsCompareSquareActiveSameId(List<SquareData> squareSources, Square squareGameObj)

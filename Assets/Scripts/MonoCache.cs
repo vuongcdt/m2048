@@ -11,5 +11,11 @@ public class MonoCache : MonoBehaviour
         boardManager = BoardManager.Instance;
         gameObjectCache = gameObject;
         transformCache = transform;
+        AwakeCustom();
+    }
+
+    protected virtual void AwakeCustom()
+    {
+        
     }
 }

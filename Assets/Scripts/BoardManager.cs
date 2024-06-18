@@ -411,7 +411,7 @@ public class BoardManager : Singleton<BoardManager>
         var maxValueInSquareValueList = _squareValueList[^1];
         // Debug.Log($"maxValueInBoard {maxValueInBoard} maxValueInSquareValueList {maxValueInSquareValueList}");
 
-        if (maxValueInBoard / (Utils.GetExponent(maxValueInBoard) / 2) > maxValueInSquareValueList)
+        if (maxValueInBoard > 8 && maxValueInBoard / (Utils.GetExponent(maxValueInBoard) / 2) > maxValueInSquareValueList)
         {
             _squareValueList.Add(maxValueInSquareValueList * 2);
         }
