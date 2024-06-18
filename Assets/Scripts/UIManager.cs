@@ -90,14 +90,14 @@ public class UIManager : Singleton<UIManager>
 
         _actionsWrapList = actionsWrapList;
 
-        foreach (var actionListWrap in _actionsWrapList)
-        {
-            Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
-        }
+        // foreach (var actionListWrap in _actionsWrapList)
+        // {
+        //     Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
+        // }
 
         foreach (var actionListWrap in _actionsWrapList)
         {
-            Debug.Log($"actionListWrap.actionType {actionListWrap.actionType}");
+            // Debug.Log($"actionListWrap.actionType {actionListWrap.actionType}");
             switch (actionListWrap.actionType)
             {
                 case ActionType.Shoot:
@@ -123,7 +123,7 @@ public class UIManager : Singleton<UIManager>
 
         if (_comboCount > 2)
         {
-            Debug.Log("////////// " + _comboCount);
+            Debug.Log("_comboCount " + _comboCount);
         }
     }
 
