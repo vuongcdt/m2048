@@ -55,9 +55,9 @@ public class Square : MonoCache
             sprintRendererBg.color = _colors[0];
             return;
         }
-        var exponent = Mathf.Log(squareData.value) / Mathf.Log(2);
+        var exponent = Utils.GetExponent(squareData.value);
         
-        var colorIndex = (int)exponent % 10; 
+        var colorIndex = exponent % 10; 
         sprintRendererBg.color = _colors[colorIndex];
     }
 }

@@ -4,8 +4,6 @@ using System.Linq;
 using Unity.Profiling;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Serialization;
-using uPools;
 
 public class BoardManager : Singleton<BoardManager>
 {
@@ -28,12 +26,14 @@ public class BoardManager : Singleton<BoardManager>
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
-    private List<int> _squareValueList = new() { 2, 4 };
+
+    private List<int> _squareValueList = new() { 2, 4, 8 };
+
     // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
     private int _newSquareValue;
     private int _randomNum;
     private int _idCount;
-    private const int MAX_COUNT_QUARE_VALUE_LIST = 3;
+    private const int MAX_COUNT_QUARE_VALUE_LIST = 6;
 
     private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
     private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
@@ -63,7 +63,7 @@ public class BoardManager : Singleton<BoardManager>
 
         _uiManager.StartUI(squareDatas);
     }
-    
+
     public IEnumerator ShootBlock()
     {
         isProcessing = true;
@@ -75,11 +75,7 @@ public class BoardManager : Singleton<BoardManager>
         ProcessingDataMaker.End();
 
         yield return new WaitForNextFrameUnit();
-        
-        foreach (var actionListWrap in _actionsWrapList)
-        {
-            Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
-        }
+        SetRandomSquareValue();
 
         yield return new WaitForNextFrameUnit();
 
@@ -88,20 +84,29 @@ public class BoardManager : Singleton<BoardManager>
         RenderUIMaker.End();
 
         yield return new WaitForNextFrameUnit();
-        SetRandomSquareValue();
+
+        // foreach (var actionListWrap in _actionsWrapList)
+        // {
+        //     Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
+        // }
     }
 
     private void ProcessingData(int column)
     {
-        int countActionsList;
         Shoot(column);
+        ProcessingLoop();
+    }
+
+    private void ProcessingLoop()
+    {
+        int countActionsList;
         do
         {
             countActionsList = _actionsWrapList.Count;
 
             MergeAllBlock();
             SortAllBlock();
-        } while (countActionsList < _actionsWrapList.Count);
+        } while (countActionsList < _actionsWrapList.Count && countActionsList < 30);
     }
 
     private void Shoot(int column)
@@ -429,59 +434,82 @@ public class BoardManager : Singleton<BoardManager>
     {
         SetNewSquareValue();
 
-        _randomNum = Random.Range(0, _squareValueList.Count);
-        _newSquareValue = _squareValueList[_randomNum];
-        nextSquare.SetValue(_newSquareValue);
+        SetRandomValue();
+        // _randomNum = Random.Range(0, _squareValueList.Count);
+        // _newSquareValue = _squareValueList[_randomNum];
+        // nextSquare.SetValue(_newSquareValue);
+    }
+
+    private readonly int[] _probabilityList = { 1, 3, 6, 10, 15, 21 };
+
+    private void SetRandomValue()
+    {
+        var countValueList = _squareValueList.Count;
+        var probabilityList = _probabilityList.Take(countValueList).ToList();
+        var maxValue = probabilityList[^1];
+        var randomNum = Random.Range(0, 1f) * maxValue;
+
+        for (var i = 0; i < countValueList; i++)
+        {
+            // Debug.Log($"countValueList - 1 - i  {countValueList - 1 - i} i {i}");
+            if (probabilityList[i] > randomNum)
+            {
+                var value = _squareValueList[countValueList - 1 - i];
+                _newSquareValue = value;
+                _randomNum = value;
+                nextSquare.SetValue(value);
+                return;
+            }
+        }
     }
 
     private void SetNewSquareValue()
     {
-        var maxValueInBoard = GetMaxValueSquareInBoard();
+        var maxValueInBoard = squareDatas.Max(square => square.value);
         var maxValueInSquareValueList = _squareValueList[^1];
-        
-        if (maxValueInBoard > maxValueInSquareValueList / 2)
+        // Debug.Log($"maxValueInBoard {maxValueInBoard} maxValueInSquareValueList {maxValueInSquareValueList}");
+
+        if (maxValueInBoard / 4 > maxValueInSquareValueList)
         {
             _squareValueList.Add(maxValueInSquareValueList * 2);
         }
 
-        if (_squareValueList.Count > MAX_COUNT_QUARE_VALUE_LIST)
+        if (_squareValueList.Count > MAX_COUNT_QUARE_VALUE_LIST - 3) //todo
         {
-            Debug.Log("_squareValueList1"+string.Join(" - ",_squareValueList));
-            
-            var minValueInBoard = GetMinValueSquareInBoard(maxValueInBoard);
-            _squareValueList.Remove(minValueInBoard);
-            squareDatas.RemoveAll(square => square.value == minValueInBoard);
+            Debug.Log("DEL MIN VALUE");
+            var minValueInBoard = _squareValueList[0];
+            _squareValueList.RemoveAt(0);
 
-            Debug.Log("_squareValueList2"+string.Join(" - ",_squareValueList));
+            ClearMinBlock(minValueInBoard);
         }
+
+        Debug.Log("_squareValueList  " + string.Join(" - ", _squareValueList));
     }
 
-    private int GetMaxValueSquareInBoard()
+    private void ClearMinBlock(int minValueInBoard)
     {
-        int maxValue = 0;
+        _actionsList.Clear();
+
+        StepAction action = new();
         foreach (var squareData in squareDatas)
         {
-            if (squareData.value > maxValue)
+            // Debug.Log($"squareData.value {squareData.value} minValueInBoard {minValueInBoard}");
+            if (squareData.value == minValueInBoard)
             {
-                maxValue = squareData.value;
+                squareData.value = 0;
+                action.squareSources.Add(squareData);
             }
         }
 
-        return maxValue;
-    }
-
-    private int GetMinValueSquareInBoard(int maxValue)
-    {
-        int minValue = maxValue;
-        foreach (var squareData in squareDatas)
+        _actionsList.Add(action);
+        foreach (var stepAction in _actionsList)
         {
-            if (squareData.value < minValue)
-            {
-                minValue = squareData.value;
-            }
+            Debug.Log($"_actionsList {JsonUtility.ToJson(stepAction)}");
         }
-
-        return minValue;
+        var item = new BoardAction(new List<StepAction>(_actionsList), ActionType.ClearMinBlock);
+        _actionsWrapList.Add(item);
+        
+        ProcessingLoop();
     }
 
     #endregion

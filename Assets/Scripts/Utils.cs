@@ -14,6 +14,11 @@ public static class Utils
         return new Cell((int)((pos.x + 5) / 2), (int)((4- pos.y) / 2));
     }
 
+    public static int GetExponent(int value)
+    {
+        return (int)(Mathf.Log(value) / Mathf.Log(2));
+    }
+
     [Serializable]
     public class Cell
     {

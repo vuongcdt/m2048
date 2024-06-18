@@ -46,14 +46,16 @@ public class UIManager : Singleton<UIManager>
         squaresData[0].value = 16;
         squaresData[1].value = 2;
         squaresData[2].value = 16;
-
+        
         squaresData[6].value = 2;
         squaresData[8].value = 2;
-
+        
         squaresData[12].value = 64;
 
         ////
-        // squaresData[2].value = 2;
+        squaresData[4].value = 8;
+        squaresData[5].value = 2;
+        squaresData[11].value = 4;
 
         ////
         // squaresData[0].value = 2;
@@ -82,14 +84,20 @@ public class UIManager : Singleton<UIManager>
 
     public void RenderUI(List<BoardAction> actionsWrapList)
     {
-        _sequence = DOTween.Sequence();
-        
-        _actionsWrapList = actionsWrapList;
-
         InitSquare();
+        _comboCount = 0;
+        _sequence = DOTween.Sequence();
+
+        _actionsWrapList = actionsWrapList;
+        
+        foreach (var actionListWrap in _actionsWrapList)
+        {
+            Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
+        }
 
         foreach (var actionListWrap in _actionsWrapList)
         {
+            Debug.Log($"actionListWrap.actionType {actionListWrap.actionType}");
             switch (actionListWrap.actionType)
             {
                 case ActionType.Shoot:
@@ -101,11 +109,15 @@ public class UIManager : Singleton<UIManager>
                 case ActionType.SortAllBlock:
                     SortUI(_sequence, actionListWrap.stepActionList);
                     break;
+                case ActionType.ClearMinBlock:
+                    ClearMinBlockUI(_sequence, actionListWrap.stepActionList);
+                    break;
             }
         }
 
         _sequence.OnComplete(() =>
         {
+            Debug.Log("OnComplete");
             _boardManager.isProcessing = false;
         });
 
@@ -113,6 +125,32 @@ public class UIManager : Singleton<UIManager>
         {
             Debug.Log("////////// " + _comboCount);
         }
+    }
+
+    private void ClearMinBlockUI(Sequence sequence, List<StepAction> stepActionList)
+    {
+        Sequence clearSequence = DOTween.Sequence();
+        foreach (var stepAction in stepActionList)
+        {
+            Debug.Log($"ClearMinBlockUI {JsonUtility.ToJson(stepAction)}");
+
+        }
+
+        // _squaresList.FindAll()
+        
+        // _squaresList.FindAll(squareGameObject =>
+        //         stepActionList.First().squareSources
+        //             .Any(sourceSquare => squareGameObject.squareData.id == sourceSquare.id))
+        //     .ForEach(squareGameObject =>
+        //     {
+        //         clearSequence.Join(squareGameObject.transform.DOMove(Vector3.one, 0)
+        //             .OnComplete(() =>
+        //             {
+        //                 squareGameObject.gameObject.SetActive(false);
+        //                 squareGameObject.SetValue(0);
+        //             }));
+        //     });
+        sequence.Append(clearSequence);
     }
 
     private void Start()
@@ -258,7 +296,6 @@ public class UIManager : Singleton<UIManager>
             squareData.id == squareGameObj.squareData.id && squareGameObj.gameObject.activeSelf);
         return isSquareActiveSameIndex;
     }
-
 
     private float GetDurationMove(Vector2 posSource, Vector2 posTarget)
     {

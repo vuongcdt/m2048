@@ -26,4 +26,5 @@ public enum ActionType
     Shoot,
     MergeAllBlock,
     SortAllBlock,
+    ClearMinBlock
 }
