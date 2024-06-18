@@ -128,7 +128,8 @@ public class BoardManager : Singleton<BoardManager>
         );
 
         action.squareTarget = new SquareData(squareTarget.cell, squareTarget.id, squareTarget.value);
-        action.squareSources.Add(new SquareData(squareSource.cell, squareSource.id, squareSource.value));
+        // action.multiSquareSources.Add(new SquareData(squareSource.cell, squareSource.id, squareSource.value));
+        action.singleSquareSources = new SquareData(squareSource.cell, squareSource.id, squareSource.value);
         action.newSquareValue = _newSquareValue;
 
         _actionsList.Add(action);
@@ -306,7 +307,7 @@ public class BoardManager : Singleton<BoardManager>
             squareTarget = squareDataTarget;
         }
 
-        action.squareSources.Add(new SquareData(squareSource.cell, squareSource.id, squareSource.value));
+        action.multiSquareSources.Add(new SquareData(squareSource.cell, squareSource.id, squareSource.value));
         action.squareTarget = new SquareData(squareTarget.cell, squareTarget.id, squareTarget.value);
         action.newSquareValue = newValue;
 
@@ -341,7 +342,7 @@ public class BoardManager : Singleton<BoardManager>
 
         foreach (var squareData in squareDataSourceList)
         {
-            action.squareSources.Add(new SquareData(squareData.cell, squareData.id, squareData.value));
+            action.multiSquareSources.Add(new SquareData(squareData.cell, squareData.id, squareData.value));
             squareData.value = 0;
             if (squareData == _processingSquare)
             {
@@ -399,7 +400,7 @@ public class BoardManager : Singleton<BoardManager>
         var squareTarget = GetSquareDataByCell(cellTarget);
         var squareSource = GetSquareDataByCell(cellSource);
 
-        action.squareSources.Add(new SquareData(squareSource.cell, squareSource.id, squareSource.value));
+        action.singleSquareSources = new SquareData(squareSource.cell, squareSource.id, squareSource.value);
         action.squareTarget = new SquareData(squareTarget.cell, squareTarget.id, squareTarget.value);
         action.newSquareValue = squareSource.value;
 
@@ -476,11 +477,11 @@ public class BoardManager : Singleton<BoardManager>
 
         if (_squareValueList.Count > MAX_COUNT_QUARE_VALUE_LIST - 3) //todo
         {
-            Debug.Log("DEL MIN VALUE");
-            var minValueInBoard = _squareValueList[0];
-            _squareValueList.RemoveAt(0);
-
-            ClearMinBlock(minValueInBoard);
+            // Debug.Log("DEL MIN VALUE");
+            // var minValueInBoard = _squareValueList[0];
+            // _squareValueList.RemoveAt(0);
+            //
+            // ClearMinBlock(minValueInBoard);
         }
 
         Debug.Log("_squareValueList  " + string.Join(" - ", _squareValueList));
@@ -497,7 +498,7 @@ public class BoardManager : Singleton<BoardManager>
             if (squareData.value == minValueInBoard)
             {
                 squareData.value = 0;
-                action.squareSources.Add(squareData);
+                action.multiSquareSources.Add(squareData);
             }
         }
 

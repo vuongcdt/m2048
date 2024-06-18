@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.Serialization;
 
 [Serializable]
 public class StepAction
 {
-    public List<SquareData> squareSources = new();
+    public List<SquareData> multiSquareSources = new();
+    public SquareData singleSquareSources;
     public SquareData squareTarget;
     public int newSquareValue;
 }

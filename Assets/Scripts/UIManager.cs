@@ -187,9 +187,10 @@ public class UIManager : Singleton<UIManager>
         // Debug.Log($"ShootUI {JsonUtility.ToJson(stepAction)}");
 
         var squarePool = _squaresList.Find(squareGameObject =>
-            squareGameObject.squareData.id == stepAction.squareSources[0].id);
+            squareGameObject.squareData.id == stepAction.singleSquareSources.id);
+        
         squarePool.SetValue(stepAction.newSquareValue);
-        squarePool.transform.position = stepAction.squareSources[0].Position;
+        squarePool.transform.position = stepAction.singleSquareSources.Position;
 
         sequence.Append(squarePool.transform
                 .DOMoveY(stepAction.squareTarget.Position.y, MERGE_DURATION)
@@ -259,7 +260,7 @@ public class UIManager : Singleton<UIManager>
         {
             // Debug.Log($"SortUI_  {JsonUtility.ToJson(mergerAction)}");
 
-            var squareSourceGameObject = FindSquareGameObjectActiveById(mergerAction.squareSources[0].id);
+            var squareSourceGameObject = FindSquareGameObjectActiveById(mergerAction.singleSquareSources.id);
 
             sortSequence.Join(squareSourceGameObject.transform
                 .DOMove(mergerAction.squareTarget.Position, MERGE_DURATION)
@@ -281,7 +282,7 @@ public class UIManager : Singleton<UIManager>
     {
         return _squaresList.FindAll(squareGameObj =>
             squareGameObj.gameObject.activeSelf &&
-            IsCompareSquareActiveSameId(stepAction.squareSources, squareGameObj));
+            IsCompareSquareActiveSameId(stepAction.multiSquareSources, squareGameObj));
     }
 
     private Square FindSquareGameObjectActiveById(int id)
