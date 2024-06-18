@@ -4,12 +4,14 @@ using System.Linq;
 using DG.Tweening;
 using Unity.Profiling;
 using UnityEngine;
+using UnityEngine.UI;
 using uPools;
 
 public class UIManager : Singleton<UIManager>
 {
     [SerializeField] private GameObject squarePrefab;
     [SerializeField] private Transform squareParentTransform;
+    [SerializeField] private Text scoreText;
 
     private BoardManager _boardManager;
     private const float MERGE_DURATION = 0.1f;
@@ -51,6 +53,9 @@ public class UIManager : Singleton<UIManager>
         squaresData[8].value = 2;
 
         squaresData[12].value = 64;
+        // squaresData[18].value = 549755813888;
+        squaresData[18].value = 8589934592;
+        // squaresData[18].value = 512 * 1024 * 1024 * 1024;
 
         ////
         squaresData[4].value = 8;
@@ -216,6 +221,7 @@ public class UIManager : Singleton<UIManager>
                         squareTargetGameObject.SetValue(mergerAction.newSquareValue);
                         squareSourceGameObject.SetValue(0);
                         squareSourceGameObject.ReturnPool();
+                        SetScore();
                         SetPause();
                     })
                 );
@@ -224,6 +230,11 @@ public class UIManager : Singleton<UIManager>
 
         sequence.Append(mergerSequence);
         sequence.AppendInterval(TIME_DELAY);
+    }
+
+    private void SetScore()
+    {
+        scoreText.text = $"Score: {_boardManager.score}";
     }
 
     private void SortUI(Sequence sequence, List<StepAction> mergerActionList)

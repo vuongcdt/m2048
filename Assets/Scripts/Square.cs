@@ -16,16 +16,29 @@ public class Square : MonoCache
     {
         _colors = new List<Color32>
         {
-            new (26, 188, 156, 225),
-            new (46, 204, 113, 225),
-            new (52, 152, 219, 225),
-            new (155, 89, 182, 225),
-            new (22, 160, 133, 225),
-            new (39, 174, 96, 225),
-            new (41, 128, 185, 225),
-            new (241, 196, 15, 225),
-            new (230, 126, 34, 225),
-            new (231, 76, 60, 225),
+            // new (255, 255, 255,255), 
+            
+            new (22, 160, 133,255),
+            new (41, 128, 185,255),
+            new (142, 68, 173,255),
+            new (243, 156, 18,255),
+            new (211, 84, 0,255),
+            new (192, 57, 43,255),
+            new (39, 174, 96,255),
+            new (232, 67, 147,255),
+            new (116, 185, 255,255),
+            new (162, 155, 254,255),
+
+            // new (210, 245, 60,255),
+            // new (70, 240, 240,255),
+            // new (0, 130, 200,255),
+            // new (60, 180, 75,255), 
+            // new (162, 155, 254,255),
+            // new (255, 225, 25,255),
+            // new (245, 130, 48,255),
+            // new (230, 25, 75,255), 
+            // new (145, 30, 180,255),
+            // new (240, 50, 230,255),
         };
         SetTextAndColor();
     }
@@ -35,7 +48,7 @@ public class Square : MonoCache
         squareData.id = id;
     }
 
-    public void SetValue(int newValue)
+    public void SetValue(long newValue)
     {
         squareData.value = newValue;
         SetTextAndColor();
@@ -49,15 +62,32 @@ public class Square : MonoCache
 
     private void SetTextAndColor()
     {
-        text.text = squareData.value == 0 ? "" : squareData.value.ToString();
+        var valueFormat = squareData.value.ToString();
+        if (squareData.value >= 1024 * 1024 * 1024)
+        {
+            valueFormat = squareData.value / (1024 * 1024 * 1024)  + "B";
+            Debug.Log($"valueFormat {valueFormat}");
+        }
+        else if (squareData.value >= 1024 * 1024)
+        {
+            valueFormat = squareData.value / (1024 * 1024)  + "M";
+            Debug.Log($"valueFormat {valueFormat}");
+        }
+        else if (squareData.value >= 1024 * 16)
+        {
+            valueFormat = squareData.value / 1024  + "K";
+            Debug.Log($"valueFormat {valueFormat}");
+        }
+        text.text = squareData.value == 0 ? "" : valueFormat;
         if (squareData.value == 0)
         {
-            sprintRendererBg.color = _colors[0];
+            // sprintRendererBg.color = _colors[0];
             return;
         }
+
         var exponent = Utils.GetExponent(squareData.value);
-        
-        var colorIndex = exponent % 10; 
+
+        var colorIndex = exponent % 10;
         sprintRendererBg.color = _colors[colorIndex];
     }
 }

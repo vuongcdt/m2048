@@ -19,7 +19,7 @@ public class BoardManager : Singleton<BoardManager>
     public bool isTouchLine;
     public int columnSelect;
     public bool isProcessing;
-    public int score;
+    public long score;
 
     private UIManager _uiManager;
     private SquareData _processingSquare;
@@ -403,7 +403,7 @@ public class BoardManager : Singleton<BoardManager>
             _squareValueList.Add(maxValueInSquareValueList * 2);
         }
 
-        if (_squareValueList.Count > MAX_COUNT_QUARE_VALUE_LIST - 3) //todo
+        if (_squareValueList.Count > MAX_COUNT_QUARE_VALUE_LIST)
         {
             Debug.Log("DEL MIN VALUE");
             var minValueInBoard = _squareValueList[0];

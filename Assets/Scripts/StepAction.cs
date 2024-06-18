@@ -8,7 +8,7 @@ public class StepAction
     public List<SquareData> multiSquareSources = new();
     public SquareData singleSquareSources;
     public SquareData squareTarget;
-    public int newSquareValue;
+    public long newSquareValue;
 }
 public class BoardAction
 {
