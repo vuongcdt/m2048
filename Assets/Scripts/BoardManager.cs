@@ -398,12 +398,12 @@ public class BoardManager : Singleton<BoardManager>
         var maxValueInSquareValueList = _squareValueList[^1];
         // Debug.Log($"maxValueInBoard {maxValueInBoard} maxValueInSquareValueList {maxValueInSquareValueList}");
 
-        if (maxValueInBoard / 4 > maxValueInSquareValueList)
+        if (maxValueInBoard / (Utils.GetExponent(maxValueInBoard) / 2) > maxValueInSquareValueList)
         {
             _squareValueList.Add(maxValueInSquareValueList * 2);
         }
 
-        if (_squareValueList.Count > MAX_COUNT_QUARE_VALUE_LIST)
+        if (_squareValueList.Count > MAX_COUNT_QUARE_VALUE_LIST - 1)
         {
             Debug.Log("DEL MIN VALUE");
             var minValueInBoard = _squareValueList[0];
@@ -412,7 +412,7 @@ public class BoardManager : Singleton<BoardManager>
             ClearMinBlock(minValueInBoard);
         }
 
-        // Debug.Log("_squareValueList  " + string.Join(" - ", _squareValueList));
+        Debug.Log("_squareValueList  " + string.Join(" - ", _squareValueList));
     }
 
     private void ClearMinBlock(int minValueInBoard)

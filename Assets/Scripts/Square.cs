@@ -63,20 +63,17 @@ public class Square : MonoCache
     private void SetTextAndColor()
     {
         var valueFormat = squareData.value.ToString();
-        if (squareData.value >= 1024 * 1024 * 1024)
+        switch (squareData.value)
         {
-            valueFormat = squareData.value / (1024 * 1024 * 1024)  + "B";
-            Debug.Log($"valueFormat {valueFormat}");
-        }
-        else if (squareData.value >= 1024 * 1024)
-        {
-            valueFormat = squareData.value / (1024 * 1024)  + "M";
-            Debug.Log($"valueFormat {valueFormat}");
-        }
-        else if (squareData.value >= 1024 * 16)
-        {
-            valueFormat = squareData.value / 1024  + "K";
-            Debug.Log($"valueFormat {valueFormat}");
+            case >= 1024 * 1024 * 1024:
+                valueFormat = squareData.value / (1024 * 1024 * 1024)  + "B";
+                break;
+            case >= 1024 * 1024:
+                valueFormat = squareData.value / (1024 * 1024)  + "M";
+                break;
+            case >= 1024 * 16:
+                valueFormat = squareData.value / 1024  + "K";
+                break;
         }
         text.text = squareData.value == 0 ? "" : valueFormat;
         if (squareData.value == 0)

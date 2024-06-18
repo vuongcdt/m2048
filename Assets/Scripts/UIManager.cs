@@ -12,6 +12,8 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private GameObject squarePrefab;
     [SerializeField] private Transform squareParentTransform;
     [SerializeField] private Text scoreText;
+    [SerializeField] private GameObject comboPrefab;
+    [SerializeField] private Text comboText;
 
     private BoardManager _boardManager;
     private const float MERGE_DURATION = 0.1f;
@@ -22,6 +24,7 @@ public class UIManager : Singleton<UIManager>
     private int _idCount = 30;
     private int _comboCount;
     private int _score;
+    private Vector2 _comboPos;
     private static readonly ProfilerMarker ProcessingTweenMaker = new("MyMaker.DOTweenSequence");
 
     public bool isPause;
@@ -54,7 +57,7 @@ public class UIManager : Singleton<UIManager>
 
         squaresData[12].value = 64;
         // squaresData[18].value = 549755813888;
-        squaresData[18].value = 8589934592;
+        // squaresData[18].value = 8589934592;
         // squaresData[18].value = 512 * 1024 * 1024 * 1024;
 
         ////
@@ -124,17 +127,20 @@ public class UIManager : Singleton<UIManager>
         {
             Debug.Log("OnComplete");
             _boardManager.isProcessing = false;
+            if (_comboCount > 2)
+            {
+                comboPrefab.SetActive(true);
+                comboPrefab.transform.position = new Vector2(_comboPos.x,_comboPos.y);
+                comboText.text = $"Combo x{_comboCount}";
+                Debug.Log("_comboCount " + _comboCount);
+            }
         });
-
-        if (_comboCount > 2)
-        {
-            Debug.Log("_comboCount " + _comboCount);
-        }
     }
 
     private void Start()
     {
         _boardManager = BoardManager.Instance;
+        comboPrefab.SetActive(false);
     }
 
     private void SetPause()
@@ -204,8 +210,6 @@ public class UIManager : Singleton<UIManager>
 
         foreach (var mergerAction in mergerActionList)
         {
-            _boardManager.score += mergerAction.newSquareValue;
-
             // Debug.Log($"MergeUI  {JsonUtility.ToJson(mergerAction)}");
             var squareSourceGameObjectsList = FindAllSquareGameObjectsActiveSameValue(mergerAction);
             var squareTargetGameObject = FindSquareGameObjectActiveById(mergerAction.squareTarget.id);
@@ -221,11 +225,17 @@ public class UIManager : Singleton<UIManager>
                         squareTargetGameObject.SetValue(mergerAction.newSquareValue);
                         squareSourceGameObject.SetValue(0);
                         squareSourceGameObject.ReturnPool();
-                        SetScore();
                         SetPause();
                     })
                 );
             }
+
+            mergerSequence.OnComplete(() =>
+            {
+                _comboPos = mergerAction.squareTarget.Position;
+                _boardManager.score += mergerAction.newSquareValue;
+                SetScore();
+            });
         }
 
         sequence.Append(mergerSequence);
@@ -234,7 +244,7 @@ public class UIManager : Singleton<UIManager>
 
     private void SetScore()
     {
-        scoreText.text = $"Score: {_boardManager.score}";
+        scoreText.text = $"{_boardManager.score}";
     }
 
     private void SortUI(Sequence sequence, List<StepAction> mergerActionList)
