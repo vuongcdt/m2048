@@ -9,31 +9,33 @@ public class BoardManager : Singleton<BoardManager>
 {
     #region NewCode
 
-    [SerializeField] private List<SquareData> squareDatas = new();
     [SerializeField] private GameObject lineColumn;
     [SerializeField] private Transform lineParentTransform;
     [SerializeField] private Square nextSquare;
 
+    public List<SquareData> squaresData = new();
     public int boardRow = 5;
     public int boardCol = 6;
     public bool isTouchLine;
     public int columnSelect;
     public bool isProcessing;
     public long score;
+    public long highScore;
+    public int idCount;
+    public long nextSquareValue;
+    public bool isClearData;
 
+    private bool _isSave;
+    private bool _isMaxItemColumn;
     private UIManager _uiManager;
     private SquareData _processingSquare;
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
 
-    private List<int> _squareValueList = new() { 2, 4, 8 };
+    private List<int> _squareValueList = new() { 2, 4 };
 
     // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
-    private int _newSquareValue;
-    private int _randomNum;
-    private bool _isMaxItemColumn;
-    private int _idCount;
     private const int MAX_COUNT_QUARE_VALUE_LIST = 6;
     private readonly int[] _probabilityList = { 1, 3, 6, 10, 15, 21 };
 
@@ -46,9 +48,13 @@ public class BoardManager : Singleton<BoardManager>
         _uiManager = UIManager.Instance;
         ResetBoard();
         RenderLineColumn();
+        if (!isClearData)
+        {
+            LoadDataFromPrefs();
+        }
         SetRandomSquareValue();
-
-        _uiManager.StartUI(squareDatas);
+        
+        _uiManager.StartUI(squaresData);
     }
 
     public IEnumerator ShootBlock()
@@ -85,12 +91,12 @@ public class BoardManager : Singleton<BoardManager>
     private void ProcessingData(int column)
     {
         Shoot(column);
-        
+
         if (_isMaxItemColumn)
         {
             return;
         }
-        
+
         ProcessingLoop();
     }
 
@@ -118,17 +124,17 @@ public class BoardManager : Singleton<BoardManager>
             return;
         }
 
-        _idCount++;
+        idCount++;
 
         var squareSource = new SquareData(
             new Utils.Cell(column, boardRow),
-            _idCount,
-            _newSquareValue
+            idCount,
+            nextSquareValue
         );
 
         action.squareTarget = new SquareData(squareTarget.cell, squareTarget.id, squareTarget.value);
         action.singleSquareSources = new SquareData(squareSource.cell, squareSource.id, squareSource.value);
-        action.newSquareValue = _newSquareValue;
+        action.newSquareValue = nextSquareValue;
 
         _actionsList.Add(action);
         var item = new BoardAction(new List<StepAction>(_actionsList), ActionType.Shoot);
@@ -136,13 +142,13 @@ public class BoardManager : Singleton<BoardManager>
 
         squareTarget.id = squareSource.id;
         squareSource.id = 0;
-        squareTarget.value = _newSquareValue;
+        squareTarget.value = nextSquareValue;
         _processingSquare = squareTarget;
     }
 
     private SquareData GetEmptySquareDataTargetByColumn(int column)
     {
-        return squareDatas.Find(block => block.value == 0 && block.cell.Column == column);
+        return squaresData.Find(block => block.value == 0 && block.cell.Column == column);
     }
 
     private void ResetBoard()
@@ -151,10 +157,10 @@ public class BoardManager : Singleton<BoardManager>
         {
             for (var x = 0; x < boardCol; x++)
             {
-                _idCount++;
-                squareDatas.Add(new SquareData(
+                idCount++;
+                squaresData.Add(new SquareData(
                     new Utils.Cell(x, boardRow - y),
-                    _idCount,
+                    idCount,
                     0));
             }
         }
@@ -175,12 +181,12 @@ public class BoardManager : Singleton<BoardManager>
     {
         _actionsList.Clear();
 
-        var squareMergeOrderByCountSameValueList = squareDatas
+        var squareMergeOrderByCountSameValueList = squaresData
             .Where(block => block.value > 0)
             .Select(block => new
             {
                 block,
-                SquareSameValueList = squareDatas.Where(squareData => IsBlockCanMerge(squareData, block)).ToArray()
+                SquareSameValueList = squaresData.Where(squareData => IsBlockCanMerge(squareData, block)).ToArray()
             })
             .Where(data => data.SquareSameValueList.Any())
             .OrderByDescending(data => data.SquareSameValueList.Count());
@@ -302,15 +308,15 @@ public class BoardManager : Singleton<BoardManager>
 
     private SquareData GetSquareDataByCell(Utils.Cell cell)
     {
-        return squareDatas.Find(item => item.cell.Row == cell.Row && item.cell.Column == cell.Column);
+        return squaresData.Find(item => item.cell.Row == cell.Row && item.cell.Column == cell.Column);
     }
 
     private void SortAllBlock()
     {
         _actionsList.Clear();
-        var emptyBlocksUpRowList = squareDatas
+        var emptyBlocksUpRowList = squaresData
             .FindAll(item => item.value == 0 &&
-                             squareDatas.Any(squareDownRow =>
+                             squaresData.Any(squareDownRow =>
                                  squareDownRow.cell.Row == item.cell.Row + 1 &&
                                  squareDownRow.cell.Column == item.cell.Column &&
                                  squareDownRow.value > 0));
@@ -369,7 +375,7 @@ public class BoardManager : Singleton<BoardManager>
 
     private IEnumerable<SquareData> GetSquaresDataHasValueDownRowByCell(SquareData squareEmptyUpRow)
     {
-        return squareDatas.Where(squareData => squareData.cell.Column == squareEmptyUpRow.cell.Column &&
+        return squaresData.Where(squareData => squareData.cell.Column == squareEmptyUpRow.cell.Column &&
                                                squareData.value > 0 &&
                                                squareData.cell.Row > squareEmptyUpRow.cell.Row)
                 .OrderBy(squareData => squareData.cell.Row)
@@ -379,7 +385,6 @@ public class BoardManager : Singleton<BoardManager>
     private void SetRandomSquareValue()
     {
         SetNewNextValue();
-
         SetRandomValue();
     }
 
@@ -393,12 +398,10 @@ public class BoardManager : Singleton<BoardManager>
 
         for (var i = 0; i < countValueList; i++)
         {
-            // Debug.Log($"countValueList - 1 - i  {countValueList - 1 - i} i {i}");
             if (probabilityList[i] > randomNum)
             {
                 var value = _squareValueList[countValueList - 1 - i];
-                _newSquareValue = value;
-                _randomNum = value;
+                nextSquareValue = value;
                 nextSquare.SetValue(value);
                 return;
             }
@@ -407,11 +410,12 @@ public class BoardManager : Singleton<BoardManager>
 
     private void SetNewNextValue()
     {
-        var maxValueInBoard = squareDatas.Max(square => square.value);
+        var maxValueInBoard = squaresData.Max(square => square.value);
         var maxValueInSquareValueList = _squareValueList[^1];
         // Debug.Log($"maxValueInBoard {maxValueInBoard} maxValueInSquareValueList {maxValueInSquareValueList}");
 
-        if (maxValueInBoard > 8 && maxValueInBoard / (Utils.GetExponent(maxValueInBoard) / 2) > maxValueInSquareValueList)
+        if (maxValueInBoard > 8 &&
+            maxValueInBoard / (Utils.GetExponent(maxValueInBoard) / 2) > maxValueInSquareValueList)
         {
             _squareValueList.Add(maxValueInSquareValueList * 2);
         }
@@ -432,9 +436,8 @@ public class BoardManager : Singleton<BoardManager>
     {
         _actionsList.Clear();
 
-        foreach (var squareData in squareDatas)
+        foreach (var squareData in squaresData)
         {
-            // Debug.Log($"squareData.value {squareData.value} minValueInBoard {minValueInBoard}");
             if (squareData.value == minValueInBoard)
             {
                 StepAction action = new()
@@ -447,15 +450,72 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
 
-        // foreach (var stepAction in _actionsList)
-        // {
-        //     Debug.Log($"_actionsList {JsonUtility.ToJson(stepAction)}");
-        // }
-
         var item = new BoardAction(new List<StepAction>(_actionsList), ActionType.ClearMinBlock);
         _actionsWrapList.Add(item);
 
         ProcessingLoop();
+    }
+
+    #endregion
+    
+    #region SaveAndLoadGame
+
+    private void OnApplicationQuit()
+    {
+        SaveGame();
+    }
+
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        CheckSaveGame(pauseStatus);
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        CheckSaveGame(!hasFocus);
+    }
+
+    private void CheckSaveGame(bool isPause)
+    {
+        if (isPause)
+        {
+            SaveGame();
+        }
+
+        if (!isPause)
+        {
+            _isSave = false;
+        }
+    }
+
+    private void SaveGame()
+    {
+        if (_isSave)
+        {
+            return;
+        }
+
+        _isSave = true;
+
+        var jsonHelper = new Utils.JsonHelper(squaresData);
+
+        Prefs.SquaresData = JsonUtility.ToJson(jsonHelper);
+        Prefs.Score = score.ToString();
+        Prefs.HighScore = highScore.ToString();
+        Prefs.IdCount = idCount;
+        Prefs.NextSquareValue = nextSquareValue.ToString();
+    }
+
+    private void LoadDataFromPrefs()
+    {
+        squaresData = JsonUtility.FromJson<Utils.JsonHelper>(Prefs.SquaresData).datas;
+        score = long.Parse(Prefs.Score);
+        highScore = long.Parse(Prefs.HighScore);
+        idCount = Prefs.IdCount;
+        nextSquareValue = long.Parse(Prefs.NextSquareValue);
+        Debug.Log($"score {score}");
+
+        _uiManager._idCount = idCount;
     }
 
     #endregion

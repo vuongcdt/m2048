@@ -31,4 +31,15 @@ public static class Utils
             Column = column;
         }
     }
+    
+    
+    public class JsonHelper
+    {
+        public List<SquareData> datas;
+
+        public JsonHelper(List<SquareData> datas)
+        {
+            this.datas = datas;
+        }
+    }
 }

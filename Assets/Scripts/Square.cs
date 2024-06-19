@@ -58,8 +58,6 @@ public class Square : MonoCache
 
     public void ReturnPool()
     {
-        // gameObject.SetActive(isActive);
-        // Debug.Log($"gameObjectCache {JsonUtility.ToJson(gameObjectCache.GetComponent<Square>().squareData)}");
         UIManager.Instance.ReturnPool(gameObjectCache);
     }
 
