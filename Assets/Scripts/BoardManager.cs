@@ -26,6 +26,7 @@ public class BoardManager : Singleton<BoardManager>
     public int idCount;
     public long nextSquareValue;
     public bool isClearData;
+    public bool isGameOver;
 
     private bool _isSave;
     private bool _isMaxItemColumn;
@@ -56,12 +57,17 @@ public class BoardManager : Singleton<BoardManager>
         }
         else
         {
-            LoadHighScore();
-            ResetBoard();
-            SetRandomSquareValue();
+            RestartGame();
         }
 
         _uiManager.StartUI(squaresData);
+    }
+
+    public void RestartGame()
+    {
+        LoadHighScore();
+        ResetBoard();
+        SetRandomSquareValue();
     }
 
     public IEnumerator ShootBlock()
@@ -89,6 +95,8 @@ public class BoardManager : Singleton<BoardManager>
 
         yield return new WaitForNextFrameUnit();
 
+        CheckGameOver();
+        
         // foreach (var actionListWrap in _actionsWrapList)
         // {
         //     Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
@@ -395,7 +403,6 @@ public class BoardManager : Singleton<BoardManager>
         SetRandomValue();
     }
 
-
     private void SetRandomValue()
     {
         var countValueList = _squareValueList.Count;
@@ -463,6 +470,10 @@ public class BoardManager : Singleton<BoardManager>
         ProcessingLoop();
     }
 
+    private void CheckGameOver()
+    {
+        isGameOver = squaresData.All(squareData => squareData.value > 0);
+    }
     #endregion
 
     #region SaveAndLoadGame
@@ -531,7 +542,7 @@ public class BoardManager : Singleton<BoardManager>
        
         _squareValueList = JsonUtility.FromJson<Utils.JsonHelper<long>>(Prefs.SquaresData)?.datas;
 
-        _uiManager._idCount = idCount;
+        _uiManager.idCount = idCount;
     }
 
     private void LoadHighScore()

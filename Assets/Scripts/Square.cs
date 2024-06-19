@@ -80,7 +80,6 @@ public class Square : MonoCache
         text.text = squareData.value == 0 ? "" : valueFormat;
         if (squareData.value == 0)
         {
-            // sprintRendererBg.color = _colors[0];
             return;
         }
 

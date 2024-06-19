@@ -15,6 +15,7 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private Text highScoreText;
     [SerializeField] private GameObject comboPrefab;
     [SerializeField] private TextMesh comboText;
+    [SerializeField] private GameObject gameOverPopup;
 
     private BoardManager _boardManager;
     private const float MERGE_DURATION = 0.1f;
@@ -22,7 +23,7 @@ public class UIManager : Singleton<UIManager>
     private List<Square> _squaresList = new();
     private List<BoardAction> _actionsWrapList = new();
     private Sequence _sequence;
-    public int _idCount = 30;
+    public int idCount = 30;
     private int _comboCount;
     private bool _isSave;
     private Vector2 _comboPos;
@@ -34,48 +35,7 @@ public class UIManager : Singleton<UIManager>
     {
         InitPoolObject();
 
-        // squaresData[0].value = 2;
-        // squaresData[6].value = 4;
-
-        ////
-        // squaresData[0].value = 16;
-        // squaresData[1].value = 2;
-        // squaresData[2].value = 16;
-        //
-        // squaresData[6].value = 2;
-        // squaresData[8].value = 2;
-        //
-        // squaresData[12].value = 64;
-        // // squaresData[18].value = 549755813888;
-        // // squaresData[18].value = 8589934592;
-        // // squaresData[18].value = 512 * 1024 * 1024 * 1024;
-        //
-        // ////
-        // squaresData[4].value = 8;
-        // squaresData[5].value = 2;
-        // squaresData[11].value = 4;
-
-        ////
-        // squaresData[0].value = 2;
-        // squaresData[1].value = 8;
-        // squaresData[2].value = 2;
-        //
-        // squaresData[6].value = 8;
-        // squaresData[7].value = 2;
-        //
-        // squaresData[12].value = 4;
-        // squaresData[13].value = 8;
-        //
-        // squaresData[19].value = 4;
-
-        ////
-        // squaresData[0].value = 2;
-        // squaresData[6].value = 4;
-        // squaresData[12].value = 2;
-
-        ////
-        // squaresData[6].value = 8;
-        // squaresData[7].value = 2;
+       TestData.SetDataTest(squaresData);
 
         ResetUI(squaresData);
     }
@@ -160,6 +120,24 @@ public class UIManager : Singleton<UIManager>
                 StartCoroutine(DeActiveComboIE());
             }
         });
+
+        if (_boardManager.isGameOver)
+        {
+            SetGameOverUI();
+        }
+    }
+
+    private void SetGameOverUI()
+    {
+        gameOverPopup.SetActive(true);
+        _boardManager.isProcessing = true;
+    }
+
+    public void RePlayGame()
+    {
+        _boardManager.isProcessing = false;
+        gameOverPopup.SetActive(false);
+        _boardManager.RestartGame();
     }
 
     private IEnumerator DeActiveComboIE()
@@ -172,6 +150,7 @@ public class UIManager : Singleton<UIManager>
     {
         _boardManager = BoardManager.Instance;
         comboPrefab.SetActive(false);
+        gameOverPopup.SetActive(false);
         SetScoreUI();
     }
     
@@ -236,14 +215,14 @@ public class UIManager : Singleton<UIManager>
     
     private void InitSquare()
     {
-        _idCount++;
+        idCount++;
         var newSquarePos = new Vector3(0, 6, 0);
 
         var squarePool = InstanceNewSquareData(newSquarePos);
 
         Debug.Log($"squarePool id {squarePool.squareData.id}");
 
-        squarePool.SetId(_idCount);
+        squarePool.SetId(idCount);
         Debug.Log($"squarePool id {squarePool.squareData.id}");
     }
 
