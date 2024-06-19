@@ -33,11 +33,11 @@ public static class Utils
     }
     
     
-    public class JsonHelper
+    public class JsonHelper<T>
     {
-        public List<SquareData> datas;
+        public List<T> datas;
 
-        public JsonHelper(List<SquareData> datas)
+        public JsonHelper(List<T> datas)
         {
             this.datas = datas;
         }

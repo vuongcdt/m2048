@@ -72,7 +72,7 @@ public class Square : MonoCache
             case >= 1024 * 1024:
                 valueFormat = squareData.value / (1024 * 1024) + "M";
                 break;
-            case >= 1024 * 16:
+            case >= 1024 * 8:
                 valueFormat = squareData.value / 1024 + "K";
                 break;
         }

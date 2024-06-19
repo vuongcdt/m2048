@@ -83,8 +83,6 @@ public class UIManager : Singleton<UIManager>
     {
         // blockPool = new GameObjectPool(squarePrefab);
         // blockPool.Prewarm(30);
-        
-        // _squaresList = new List<Square>();
     }
 
     // private GameObject InstanceNewSquareData(Vector3 pos)
@@ -258,12 +256,6 @@ public class UIManager : Singleton<UIManager>
         {
             var squareSourceGameObjectsList = FindAllSquareGameObjectsActiveSameValue(mergerAction);
             var squareTargetGameObject = FindSquareGameObjectActiveById(mergerAction.squareTarget.id);
-
-            Debug.Log($"MergeUI count {squareSourceGameObjectsList.Count}");
-            foreach (var square in _squaresList)
-            {
-                Debug.Log($"squareList {JsonUtility.ToJson(square)}");
-            }
 
             foreach (var squareSourceGameObject in squareSourceGameObjectsList)
             {

@@ -9,6 +9,7 @@ public class Constants
         public const string HIGH_SCORE_KEY = "HighScoreKey";
         public const string ID_COUNT_KEY = "IdCountKey";
         public const string NEXT_SQUARE_VALUE_KEY = "NextSquareValueKey";
+        public const string SQUARE_VALUE_LIST_KEY = "SquareValueListKey";
     }
 
     public class SquareColor

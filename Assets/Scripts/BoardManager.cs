@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Profiling;
 using Unity.VisualScripting;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class BoardManager : Singleton<BoardManager>
 {
@@ -33,11 +35,11 @@ public class BoardManager : Singleton<BoardManager>
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
 
-    private List<int> _squareValueList = new() { 2, 4 };
+    private List<long> _squareValueList = new() { 2, 4 };
 
     // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
-    private const int MAX_COUNT_QUARE_VALUE_LIST = 6;
-    private readonly int[] _probabilityList = { 1, 3, 6, 10, 15, 21 };
+    private const int MAX_COUNT_QUARE_VALUE_LIST = 7;
+    private readonly int[] _probabilityList = { 1, 4, 8, 13, 19, 26, 34 };
 
     private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
     private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
@@ -50,13 +52,14 @@ public class BoardManager : Singleton<BoardManager>
         if (!isClearData)
         {
             LoadDataFromPrefs();
+            nextSquare.SetValue(nextSquareValue);
         }
         else
         {
             ResetBoard();
+            SetRandomSquareValue();
         }
-        SetRandomSquareValue();
-        
+
         _uiManager.StartUI(squaresData);
     }
 
@@ -435,7 +438,7 @@ public class BoardManager : Singleton<BoardManager>
         Debug.Log("_squareValueList  " + string.Join(" - ", _squareValueList));
     }
 
-    private void ClearMinBlock(int minValueInBoard)
+    private void ClearMinBlock(long minValueInBoard)
     {
         _actionsList.Clear();
 
@@ -460,7 +463,7 @@ public class BoardManager : Singleton<BoardManager>
     }
 
     #endregion
-    
+
     #region SaveAndLoadGame
 
     private void OnApplicationQuit()
@@ -500,23 +503,33 @@ public class BoardManager : Singleton<BoardManager>
 
         _isSave = true;
 
-        var jsonHelper = new Utils.JsonHelper(squaresData);
+        var jsonHelper = new Utils.JsonHelper<SquareData>(squaresData);
 
         Prefs.SquaresData = JsonUtility.ToJson(jsonHelper);
         Prefs.Score = score.ToString();
         Prefs.HighScore = highScore.ToString();
         Prefs.IdCount = idCount;
         Prefs.NextSquareValue = nextSquareValue.ToString();
+        Prefs.SquareValueList = JsonUtility.ToJson(_squareValueList);
     }
 
     private void LoadDataFromPrefs()
     {
-        squaresData = JsonUtility.FromJson<Utils.JsonHelper>(Prefs.SquaresData).datas;
+        squaresData = JsonUtility.FromJson<Utils.JsonHelper<SquareData>>(Prefs.SquaresData)?.datas;
         score = long.Parse(Prefs.Score);
         highScore = long.Parse(Prefs.HighScore);
         idCount = Prefs.IdCount;
-        nextSquareValue = long.Parse(Prefs.NextSquareValue);
-        Debug.Log($"score {score}");
+        Debug.Log($"Prefs.NextSquareValue {Prefs.NextSquareValue}");
+        try
+        {
+            nextSquareValue = long.Parse(Prefs.NextSquareValue);
+        }
+        catch (Exception e)
+        {
+            nextSquareValue = _squareValueList.Min();
+        }
+       
+        _squareValueList = JsonUtility.FromJson<Utils.JsonHelper<long>>(Prefs.SquaresData)?.datas;
 
         _uiManager._idCount = idCount;
     }

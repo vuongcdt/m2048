@@ -27,6 +27,11 @@ public static class Prefs
         get => PlayerPrefs.GetString(Constants.PrefConsts.NEXT_SQUARE_VALUE_KEY);
         set => PlayerPrefs.SetString(Constants.PrefConsts.NEXT_SQUARE_VALUE_KEY, value);
     }
+    public static string SquareValueList
+    {
+        get => PlayerPrefs.GetString(Constants.PrefConsts.NEXT_SQUARE_VALUE_KEY);
+        set => PlayerPrefs.SetString(Constants.PrefConsts.NEXT_SQUARE_VALUE_KEY, value);
+    }
     public static void ClearPrefs()
     {
         PlayerPrefs.DeleteAll();
