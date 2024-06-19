@@ -21,10 +21,10 @@ public class BoardManager : Singleton<BoardManager>
     public bool isTouchLine;
     public int columnSelect;
     public bool isProcessing;
-    public long score;
-    public long highScore;
+    public float score;
+    public float highScore;
     public int idCount;
-    public long nextSquareValue;
+    public float nextSquareValue;
     public bool isClearData;
     public bool isGameOver;
 
@@ -39,8 +39,8 @@ public class BoardManager : Singleton<BoardManager>
     private List<long> _squareValueList = new() { 2, 4 };
 
     // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
-    private const int MAX_COUNT_QUARE_VALUE_LIST = 7;
-    private readonly int[] _probabilityList = { 1, 4, 8, 13, 19, 26, 34 };
+    private const int MAX_COUNT_QUARE_VALUE_LIST = 9;
+    private readonly int[] _probabilityList = { 1, 4, 10, 18, 28, 30, 44, 60, 78 };
 
     private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
     private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
@@ -50,14 +50,15 @@ public class BoardManager : Singleton<BoardManager>
         // Application.targetFrameRate = 60;
         _uiManager = UIManager.Instance;
         RenderLineColumn();
-        if (!isClearData)
+        Debug.Log($"nextSquareValue {nextSquareValue}");
+        if (isClearData || nextSquareValue < 1)
         {
-            LoadDataFromPrefs();
-            nextSquare.SetValue(nextSquareValue);
+            RestartGame();
         }
         else
         {
-            RestartGame();
+            LoadDataFromPrefs();
+            nextSquare.SetValue(nextSquareValue);
         }
 
         _uiManager.StartUI(squaresData);
@@ -96,7 +97,7 @@ public class BoardManager : Singleton<BoardManager>
         yield return new WaitForNextFrameUnit();
 
         CheckGameOver();
-        
+
         // foreach (var actionListWrap in _actionsWrapList)
         // {
         //     Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
@@ -429,7 +430,7 @@ public class BoardManager : Singleton<BoardManager>
         // Debug.Log($"maxValueInBoard {maxValueInBoard} maxValueInSquareValueList {maxValueInSquareValueList}");
 
         if (maxValueInBoard > 8 &&
-            maxValueInBoard / (Utils.GetExponent(maxValueInBoard) / 2) > maxValueInSquareValueList)
+            maxValueInBoard / (Utils.GetExponent(maxValueInBoard) + 3) > maxValueInSquareValueList)
         {
             _squareValueList.Add(maxValueInSquareValueList * 2);
         }
@@ -474,6 +475,7 @@ public class BoardManager : Singleton<BoardManager>
     {
         isGameOver = squaresData.All(squareData => squareData.value > 0);
     }
+
     #endregion
 
     #region SaveAndLoadGame
@@ -518,28 +520,21 @@ public class BoardManager : Singleton<BoardManager>
         var jsonHelper = new Utils.JsonHelper<SquareData>(squaresData);
 
         Prefs.SquaresData = JsonUtility.ToJson(jsonHelper);
-        Prefs.Score = score.ToString();
-        Prefs.HighScore = highScore.ToString();
+        Prefs.Score = score;
+        Prefs.HighScore = highScore;
         Prefs.IdCount = idCount;
-        Prefs.NextSquareValue = nextSquareValue.ToString();
+        Prefs.NextSquareValue = nextSquareValue;
         Prefs.SquareValueList = JsonUtility.ToJson(_squareValueList);
     }
 
     private void LoadDataFromPrefs()
     {
         squaresData = JsonUtility.FromJson<Utils.JsonHelper<SquareData>>(Prefs.SquaresData)?.datas;
-        score = long.Parse(Prefs.Score);
+        score = Prefs.Score;
         LoadHighScore();
         idCount = Prefs.IdCount;
-        try
-        {
-            nextSquareValue = long.Parse(Prefs.NextSquareValue);
-        }
-        catch (Exception e)
-        {
-            nextSquareValue = _squareValueList.Min();
-        }
-       
+        nextSquareValue = Prefs.NextSquareValue;
+
         _squareValueList = JsonUtility.FromJson<Utils.JsonHelper<long>>(Prefs.SquaresData)?.datas;
 
         _uiManager.idCount = idCount;
@@ -547,7 +542,7 @@ public class BoardManager : Singleton<BoardManager>
 
     private void LoadHighScore()
     {
-        highScore = long.Parse(Prefs.HighScore);
+        highScore = Prefs.HighScore;
     }
 
     #endregion

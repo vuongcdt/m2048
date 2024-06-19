@@ -22,6 +22,7 @@ public class LineColumn : MonoCache
             return;
         }
         StartCoroutine(boardManager.ShootBlock());
+        SetActiveLine(false);
     }
 
     private void OnMouseEnter()

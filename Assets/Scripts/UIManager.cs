@@ -117,6 +117,9 @@ public class UIManager : Singleton<UIManager>
                 comboPrefab.transform.position = new Vector2(_comboPos.x, _comboPos.y - 1.2f);
                 comboPrefab.SetActive(true);
 
+                var endNewValueMerge = _actionsWrapList.Last(boardAction => boardAction.actionType == ActionType.MergeAllBlock);
+
+                _boardManager.score += (_comboCount - 1) * endNewValueMerge.stepActionList[^1]?.newSquareValue ?? 0;
                 StartCoroutine(DeActiveComboIE());
             }
         });

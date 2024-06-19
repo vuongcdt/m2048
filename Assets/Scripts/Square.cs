@@ -50,7 +50,7 @@ public class Square : MonoCache
         squareData.id = id;
     }
 
-    public void SetValue(long newValue)
+    public void SetValue(float newValue)
     {
         squareData.value = newValue;
         SetTextAndColor();
