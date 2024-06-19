@@ -46,11 +46,14 @@ public class BoardManager : Singleton<BoardManager>
     {
         // Application.targetFrameRate = 60;
         _uiManager = UIManager.Instance;
-        ResetBoard();
         RenderLineColumn();
         if (!isClearData)
         {
             LoadDataFromPrefs();
+        }
+        else
+        {
+            ResetBoard();
         }
         SetRandomSquareValue();
         
