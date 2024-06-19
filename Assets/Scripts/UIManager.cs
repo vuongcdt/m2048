@@ -12,6 +12,7 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private GameObject squarePrefab;
     [SerializeField] private Transform squareParentTransform;
     [SerializeField] private Text scoreText;
+    [SerializeField] private Text highScoreText;
     [SerializeField] private GameObject comboPrefab;
     [SerializeField] private TextMesh comboText;
 
@@ -290,6 +291,8 @@ public class UIManager : Singleton<UIManager>
         {
             _boardManager.highScore = _boardManager.score;
         }
+
+        highScoreText.text = _boardManager.highScore.ToString();
     }
 
     private void SortUI(Sequence sequence, List<StepAction> mergerActionList)

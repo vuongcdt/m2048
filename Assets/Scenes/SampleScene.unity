@@ -995,6 +995,7 @@ MonoBehaviour:
   squarePrefab: {fileID: 1501351254502025820, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
   squareParentTransform: {fileID: 386745771}
   scoreText: {fileID: 1222888634}
+  highScoreText: {fileID: 1039126296}
   comboPrefab: {fileID: 1016378124}
   comboText: {fileID: 1661538697}
   _idCount: 30
@@ -1238,7 +1239,7 @@ GameObject:
   - component: {fileID: 1039126297}
   - component: {fileID: 1039126296}
   m_Layer: 5
-  m_Name: HighScore
+  m_Name: HighScoreText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1348,7 +1349,7 @@ GameObject:
   - component: {fileID: 1222888635}
   - component: {fileID: 1222888634}
   m_Layer: 5
-  m_Name: Score
+  m_Name: ScoreText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

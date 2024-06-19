@@ -56,6 +56,7 @@ public class BoardManager : Singleton<BoardManager>
         }
         else
         {
+            LoadHighScore();
             ResetBoard();
             SetRandomSquareValue();
         }
@@ -517,9 +518,8 @@ public class BoardManager : Singleton<BoardManager>
     {
         squaresData = JsonUtility.FromJson<Utils.JsonHelper<SquareData>>(Prefs.SquaresData)?.datas;
         score = long.Parse(Prefs.Score);
-        highScore = long.Parse(Prefs.HighScore);
+        LoadHighScore();
         idCount = Prefs.IdCount;
-        Debug.Log($"Prefs.NextSquareValue {Prefs.NextSquareValue}");
         try
         {
             nextSquareValue = long.Parse(Prefs.NextSquareValue);
@@ -532,6 +532,11 @@ public class BoardManager : Singleton<BoardManager>
         _squareValueList = JsonUtility.FromJson<Utils.JsonHelper<long>>(Prefs.SquaresData)?.datas;
 
         _uiManager._idCount = idCount;
+    }
+
+    private void LoadHighScore()
+    {
+        highScore = long.Parse(Prefs.HighScore);
     }
 
     #endregion
