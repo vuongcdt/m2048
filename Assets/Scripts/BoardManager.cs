@@ -35,22 +35,19 @@ public class BoardManager : Singleton<BoardManager>
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
-
     private List<long> _squareValueList = new() { 2, 4 };
-
     // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
-    private const int MAX_COUNT_QUARE_VALUE_LIST = 9;
     private readonly int[] _probabilityList = { 1, 4, 10, 18, 28, 30, 44, 60, 78 };
-
     private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
     private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
+    
+    private const int MAX_COUNT_QUARE_VALUE_LIST = 9;
 
     private void Start()
     {
         // Application.targetFrameRate = 60;
         _uiManager = UIManager.Instance;
         RenderLineColumn();
-        Debug.Log($"nextSquareValue {nextSquareValue}");
         if (isClearData || nextSquareValue < 1)
         {
             RestartGame();
@@ -230,7 +227,7 @@ public class BoardManager : Singleton<BoardManager>
     private bool IsBlockCanMerge(SquareData squareData, SquareData block)
     {
         var isHasValue = squareData.value > 0;
-        var isSameValue = block.value == squareData.value;
+        var isSameValue = Mathf.Approximately(block.value, squareData.value);
 
         var squareColumn = squareData.cell.Column;
         var squareRow = squareData.cell.Row;
@@ -247,7 +244,7 @@ public class BoardManager : Singleton<BoardManager>
 
     private void MergeSingleBlock(SquareData squareDataTarget, SquareData squareDataSource)
     {
-        if (squareDataSource.value != squareDataTarget.value)
+        if (!Mathf.Approximately(squareDataSource.value, squareDataTarget.value))
         {
             return;
         }
@@ -292,7 +289,8 @@ public class BoardManager : Singleton<BoardManager>
     {
         var squareDataSourceList = squareSourceList as SquareData[] ?? squareSourceList.ToArray();
         var isCompareAllValue =
-            squareDataSourceList.All(squareDataSameValue => squareDataSameValue.value == squareTarget.value);
+            squareDataSourceList.All(squareDataSameValue =>
+                Mathf.Approximately(squareDataSameValue.value, squareTarget.value));
         if (!isCompareAllValue)
         {
             return;
@@ -427,24 +425,23 @@ public class BoardManager : Singleton<BoardManager>
     {
         var maxValueInBoard = squaresData.Max(square => square.value);
         var maxValueInSquareValueList = _squareValueList[^1];
-        // Debug.Log($"maxValueInBoard {maxValueInBoard} maxValueInSquareValueList {maxValueInSquareValueList}");
 
-        if (maxValueInBoard > 8 &&
-            maxValueInBoard / (Utils.GetExponent(maxValueInBoard) + 3) > maxValueInSquareValueList)
+        var isEntryAddNewValue = maxValueInBoard > 8 &&
+                                 maxValueInBoard / (Utils.GetExponent(maxValueInBoard) + 3) > maxValueInSquareValueList;
+        if (isEntryAddNewValue)
         {
             _squareValueList.Add(maxValueInSquareValueList * 2);
         }
 
-        if (_squareValueList.Count > MAX_COUNT_QUARE_VALUE_LIST - 1)
+        if (_squareValueList.Count <= MAX_COUNT_QUARE_VALUE_LIST - 1)
         {
-            Debug.Log("DEL MIN VALUE");
-            var minValueInBoard = _squareValueList[0];
-            _squareValueList.RemoveAt(0);
-
-            ClearMinBlock(minValueInBoard);
+            return;
         }
 
-        Debug.Log("_squareValueList  " + string.Join(" - ", _squareValueList));
+        var minValueInBoard = _squareValueList[0];
+        _squareValueList.RemoveAt(0);
+
+        ClearMinBlock(minValueInBoard);
     }
 
     private void ClearMinBlock(long minValueInBoard)
@@ -453,7 +450,7 @@ public class BoardManager : Singleton<BoardManager>
 
         foreach (var squareData in squaresData)
         {
-            if (squareData.value == minValueInBoard)
+            if (Mathf.Approximately(squareData.value, minValueInBoard))
             {
                 StepAction action = new()
                 {

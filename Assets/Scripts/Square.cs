@@ -55,6 +55,11 @@ public class Square : MonoCache
         squareData.value = newValue;
         SetTextAndColor();
     }
+    
+    public void SetActiveObj(bool isActive)
+    {
+       gameObjectCache.SetActive(isActive);
+    }
 
     public void ReturnPool()
     {

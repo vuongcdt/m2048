@@ -392,7 +392,7 @@ MonoBehaviour:
   highScore: 0
   idCount: 0
   nextSquareValue: 0
-  isClearData: 1
+  isClearData: 0
   isGameOver: 0
 --- !u!4 &457360940
 Transform:
@@ -1001,7 +1001,7 @@ MonoBehaviour:
   comboPrefab: {fileID: 1016378124}
   comboText: {fileID: 1661538697}
   gameOverPopup: {fileID: 1208222313}
-  _idCount: 30
+  idCount: 30
 --- !u!1001 &1016378122
 PrefabInstance:
   m_ObjectHideFlags: 0
