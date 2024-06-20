@@ -38,11 +38,11 @@ public class BoardManager : Singleton<BoardManager>
     private List<long> _squareValueList = new() { 2, 4 };
     // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
     private readonly int[] _probabilityList = { 1, 4, 10, 18, 28, 30, 44, 60, 78 };
-    private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
-    private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
     
     private const int MAX_COUNT_QUARE_VALUE_LIST = 9;
 
+    private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
+    private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
     private void Start()
     {
         // Application.targetFrameRate = 60;

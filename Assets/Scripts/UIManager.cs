@@ -26,12 +26,14 @@ public class UIManager : Singleton<UIManager>
     private int _comboCount;
     private bool _isSave;
     private Vector2 _comboPos;
-    private static readonly ProfilerMarker ProcessingTweenMaker = new("MyMaker.DOTweenSequence");
     private GameObjectPool blockPool;
     
     private const string FORMAT_SCORE = "0000";
+    private const string COMBO_TEXT_FORMAT = "Combo x{_comboCount}";
     private const float MERGE_DURATION = 0.1f;
     private const float TIME_DELAY = 0.1f;
+    
+    private static readonly ProfilerMarker ProcessingTweenMaker = new("MyMaker.DOTweenSequence");
 
     private void Start()
     {
@@ -135,7 +137,7 @@ public class UIManager : Singleton<UIManager>
     {
         if (_comboCount > 2)
         {
-            comboText.text = $"Combo x{_comboCount}";
+            comboText.text = string.Format(COMBO_TEXT_FORMAT,_comboCount);
             comboPrefab.transform.position = new Vector2(_comboPos.x, _comboPos.y - 1.2f);
             comboPrefab.SetActive(true);
 
