@@ -33,8 +33,20 @@ public class UIManager : Singleton<UIManager>
     private const float MERGE_DURATION = 0.1f;
     private const float TIME_DELAY = 0.1f;
 
+    private void Start()
+    {
+        _boardManager = BoardManager.Instance;
+        
+        comboPrefab.SetActive(false);
+        gameOverPopup.SetActive(false);
+        
+        SetScoreUI();
+    }
+    
     public void StartUI(List<SquareData> squaresData)
     {
+        _squareScript = squarePrefab.GetComponent<Square>();
+
         InitPoolObject();
 
        TestData.SetDataTest(squaresData);
@@ -155,17 +167,6 @@ public class UIManager : Singleton<UIManager>
     {
         yield return new WaitForSeconds(1f);
         comboPrefab.SetActive(false);
-    }
-
-    private void Start()
-    {
-        _boardManager = BoardManager.Instance;
-        _squareScript = squarePrefab.GetComponent<Square>();
-
-        comboPrefab.SetActive(false);
-        gameOverPopup.SetActive(false);
-        
-        SetScoreUI();
     }
     
     private void ResetUI(List<SquareData> squaresData)

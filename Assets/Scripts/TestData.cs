@@ -81,6 +81,5 @@ public static class TestData
         // squaresData[2 + 24].value = 4;
         // squaresData[3 + 24].value = 2;
         // squaresData[4 + 24].value = 4;
-        
     }
 }

@@ -78,6 +78,7 @@ public class BoardManager : Singleton<BoardManager>
         ProcessingData(columnSelect);
 
         ProcessingDataMaker.End();
+        CheckGameOver();
 
         yield return new WaitForNextFrameUnit();
         if (!_isMaxItemColumn)
@@ -92,9 +93,7 @@ public class BoardManager : Singleton<BoardManager>
         RenderUIMaker.End();
 
         yield return new WaitForNextFrameUnit();
-
-        CheckGameOver();
-
+        
         // foreach (var actionListWrap in _actionsWrapList)
         // {
         //     Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
@@ -278,7 +277,7 @@ public class BoardManager : Singleton<BoardManager>
         _actionsList.Add(action);
         squareTarget.value = newValue;
         squareSource.value = 0;
-        // squareSource.id = GetSquareSourceID(squareSource);
+        
         if (squareSource == _processingSquare)
         {
             _processingSquare = squareTarget;
