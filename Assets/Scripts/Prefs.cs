@@ -4,7 +4,7 @@ public static class Prefs
 {
     public static string SquaresData
     {
-        get => PlayerPrefs.GetString(Constants.PrefConsts.SQUARES_DATA_KEY, "");
+        get => PlayerPrefs.GetString(Constants.PrefConsts.SQUARES_DATA_KEY);
         set => PlayerPrefs.SetString(Constants.PrefConsts.SQUARES_DATA_KEY, value);
     }
 

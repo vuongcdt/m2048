@@ -65,6 +65,24 @@ public class UIManager : Singleton<UIManager>
         }
     }
 
+    private void ResetUI(List<SquareData> squaresData)
+    {
+        foreach (var squareData in squaresData)
+        {
+            if (squareData.value <= 0)
+            {
+                continue;
+            }
+
+            var newSquareData = InstanceNewSquareData(squareData.Position);
+
+            newSquareData.SetValue(squareData.value);
+            newSquareData.SetId(squareData.id);
+        }
+    }
+
+    #region ResetUI
+
     private Square InstanceNewSquareData(Vector3 pos)
     {
         var squarePool = FindSquarePoolDeActive();
@@ -96,6 +114,15 @@ public class UIManager : Singleton<UIManager>
         return null;
     }
 
+    #endregion
+
+    public void RePlayGame()
+    {
+        _boardManager.isProcessing = false;
+        gameOverPopup.SetActive(false);
+        _boardManager.RestartGame();
+    }
+
     public void ReturnPool(GameObject insObj)
     {
         insObj.SetActive(false);
@@ -103,7 +130,7 @@ public class UIManager : Singleton<UIManager>
 
     public void RenderUI(List<BoardAction> actionsWrapList)
     {
-        InitSquare();
+        InitNewSquareForShoot();
         _comboCount = 0;
         _sequence = DOTween.Sequence();
 
@@ -146,6 +173,8 @@ public class UIManager : Singleton<UIManager>
         }
     }
 
+    #region RenderUI
+
     private void SetComboUI()
     {
         if (_comboCount > 2)
@@ -165,41 +194,17 @@ public class UIManager : Singleton<UIManager>
         }
     }
 
-    private void SetGameOverUI()
-    {
-        gameOverPopup.SetActive(true);
-        _boardManager.isProcessing = true;
-    }
-
-    public void RePlayGame()
-    {
-        _boardManager.isProcessing = false;
-        gameOverPopup.SetActive(false);
-        _boardManager.RestartGame();
-    }
-
     private IEnumerator DeActiveComboIE()
     {
         yield return new WaitForSeconds(1f);
         comboPrefab.SetActive(false);
     }
 
-    private void ResetUI(List<SquareData> squaresData)
+    private void SetGameOverUI()
     {
-        foreach (var squareData in squaresData)
-        {
-            if (squareData.value <= 0)
-            {
-                continue;
-            }
-
-            var newSquareData = InstanceNewSquareData(squareData.Position);
-
-            newSquareData.SetValue(squareData.value);
-            newSquareData.SetId(squareData.id);
-        }
+        gameOverPopup.SetActive(true);
+        _boardManager.isProcessing = true;
     }
-
 
     private void ShootUI(Sequence sequence, StepAction stepAction)
     {
@@ -228,7 +233,7 @@ public class UIManager : Singleton<UIManager>
         return null;
     }
 
-    private void InitSquare()
+    private void InitNewSquareForShoot()
     {
         idCount++;
         var newSquarePos = new Vector3(0, 6, 0);
@@ -342,4 +347,6 @@ public class UIManager : Singleton<UIManager>
             squareData.id == squareGameObj.squareData.id && squareGameObj.gameObject.activeSelf);
         return isSquareActiveSameIndex;
     }
+
+    #endregion
 }
