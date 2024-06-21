@@ -18,5 +18,11 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         {
             Destroy(this.gameObject);
         }
+
+        AwakeCustom();
+    }
+
+    protected virtual void AwakeCustom()
+    {
     }
 }

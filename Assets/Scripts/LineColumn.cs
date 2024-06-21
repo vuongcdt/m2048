@@ -1,51 +1,44 @@
-﻿using System;
-using System.Linq;
-using DG.Tweening;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class LineColumn : MonoBehaviour
+public class LineColumn : MonoCache
 {
-    [SerializeField] private GameObject square;
-
-    private Square _squareScript;
-    private BoardManager _boardManager;
-    private PlayerManager _playerManager;
-
-    private int _column;
-
-    public int Column
+    [SerializeField] private SpriteRenderer bg;
+    
+    public int column;
+    
+    private void OnMouseDown()
     {
-        get => _column;
-        set => _column = value;
+        SetActiveLine(true);
+        boardManager.columnSelect = column;
+        boardManager.isTouchLine = true;
     }
 
-    private void Awake()
+    private void OnMouseUp()
     {
-        _squareScript = square.GetComponent<Square>();
-        _boardManager = BoardManager.Instance;
-        _playerManager = PlayerManager.Instance;
+        boardManager.isTouchLine = false;
+        
+        if (boardManager.isProcessing)
+        {
+            return;
+        }
+        StartCoroutine(boardManager.ShootBlock());
+        SetActiveLine(false);
     }
 
-    private void OnEnable()
+    private void OnMouseEnter()
     {
-        SquareMoveToPoint();
+        if (!boardManager.isTouchLine) return;
+        boardManager.columnSelect = column;
+        SetActiveLine(true);
     }
 
-    private void SquareMoveToPoint()
+    private void OnMouseExit()
     {
-        _squareScript.Value = _boardManager.SquareNextValue;
-
-        square.transform
-            .DOMoveY(_playerManager.EndValueSquareToPoint, _playerManager.DurationSquareToPoint)
-            .SetEase(Ease.Linear)
-            // .OnComplete(() => { Debug.Log("square.transform.position: " + square.transform.position); })
-            ;
+        SetActiveLine(false);
     }
-
-    private void OnDisable()
+    
+    private void SetActiveLine(bool value)
     {
-        square.transform.position = new Vector2(square.transform.position.x, -5);
-        _squareScript.Color = Constants.SquareColor.White;
-        _squareScript.Value = 0;
+        bg.color = value ? new Color(0.47f, 0.47f, 0.47f, 0.35f) : new Color(0.27f, 0.27f, 0.27f, 0.35f);
     }
 }

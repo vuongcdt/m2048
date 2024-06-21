@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.annulusgames.u-pools": {
+      "version": "https://github.com/AnnulusGames/uPools.git?path=/Assets/uPools",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "1f57d5e49abb6ba7990dc61f43c66ad7d5223438"
+    },
     "com.unity.2d.animation": {
       "version": "9.0.4",
       "depth": 1,

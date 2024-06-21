@@ -1,156 +1,546 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Profiling;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class BoardManager : Singleton<BoardManager>
 {
-    [SerializeField] private Square square;
-    [SerializeField] private Transform parentTransform;
-    [SerializeField] private int row;
-    [SerializeField] private int column;
+    #region NewCode
 
-    private readonly List<Square> _listSquare = new();
-    private readonly List<int> _listSquareValue = new() { 2, 8 };
-    // private readonly List<int> _listSquareValue = new() { 2, 4, 8, 16, 32, 64, 128 };
+    [SerializeField] private GameObject lineColumn;
+    [SerializeField] private Transform lineParentTransform;
+    [SerializeField] private Square nextSquare;
 
-    private int _columnIndex;
-    private int _randomNum;
-    private int _squareNextValue;
-    private int _endValueSquareToPoint;
-    private float _durationSquareToPoint;
-    private bool _isRunToPoint;
-    private bool _isCheckSquare;
+    public List<SquareData> squaresData = new();
+    public int boardRow = 5;
+    public int boardCol = 6;
+    public bool isTouchLine;
+    public int columnSelect;
+    public bool isProcessing;
+    public float score;
+    public float highScore;
+    public int idCount;
+    public float nextSquareValue;
+    public bool isClearData;
+    public bool isGameOver;
 
-    // public List<Square> ListSquare => _listSquare;
-    public int SquareNextValue => _squareNextValue;
-    public int Row => row;
-    public int Column => column;
+    private bool _isSave;
+    private bool _isMaxItemColumn;
+    private UIManager _uiManager;
+    private SquareData _processingSquare;
+    private List<GameObject> _lineColumnList = new();
+    private List<StepAction> _actionsList = new();
+    private List<BoardAction> _actionsWrapList = new();
+    private List<long> _squareValueList = new() { 2, 4 };
+    // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
+    private readonly int[] _probabilityList = { 1, 4, 10, 18, 28, 30, 44, 60, 78 };
+    
+    private const int MAX_COUNT_QUARE_VALUE_LIST = 9;
 
-    public Square ProcessingSquare { get; set; }
-
+    private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
+    private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
     private void Start()
     {
-        RenderSquareBoard();
+        // Application.targetFrameRate = 60;
+        _uiManager = UIManager.Instance;
+        RenderLineColumn();
+        if (isClearData || nextSquareValue < 1)
+        {
+            RestartGame();
+        }
+        else
+        {
+            LoadDataFromPrefs();
+            nextSquare.SetValue(nextSquareValue);
+        }
+
+        _uiManager.StartUI(squaresData);
     }
 
-    private void RenderSquareBoard()
+    public void RestartGame()
     {
-        for (var y = row; y > 0; y--)
-        {
-            for (var x = 0; x < column; x++)
-            {
-                square.Value = 0;
-                square.Column = x;
-                square.Row = row - y;
-                square.Index = x + (row - y) * column;
+        LoadHighScore();
+        ResetBoard();
+        SetRandomSquareValue();
+    }
 
-                _listSquare.Add(Instantiate(square,
-                    new Vector2(x * 2 - row, y * 2 - column),
-                    Quaternion.identity,
-                    parentTransform
-                ));
+    public IEnumerator ShootBlock()
+    {
+        isProcessing = true;
+        _actionsWrapList.Clear();
+        yield return new WaitForNextFrameUnit();
+
+        ProcessingDataMaker.Begin();
+        ProcessingData(columnSelect);
+
+        ProcessingDataMaker.End();
+        CheckGameOver();
+
+        yield return new WaitForNextFrameUnit();
+        if (!_isMaxItemColumn)
+        {
+            SetRandomSquareValue();
+        }
+
+        yield return new WaitForNextFrameUnit();
+
+        RenderUIMaker.Begin();
+        _uiManager.RenderUI(_actionsWrapList);
+        RenderUIMaker.End();
+
+        yield return new WaitForNextFrameUnit();
+        
+        // foreach (var actionListWrap in _actionsWrapList)
+        // {
+        //     Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
+        // }
+    }
+
+    private void ProcessingData(int column)
+    {
+        Shoot(column);
+
+        if (_isMaxItemColumn)
+        {
+            return;
+        }
+
+        ProcessingLoop();
+    }
+
+    private void ProcessingLoop()
+    {
+        int countActionsList;
+        do
+        {
+            countActionsList = _actionsWrapList.Count;
+
+            MergeAllBlock();
+            SortAllBlock();
+        } while (countActionsList < _actionsWrapList.Count && countActionsList < 30);
+    }
+
+    private void Shoot(int column)
+    {
+        _actionsList.Clear();
+        _isMaxItemColumn = false;
+        var action = new StepAction();
+        var squareTarget = GetEmptySquareDataTargetByColumn(column);
+        if (squareTarget == null)
+        {
+            _isMaxItemColumn = true;
+            return;
+        }
+
+        idCount++;
+
+        var squareSource = new SquareData(
+            new Utils.Cell(column, boardRow),
+            idCount,
+            nextSquareValue
+        );
+
+        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.id, squareTarget.value);
+        action.singleSquareSources = new SquareData(squareSource.cell, squareSource.id, squareSource.value);
+        action.newSquareValue = nextSquareValue;
+
+        _actionsList.Add(action);
+        var item = new BoardAction(new List<StepAction>(_actionsList), ActionType.Shoot);
+        _actionsWrapList.Add(item);
+
+        squareTarget.id = squareSource.id;
+        squareSource.id = 0;
+        squareTarget.value = nextSquareValue;
+        _processingSquare = squareTarget;
+    }
+
+    private SquareData GetEmptySquareDataTargetByColumn(int column)
+    {
+        return squaresData.Find(block => block.value == 0 && block.cell.Column == column);
+    }
+
+    private void ResetBoard()
+    {
+        for (var y = boardRow; y > 0; y--)
+        {
+            for (var x = 0; x < boardCol; x++)
+            {
+                idCount++;
+                squaresData.Add(new SquareData(
+                    new Utils.Cell(x, boardRow - y),
+                    idCount,
+                    0));
             }
         }
     }
 
-    private void FixedUpdate()
+    private void RenderLineColumn()
     {
-        if (_squareNextValue == 0)
+        for (int i = 0; i < boardCol; i++)
         {
-            SetRandomSquareValue();
+            var posLine = new Vector2(i * 2 - boardRow, 0);
+            var line = Instantiate(lineColumn, posLine, Quaternion.identity, lineParentTransform);
+            line.GetComponent<LineColumn>().column = i;
+            _lineColumnList.Add(line);
         }
     }
 
-    public List<Square> GetSquareEmptyByColumn(int index)
+    private void MergeAllBlock()
     {
-        return _listSquare
-            .Where(s => s.Column == index && s.Value == 0)
-            .OrderBy(s => s.Index)
-            .ToList();
-    }
+        _actionsList.Clear();
 
-    public void SetSquare()
-    {
-        ProcessingSquare.Value = _squareNextValue;
+        var squareMergeOrderByCountSameValueList = squaresData
+            .Where(block => block.value > 0)
+            .Select(block => new
+            {
+                block,
+                SquareSameValueList = squaresData.Where(squareData => IsBlockCanMerge(squareData, block)).ToArray()
+            })
+            .Where(data => data.SquareSameValueList.Any())
+            .OrderByDescending(data => data.SquareSameValueList.Count());
 
-        _isCheckSquare = true;
-        CompareSquare(ProcessingSquare);
-        _isCheckSquare = false;
-
-        SetRandomSquareValue();
-    }
-
-    private void CompareSquare(Square processingSquare)
-    {
-        var squaresSame = _listSquare
-            .Where(s => IsEntryPassSquare(processingSquare, s))
-            .ToList();
-
-        var countSquare = squaresSame.Count;
-        Debug.Log("countSquare: " + countSquare);
-
-        if (countSquare == 0)
+        foreach (var data in squareMergeOrderByCountSameValueList)
         {
-            _isCheckSquare = false;
-            return;
+            if (data.SquareSameValueList.Count() == 1)
+            {
+                MergeSingleBlock(data.block, data.SquareSameValueList.First());
+            }
+            else
+            {
+                MergeMultiBlock(data.block, data.SquareSameValueList);
+            }
         }
 
-        processingSquare.Value *= (int)Mathf.Pow(2, countSquare);
-        squaresSame.ForEach(squareSameValue => squareSameValue.Value = 0);
-
-        FillBoard();
-
-        if (_isCheckSquare)
-        {
-            CompareSquare(ProcessingSquare);
-        }
-    }
-
-    private void FillBoard()
-    {
-        var emptySquares = _listSquare
-            .Where(s => s.Value == 0 && SquareHasValueSameColumnNextRow(s))
-            .ToList();
-
-        if (emptySquares.Count == 0)
+        if (!_actionsList.Any())
         {
             return;
         }
 
-        emptySquares.ForEach(squareEmpty => InvertedSquare(SquareHasValueSameColumnNextRow(squareEmpty), squareEmpty));
-
-        return;
-
-        Square SquareHasValueSameColumnNextRow(Square s) => _listSquare
-            .FirstOrDefault(e => e.Column == s.Column && e.Value != 0 && e.Row == s.Row + 1);
+        _actionsWrapList.Add(new BoardAction(new List<StepAction>(_actionsList), ActionType.MergeAllBlock));
     }
 
-    private static bool IsEntryPassSquare(Square squareCheck, Square squareMap)
+    
+    private bool IsBlockCanMerge(SquareData squareData, SquareData block)
     {
-        return IsSameValue() && (IsNextToSameColumn(squareMap) || IsNexToSameRow(squareMap));
+        var isHasValue = squareData.value > 0;
+        var isSameValue = Mathf.Approximately(block.value, squareData.value);
 
-        bool IsNextToSameColumn(Square s) =>
-            (s.Column == squareCheck.Column + 1 || s.Column == squareCheck.Column - 1)
-            && s.Row == squareCheck.Row;
+        var squareColumn = squareData.cell.Column;
+        var squareRow = squareData.cell.Row;
+        var blockColumn = block.cell.Column;
+        var blockRow = block.cell.Row;
 
-        bool IsNexToSameRow(Square s) => s.Row == squareCheck.Row - 1 && s.Column == squareCheck.Column;
+        var isSquareRight = squareColumn == blockColumn + 1 && squareRow == blockRow;
+        var isSquareLeft = squareColumn == blockColumn - 1 && squareRow == blockRow;
+        var isSquareDown = squareRow == blockRow + 1 && squareColumn == blockColumn;
+        var isSquareUp = squareRow == blockRow - 1 && squareColumn == blockColumn;
 
-        bool IsSameValue() => squareCheck.Value > 0 && squareMap.Value == squareCheck.Value;
+        return isHasValue && isSameValue && (isSquareRight || isSquareLeft || isSquareDown || isSquareUp);
     }
 
-    private void InvertedSquare(Square squareHasValue, Square squareEmpty)
+    private void MergeSingleBlock(SquareData squareDataTarget, SquareData squareDataSource)
     {
-        squareEmpty.Value = squareHasValue.Value;
-        squareHasValue.Value = 0;
+        if (!Mathf.Approximately(squareDataSource.value, squareDataTarget.value))
+        {
+            return;
+        }
 
-        CompareSquare(squareEmpty);
+        SquareData squareSource;
+        SquareData squareTarget;
+        var action = new StepAction();
+
+        var newValue = squareDataTarget.value * 2;
+        var isSameColumn = squareDataSource.cell.Row == squareDataTarget.cell.Row - 1;
+        var isSameRowRight = squareDataTarget.cell.Column > squareDataSource.cell.Column &&
+                             squareDataSource.cell.Column >= _processingSquare.cell.Column;
+        var isSameRowLeft = squareDataTarget.cell.Column < squareDataSource.cell.Column &&
+                            squareDataSource.cell.Column <= _processingSquare.cell.Column;
+
+        if (isSameColumn || isSameRowRight || isSameRowLeft)
+        {
+            squareSource = squareDataTarget;
+            squareTarget = squareDataSource;
+        }
+        else
+        {
+            squareSource = squareDataSource;
+            squareTarget = squareDataTarget;
+        }
+
+        action.multiSquareSources.Add(new SquareData(squareSource.cell, squareSource.id, squareSource.value));
+        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.id, squareTarget.value);
+        action.newSquareValue = newValue;
+
+        _actionsList.Add(action);
+        squareTarget.value = newValue;
+        squareSource.value = 0;
+        
+        if (squareSource == _processingSquare)
+        {
+            _processingSquare = squareTarget;
+        }
     }
 
+    private void MergeMultiBlock(SquareData squareTarget, IEnumerable<SquareData> squareSourceList)
+    {
+        var squareDataSourceList = squareSourceList as SquareData[] ?? squareSourceList.ToArray();
+        var isCompareAllValue =
+            squareDataSourceList.All(squareDataSameValue =>
+                Mathf.Approximately(squareDataSameValue.value, squareTarget.value));
+        if (!isCompareAllValue)
+        {
+            return;
+        }
+
+        var countBlockSameValue = squareDataSourceList.Count();
+
+        var action = new StepAction();
+
+        var newValue = squareTarget.value * (int)Mathf.Pow(2, countBlockSameValue);
+
+        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.id, squareTarget.value);
+        action.newSquareValue = newValue;
+
+        foreach (var squareData in squareDataSourceList)
+        {
+            action.multiSquareSources.Add(new SquareData(squareData.cell, squareData.id, squareData.value));
+            squareData.value = 0;
+            if (squareData == _processingSquare)
+            {
+                _processingSquare = squareTarget;
+            }
+        }
+
+        _actionsList.Add(action);
+
+        squareTarget.value = newValue;
+    }
+
+    private SquareData GetSquareDataByCell(Utils.Cell cell)
+    {
+        return squaresData.Find(item => item.cell.Row == cell.Row && item.cell.Column == cell.Column);
+    }
+
+    private void SortAllBlock()
+    {
+        _actionsList.Clear();
+        var emptyBlocksUpRowList = squaresData
+            .FindAll(item => item.value == 0 &&
+                             squaresData.Any(squareDownRow =>
+                                 squareDownRow.cell.Row == item.cell.Row + 1 &&
+                                 squareDownRow.cell.Column == item.cell.Column &&
+                                 squareDownRow.value > 0));
+
+        if (!emptyBlocksUpRowList.Any())
+        {
+            return;
+        }
+
+        foreach (var emptyBlocksUpRow in emptyBlocksUpRowList)
+        {
+            var squareHasValueDownRowList = GetSquaresDataHasValueDownRowByCell(emptyBlocksUpRow);
+
+            foreach (var squareHasValueDownRow in squareHasValueDownRowList)
+            {
+                SortBlock(squareHasValueDownRow.cell,
+                    new Utils.Cell(squareHasValueDownRow.cell.Column, squareHasValueDownRow.cell.Row - 1));
+            }
+        }
+
+        if (!_actionsList.Any())
+        {
+            return;
+        }
+
+        _actionsWrapList.Add(new BoardAction(new List<StepAction>(_actionsList), ActionType.SortAllBlock));
+    }
+
+    private void SortBlock(Utils.Cell cellSource, Utils.Cell cellTarget)
+    {
+        var action = new StepAction();
+        var squareTarget = GetSquareDataByCell(cellTarget);
+        var squareSource = GetSquareDataByCell(cellSource);
+
+        action.singleSquareSources = new SquareData(squareSource.cell, squareSource.id, squareSource.value);
+        action.squareTarget = new SquareData(squareTarget.cell, squareTarget.id, squareTarget.value);
+        action.newSquareValue = squareSource.value;
+
+        _actionsList.Add(action);
+
+        squareTarget.value = squareSource.value;
+        squareSource.value = 0;
+        squareTarget.id = squareSource.id;
+        squareSource.id = GetSquareSourceID(squareSource);
+
+        if (squareSource == _processingSquare)
+        {
+            _processingSquare = squareTarget;
+        }
+    }
+
+    private int GetSquareSourceID(SquareData squareSource)
+    {
+        return squareSource.cell.Column + squareSource.cell.Row * boardCol + 1;
+    }
+
+    private IEnumerable<SquareData> GetSquaresDataHasValueDownRowByCell(SquareData squareEmptyUpRow)
+    {
+        return squaresData.Where(squareData => squareData.cell.Column == squareEmptyUpRow.cell.Column &&
+                                               squareData.value > 0 &&
+                                               squareData.cell.Row > squareEmptyUpRow.cell.Row)
+                .OrderBy(squareData => squareData.cell.Row)
+            ;
+    }
 
     private void SetRandomSquareValue()
     {
-        _randomNum = Random.Range(0, _listSquareValue.Count);
-        _squareNextValue = _listSquareValue[_randomNum];
+        SetNewNextValue();
+        SetRandomValue();
     }
+
+    private void SetRandomValue()
+    {
+        var countValueList = _squareValueList.Count;
+        var probabilityList = _probabilityList.Take(countValueList).ToList();
+        var maxValue = probabilityList[^1];
+        var randomNum = Random.Range(0, 1f) * maxValue;
+
+        for (var i = 0; i < countValueList; i++)
+        {
+            if (probabilityList[i] > randomNum)
+            {
+                var value = _squareValueList[countValueList - 1 - i];
+                nextSquareValue = value;
+                nextSquare.SetValue(value);
+                return;
+            }
+        }
+    }
+
+    private void SetNewNextValue()
+    {
+        var maxValueInBoard = squaresData.Max(square => square.value);
+        var maxValueInSquareValueList = _squareValueList[^1];
+
+        var isEntryAddNewValue = maxValueInBoard > 8 &&
+                                 maxValueInBoard / (Utils.GetExponent(maxValueInBoard) + 3) > maxValueInSquareValueList;
+        if (isEntryAddNewValue)
+        {
+            _squareValueList.Add(maxValueInSquareValueList * 2);
+        }
+
+        if (_squareValueList.Count <= MAX_COUNT_QUARE_VALUE_LIST - 1)
+        {
+            return;
+        }
+
+        var minValueInBoard = _squareValueList[0];
+        _squareValueList.RemoveAt(0);
+
+        ClearMinBlock(minValueInBoard);
+    }
+
+    private void ClearMinBlock(long minValueInBoard)
+    {
+        _actionsList.Clear();
+
+        foreach (var squareData in squaresData)
+        {
+            if (Mathf.Approximately(squareData.value, minValueInBoard))
+            {
+                StepAction action = new()
+                {
+                    squareTarget = new SquareData(squareData.cell, squareData.id, squareData.value)
+                };
+
+                squareData.value = 0;
+                _actionsList.Add(action);
+            }
+        }
+
+        var item = new BoardAction(new List<StepAction>(_actionsList), ActionType.ClearMinBlock);
+        _actionsWrapList.Add(item);
+
+        ProcessingLoop();
+    }
+
+    private void CheckGameOver()
+    {
+        isGameOver = squaresData.All(squareData => squareData.value > 0);
+    }
+
+    #endregion
+
+    #region SaveAndLoadGame
+
+    private void OnApplicationQuit()
+    {
+        SaveGame();
+    }
+
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        CheckSaveGame(pauseStatus);
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        CheckSaveGame(!hasFocus);
+    }
+
+    private void CheckSaveGame(bool isPause)
+    {
+        if (isPause)
+        {
+            SaveGame();
+        }
+
+        if (!isPause)
+        {
+            _isSave = false;
+        }
+    }
+
+    private void SaveGame()
+    {
+        if (_isSave)
+        {
+            return;
+        }
+
+        _isSave = true;
+
+        var jsonHelper = new Utils.JsonHelper<SquareData>(squaresData);
+
+        Prefs.SquaresData = JsonUtility.ToJson(jsonHelper);
+        Prefs.Score = score;
+        Prefs.HighScore = highScore;
+        Prefs.IdCount = idCount;
+        Prefs.NextSquareValue = nextSquareValue;
+        Prefs.SquareValueList = JsonUtility.ToJson(_squareValueList);
+    }
+
+    private void LoadDataFromPrefs()
+    {
+        squaresData = JsonUtility.FromJson<Utils.JsonHelper<SquareData>>(Prefs.SquaresData)?.datas;
+        score = Prefs.Score;
+        LoadHighScore();
+        idCount = Prefs.IdCount;
+        nextSquareValue = Prefs.NextSquareValue;
+
+        _squareValueList = JsonUtility.FromJson<Utils.JsonHelper<long>>(Prefs.SquaresData)?.datas;
+
+        _uiManager.idCount = idCount;
+    }
+
+    private void LoadHighScore()
+    {
+        highScore = Prefs.HighScore;
+    }
+
+    #endregion
 }
