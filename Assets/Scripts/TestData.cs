@@ -4,18 +4,19 @@ public static class TestData
 {
     public static void SetDataTest(List<SquareData> squaresData)
     {
+        BoardManager.Instance.isClearData = true;
         // squaresData[0].value = 2;
         // squaresData[6].value = 4;
 
         ////
-        // squaresData[0].value = 16;
-        // squaresData[1].value = 2;
-        // squaresData[2].value = 16;
-        //
-        // squaresData[6].value = 2;
-        // squaresData[8].value = 2;
-        //
-        // squaresData[12].value = 64;
+        squaresData[0].value = 16;
+        squaresData[1].value = 2;
+        squaresData[2].value = 16;
+        
+        squaresData[6].value = 2;
+        squaresData[8].value = 2;
+        
+        squaresData[12].value = 64;
         // squaresData[18].value = 549755813888;
         // squaresData[18].value = 8589934592;
         // squaresData[18].value = 512 * 1024 * 1024 * 1024;

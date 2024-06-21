@@ -109,6 +109,7 @@ public class BoardManager : Singleton<BoardManager>
     {
         isProcessing = true;
         _actionsWrapList.Clear();
+        
         yield return new WaitForNextFrameUnit();
 
         ProcessingDataMaker.Begin();
@@ -116,7 +117,9 @@ public class BoardManager : Singleton<BoardManager>
         ProcessingDataMaker.End();
 
         CheckGameOver();
+        
         yield return new WaitForNextFrameUnit();
+        
         if (!_isMaxItemColumn)
         {
             SetRandomSquareValue();
@@ -125,7 +128,7 @@ public class BoardManager : Singleton<BoardManager>
         yield return new WaitForNextFrameUnit();
 
         RenderUIMaker.Begin();
-        _uiManager.RenderUI(_actionsWrapList);
+        StartCoroutine(_uiManager.RenderUI(_actionsWrapList));
         RenderUIMaker.End();
 
         yield return new WaitForNextFrameUnit();
@@ -236,7 +239,7 @@ public class BoardManager : Singleton<BoardManager>
         {
             if (data.squareSameValueList.Count == 1)
             {
-                MergeSingleBlock(data.square, data.squareSameValueList.First());
+                MergeSingleBlock(data.square, data.squareSameValueList[0]);
             }
             else
             {

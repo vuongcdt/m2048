@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using Unity.Profiling;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using uPools;
+using Sequence = DG.Tweening.Sequence;
 
 public class UIManager : Singleton<UIManager>
 {
@@ -51,7 +53,7 @@ public class UIManager : Singleton<UIManager>
 
         InitPoolObject();
 
-        // TestData.SetDataTest(squaresData);
+        TestData.SetDataTest(squaresData);
 
         ResetUI(squaresData);
     }
@@ -128,9 +130,10 @@ public class UIManager : Singleton<UIManager>
         insObj.SetActive(false);
     }
 
-    public void RenderUI(List<BoardAction> actionsWrapList)
+    public IEnumerator RenderUI(List<BoardAction> actionsWrapList)
     {
         InitNewSquareForShoot();
+        yield return new WaitForNextFrameUnit();
         _comboCount = 0;
         _sequence = DOTween.Sequence();
 
