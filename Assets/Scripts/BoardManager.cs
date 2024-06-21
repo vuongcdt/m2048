@@ -59,12 +59,15 @@ public class BoardManager : Singleton<BoardManager>
         {
             LoadDataFromPrefs();
         }
-        
+
         if (nextSquareValue == 0)
         {
             nextSquareValue = 2;
         }
-        
+
+        Debug.Log($"_squareValueList {string.Join(", ", _squareValueList)}");
+        Debug.Log($"nextSquareValue {nextSquareValue}");
+
         nextSquare.SetValue(nextSquareValue);
         _uiManager.StartUI(squaresData);
     }
@@ -617,9 +620,27 @@ public class BoardManager : Singleton<BoardManager>
         idCount = Prefs.IdCount;
         nextSquareValue = Prefs.NextSquareValue;
 
-        _squareValueList = JsonUtility.FromJson<Utils.JsonHelper<long>>(Prefs.SquaresData)?.datas;
+        LoadSquareValueList();
 
         _uiManager.idCount = idCount;
+    }
+
+    private void LoadSquareValueList()
+    {
+        var numsList = JsonUtility.FromJson<Utils.JsonHelper<long>>(Prefs.SquaresData).datas;
+        var valueListPrefs = new List<long>();
+        foreach (var value in numsList)
+        {
+            if (value > 0)
+            {
+                valueListPrefs.Add(value);
+            }
+        }
+
+        if (valueListPrefs.Any())
+        {
+            _squareValueList = valueListPrefs;
+        }
     }
 
     private void LoadHighScore()
