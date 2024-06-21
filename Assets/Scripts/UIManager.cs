@@ -130,10 +130,9 @@ public class UIManager : Singleton<UIManager>
         insObj.SetActive(false);
     }
 
-    public IEnumerator RenderUI(List<BoardAction> actionsWrapList)
+    public void RenderUI(List<BoardAction> actionsWrapList)
     {
         InitNewSquareForShoot();
-        yield return new WaitForNextFrameUnit();
         _comboCount = 0;
         _sequence = DOTween.Sequence();
 

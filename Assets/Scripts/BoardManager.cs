@@ -109,29 +109,22 @@ public class BoardManager : Singleton<BoardManager>
     {
         isProcessing = true;
         _actionsWrapList.Clear();
-        
         yield return new WaitForNextFrameUnit();
 
         ProcessingDataMaker.Begin();
         ProcessingData(columnSelect);
         ProcessingDataMaker.End();
 
-        CheckGameOver();
-        
         yield return new WaitForNextFrameUnit();
-        
+        CheckGameOver();
         if (!_isMaxItemColumn)
         {
             SetRandomSquareValue();
         }
 
-        yield return new WaitForNextFrameUnit();
-
         RenderUIMaker.Begin();
-        StartCoroutine(_uiManager.RenderUI(_actionsWrapList));
+        _uiManager.RenderUI(_actionsWrapList);
         RenderUIMaker.End();
-
-        yield return new WaitForNextFrameUnit();
 
         // foreach (var actionListWrap in _actionsWrapList)
         // {
