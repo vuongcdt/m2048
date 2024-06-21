@@ -223,6 +223,7 @@ public class BoardManager : Singleton<BoardManager>
         _actionsWrapList.Add(new BoardAction(new List<StepAction>(_actionsList), ActionType.MergeAllBlock));
     }
 
+    
     private bool IsBlockCanMerge(SquareData squareData, SquareData block)
     {
         var isHasValue = squareData.value > 0;
