@@ -35,11 +35,14 @@ public static class Utils
     
     public class JsonHelper<T>
     {
-        public List<T> datas;
+        public List<T> data;
 
-        public JsonHelper(List<T> datas)
+        public JsonHelper(List<T> data)
         {
-            this.datas = datas;
+            this.data = data;
+        }
+        public JsonHelper()
+        {
         }
     }
 }

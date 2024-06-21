@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using DG.Tweening;
 using UnityEngine;
-using uPools;
 
 public class Square : MonoCache
 {

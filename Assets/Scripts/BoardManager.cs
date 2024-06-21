@@ -34,7 +34,7 @@ public class BoardManager : Singleton<BoardManager>
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
 
-    private List<long> _squareValueList = new() { 2, 4 };
+    private List<float> _squareValueList = new() { 2, 4 };
 
     // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
     private readonly int[] _probabilityList = { 1, 4, 10, 18, 28, 30, 44, 60, 78 };
@@ -76,7 +76,9 @@ public class BoardManager : Singleton<BoardManager>
         {
             var posLine = new Vector2(i * 2 - boardRow, 0);
             var line = Instantiate(lineColumn, posLine, Quaternion.identity, lineParentTransform);
+            
             line.GetComponent<LineColumn>().column = i;
+            
             _lineColumnList.Add(line);
         }
     }
@@ -542,7 +544,7 @@ public class BoardManager : Singleton<BoardManager>
         ClearMinBlock(minValueInBoard);
     }
 
-    private void ClearMinBlock(long minValueInBoard)
+    private void ClearMinBlock(float minValueInBoard)
     {
         _actionsList.Clear();
 
@@ -607,29 +609,31 @@ public class BoardManager : Singleton<BoardManager>
 
         _isSave = true;
 
-        var jsonHelper = new Utils.JsonHelper<SquareData>(squaresData);
+        var jsonHelperSquaresData = new Utils.JsonHelper<SquareData>(squaresData);
+        var jsonHelperValueList = new Utils.JsonHelper<float>(_squareValueList);
 
-        Prefs.SquaresData = JsonUtility.ToJson(jsonHelper);
+        Prefs.SquaresData = JsonUtility.ToJson(jsonHelperSquaresData);
         Prefs.Score = score;
         Prefs.HighScore = highScore;
         Prefs.IdCount = idCount;
+        Prefs.SquareValueList = JsonUtility.ToJson(jsonHelperValueList);
         Prefs.NextSquareValue = nextSquareValue;
-        Prefs.SquareValueList = JsonUtility.ToJson(_squareValueList);
     }
 
     #endregion
 
     private void LoadDataFromPrefs()
     {
-        squaresData = JsonUtility.FromJson<Utils.JsonHelper<SquareData>>(Prefs.SquaresData).datas;
+        squaresData = JsonUtility.FromJson<Utils.JsonHelper<SquareData>>(Prefs.SquaresData).data;
         score = Prefs.Score;
-        LoadHighScore();
         idCount = Prefs.IdCount;
-        nextSquareValue = Prefs.NextSquareValue;
-
-        LoadSquareValueList();
-
         _uiManager.idCount = idCount;
+        
+        LoadHighScore();
+        LoadSquareValueList();
+        
+        nextSquareValue = Prefs.NextSquareValue;
+        nextSquare.SetValue(nextSquareValue);
     }
 
 
@@ -637,8 +641,12 @@ public class BoardManager : Singleton<BoardManager>
 
     private void LoadSquareValueList()
     {
-        var numsList = JsonUtility.FromJson<Utils.JsonHelper<long>>(Prefs.SquaresData).datas;
-        var valueListPrefs = new List<long>();
+        if ( string.IsNullOrWhiteSpace(Prefs.SquareValueList) || string.IsNullOrEmpty(Prefs.SquareValueList))
+        {
+            return;
+        }
+        var numsList = JsonUtility.FromJson<Utils.JsonHelper<float>>(Prefs.SquareValueList).data;
+        var valueListPrefs = new List<float>();
         foreach (var value in numsList)
         {
             if (value > 0)
@@ -646,6 +654,7 @@ public class BoardManager : Singleton<BoardManager>
                 valueListPrefs.Add(value);
             }
         }
+
 
         if (valueListPrefs.Any())
         {

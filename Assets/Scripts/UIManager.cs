@@ -28,7 +28,7 @@ public class UIManager : Singleton<UIManager>
     private Vector2 _comboPos;
     private GameObjectPool blockPool;
 
-    private const string FORMAT_SCORE = "0000";
+    private const string FORMAT_SCORE = "0";
     private const string COMBO_TEXT_FORMAT = "Combo x{0}";
     private const float MERGE_DURATION = 0.1f;
     private const float TIME_DELAY = 0.1f;
@@ -279,6 +279,19 @@ public class UIManager : Singleton<UIManager>
         sequence.AppendInterval(TIME_DELAY);
     }
 
+    private List<Square> FindAllSquareGameObjectsActiveSameValue(StepAction stepAction)
+    {
+        return _squaresList.FindAll(squareGameObj =>
+            IsCompareSquareActiveSameId(stepAction.multiSquareSources, squareGameObj));
+    }
+
+    private bool IsCompareSquareActiveSameId(List<SquareData> squareSources, Square squareGameObj)
+    {
+        var isSquareActiveSameIndex = squareSources.Any(squareData =>
+            squareData.id == squareGameObj.squareData.id && squareGameObj.gameObject.activeSelf);
+        return isSquareActiveSameIndex;
+    }
+
     private void SetScoreUI()
     {
         scoreText.text = _boardManager.score.ToString(FORMAT_SCORE);
@@ -333,19 +346,6 @@ public class UIManager : Singleton<UIManager>
         }
 
         sequence.Append(clearMinValueSequence);
-    }
-
-    private List<Square> FindAllSquareGameObjectsActiveSameValue(StepAction stepAction)
-    {
-        return _squaresList.FindAll(squareGameObj =>
-            IsCompareSquareActiveSameId(stepAction.multiSquareSources, squareGameObj));
-    }
-
-    private bool IsCompareSquareActiveSameId(List<SquareData> squareSources, Square squareGameObj)
-    {
-        var isSquareActiveSameIndex = squareSources.Any(squareData =>
-            squareData.id == squareGameObj.squareData.id && squareGameObj.gameObject.activeSelf);
-        return isSquareActiveSameIndex;
     }
 
     #endregion
