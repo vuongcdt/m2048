@@ -45,7 +45,7 @@ public class BoardManager : Singleton<BoardManager>
 
     private void Start()
     {
-        // Application.targetFrameRate = 60;
+        Application.targetFrameRate = 60;
         _uiManager = UIManager.Instance;
         RenderLineColumn();
         if (isClearData)
@@ -75,9 +75,9 @@ public class BoardManager : Singleton<BoardManager>
         {
             var posLine = new Vector2(i * 2 - boardRow, 0);
             var line = Instantiate(lineColumn, posLine, Quaternion.identity, lineParentTransform);
-            
+
             line.GetComponent<LineColumn>().column = i;
-            
+
             _lineColumnList.Add(line);
         }
     }
@@ -605,7 +605,7 @@ public class BoardManager : Singleton<BoardManager>
     private void OnApplicationFocus(bool hasFocus)
     {
         CheckSaveGame(!hasFocus);
-    }
+    } 
 
     #region SaveGame
 
@@ -646,14 +646,16 @@ public class BoardManager : Singleton<BoardManager>
 
     private void LoadDataFromPrefs()
     {
-        squaresData = JsonUtility.FromJson<Utils.JsonHelper<SquareData>>(Prefs.SquaresData).data;
+        squaresData = string.IsNullOrEmpty(Prefs.SquaresData)
+            ? new List<SquareData>()
+            : JsonUtility.FromJson<Utils.JsonHelper<SquareData>>(Prefs.SquaresData).data;
         score = Prefs.Score;
         idCount = Prefs.IdCount;
         _uiManager.idCount = idCount;
-        
+
         LoadHighScore();
         LoadSquareValueList();
-        
+
         nextSquareValue = Prefs.NextSquareValue;
         nextSquare.SetValue(nextSquareValue);
     }
@@ -663,10 +665,11 @@ public class BoardManager : Singleton<BoardManager>
 
     private void LoadSquareValueList()
     {
-        if ( string.IsNullOrWhiteSpace(Prefs.SquareValueList) || string.IsNullOrEmpty(Prefs.SquareValueList))
+        if (string.IsNullOrWhiteSpace(Prefs.SquareValueList) || string.IsNullOrEmpty(Prefs.SquareValueList))
         {
             return;
         }
+
         var numsList = JsonUtility.FromJson<Utils.JsonHelper<float>>(Prefs.SquareValueList).data;
         var valueListPrefs = new List<float>();
         foreach (var value in numsList)
