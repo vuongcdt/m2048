@@ -411,7 +411,7 @@ public class BoardManager : Singleton<BoardManager>
         _actionsList.Clear();
         var emptyBlocksUpRowList = GetEmptyBlocksUpRowList();
 
-        if (!emptyBlocksUpRowList.Any())
+        if (emptyBlocksUpRowList.Count == 0)
         {
             return;
         }
@@ -421,7 +421,7 @@ public class BoardManager : Singleton<BoardManager>
             SortBlockBySquaresDataHasValueDownRowByCell(emptyBlocksUpRow);
         }
 
-        if (!_actionsList.Any())
+        if (_actionsList.Count == 0)
         {
             return;
         }
@@ -678,7 +678,7 @@ public class BoardManager : Singleton<BoardManager>
         }
 
 
-        if (valueListPrefs.Any())
+        if (valueListPrefs.Count > 0)
         {
             _squareValueList = valueListPrefs;
         }
