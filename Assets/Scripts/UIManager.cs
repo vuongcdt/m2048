@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using Unity.Profiling;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using uPools;
 using Sequence = DG.Tweening.Sequence;
@@ -16,8 +16,9 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private Text scoreText;
     [SerializeField] private Text highScoreText;
     [SerializeField] private GameObject comboPrefab;
-    [SerializeField] private TextMesh comboText;
+    [SerializeField] private Text comboText;
     [SerializeField] private GameObject gameOverPopup;
+    [SerializeField] private Camera cameraMain;
 
     private BoardManager _boardManager;
     private Square _squareScript;
@@ -50,11 +51,7 @@ public class UIManager : Singleton<UIManager>
     public void StartUI(List<SquareData> squaresData)
     {
         _squareScript = squarePrefab.GetComponent<Square>();
-
         InitPoolObject();
-
-        TestData.SetDataTest(squaresData);
-
         ResetUI(squaresData);
     }
 
@@ -182,7 +179,8 @@ public class UIManager : Singleton<UIManager>
         if (_comboCount > 2)
         {
             comboText.text = string.Format(COMBO_TEXT_FORMAT, _comboCount);
-            comboPrefab.transform.position = new Vector2(_comboPos.x, _comboPos.y - 1.2f);
+            var targetWorldPos = new Vector2(_comboPos.x, _comboPos.y - 1.3f);
+            comboPrefab.transform.position = cameraMain.WorldToScreenPoint(targetWorldPos);
             comboPrefab.SetActive(true);
 
             var endNewValueMerge = _actionsWrapList
@@ -198,7 +196,7 @@ public class UIManager : Singleton<UIManager>
 
     private IEnumerator DeActiveComboIE()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1);
         comboPrefab.SetActive(false);
     }
 
@@ -332,7 +330,15 @@ public class UIManager : Singleton<UIManager>
             sortSequence.Join(squareSourceGameObject.transform
                 .DOMove(mergerAction.squareTarget.Position, MERGE_DURATION)
                 .SetEase(Ease.Linear)
-                .OnComplete(() => { squareSourceGameObject.SetValue(mergerAction.newSquareValue); })
+                .OnComplete(() =>
+                {
+                    var mergeEndPos = mergerAction.singleSquareSources.Position;
+                    squareSourceGameObject.SetValue(mergerAction.newSquareValue);
+                    if ((mergeEndPos - _comboPos).sqrMagnitude == 0 )
+                    {
+                        _comboPos = mergerAction.squareTarget.Position;
+                    }
+                })
             );
         }
 

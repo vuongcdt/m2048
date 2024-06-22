@@ -48,6 +48,8 @@ public class BoardManager : Singleton<BoardManager>
         Application.targetFrameRate = 60;
         _uiManager = UIManager.Instance;
         RenderLineColumn();
+        RenderBoard();
+
         if (isClearData)
         {
             RestartGame();
@@ -57,13 +59,12 @@ public class BoardManager : Singleton<BoardManager>
             LoadDataFromPrefs();
         }
 
+        TestData.SetDataTest(squaresData);
+        
         if (nextSquareValue == 0)
         {
             nextSquareValue = 2;
         }
-
-        Debug.Log($"_squareValueList {string.Join(", ", _squareValueList)}");
-        Debug.Log($"nextSquareValue {nextSquareValue}");
 
         nextSquare.SetValue(nextSquareValue);
         _uiManager.StartUI(squaresData);
@@ -85,11 +86,10 @@ public class BoardManager : Singleton<BoardManager>
     public void RestartGame()
     {
         LoadHighScore();
-        ResetBoard();
         SetRandomSquareValue();
     }
 
-    private void ResetBoard()
+    private void RenderBoard()
     {
         for (var y = boardRow; y > 0; y--)
         {
