@@ -135,7 +135,7 @@ public class UIManager : Singleton<UIManager>
         InitNewSquareForShoot();
         _comboCount = 0;
         _sequence = DOTween.Sequence();
-
+        
         _actionsWrapList = actionsWrapList;
 
         // foreach (var actionListWrap in _actionsWrapList)
@@ -283,14 +283,30 @@ public class UIManager : Singleton<UIManager>
 
     private List<Square> FindAllSquareGameObjectsActiveSameValue(StepAction stepAction)
     {
-        return _squaresList.FindAll(squareGameObj =>
-            IsCompareSquareActiveSameId(stepAction.multiSquareSources, squareGameObj));
+        List<Square> list = new List<Square>();
+        foreach (var squareGameObj in _squaresList)
+        {
+            if (IsCompareSquareActiveSameId(stepAction.multiSquareSources, squareGameObj))
+            {
+                list.Add(squareGameObj);
+            }
+        }
+
+        return list;
     }
 
     private bool IsCompareSquareActiveSameId(List<SquareData> squareSources, Square squareGameObj)
     {
-        var isSquareActiveSameIndex = squareSources.Any(squareData =>
-            squareData.id == squareGameObj.squareData.id && squareGameObj.gameObject.activeSelf);
+        var isSquareActiveSameIndex = false;
+        foreach (var squareData in squareSources)
+        {
+            if (squareData.id == squareGameObj.squareData.id && squareGameObj.gameObject.activeSelf)
+            {
+                isSquareActiveSameIndex = true;
+                break;
+            }
+        }
+
         return isSquareActiveSameIndex;
     }
 

@@ -33,7 +33,6 @@ public class BoardManager : Singleton<BoardManager>
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
-
     private List<float> _squareValueList = new() { 2, 4 };
 
     // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
@@ -194,12 +193,30 @@ public class BoardManager : Singleton<BoardManager>
 
     private SquareData GetEmptySquareDataTargetByColumn(int column)
     {
-        return squaresData.Find(block => block.value == 0 && block.cell.Column == column);
+        foreach (var block in squaresData)
+        {
+            if (block.value == 0 && block.cell.Column == column)
+            {
+                return block;
+            }
+        }
+
+        return null;
     }
 
     private void CheckGameOver()
     {
-        isGameOver = squaresData.All(squareData => squareData.value > 0);
+        bool all = true;
+        foreach (var squareData in squaresData)
+        {
+            if (!(squareData.value > 0))
+            {
+                all = false;
+                break;
+            }
+        }
+
+        isGameOver = all;
     }
 
     #endregion
@@ -208,12 +225,7 @@ public class BoardManager : Singleton<BoardManager>
     {
         _actionsList.Clear();
 
-        List<CountSquareList> squareMergeOrderByCountSameValueList = new();
-        GetSquareSameValueList(squareMergeOrderByCountSameValueList);
-
-        squareMergeOrderByCountSameValueList
-            .Sort((a, b) => b.squareSameValueList.Count - a.squareSameValueList.Count);
-
+        var squareMergeOrderByCountSameValueList = GetSquareMergeOrderByCountSameValueList();
 
         CreateActionByMergeType(squareMergeOrderByCountSameValueList);
 
@@ -226,7 +238,7 @@ public class BoardManager : Singleton<BoardManager>
 
     #region MergeBlock
 
-    private void CreateActionByMergeType(List<CountSquareList> squareMergeOrderByCountSameValueList)
+    private void CreateActionByMergeType(List<Utils.CountSquareList> squareMergeOrderByCountSameValueList)
     {
         foreach (var data in squareMergeOrderByCountSameValueList)
         {
@@ -241,8 +253,9 @@ public class BoardManager : Singleton<BoardManager>
         }
     }
 
-    private void GetSquareSameValueList(List<CountSquareList> squareMergeOrderByCountSameValueList)
+    private List<Utils.CountSquareList> GetSquareMergeOrderByCountSameValueList()
     {
+        List<Utils.CountSquareList> squareMergeOrderByCountSameValueList = new();
         foreach (var block in squaresData)
         {
             if (!(block.value > 0))
@@ -258,20 +271,12 @@ public class BoardManager : Singleton<BoardManager>
                 continue;
             }
 
-            squareMergeOrderByCountSameValueList.Add(new CountSquareList(block, squareSameValueList));
+            squareMergeOrderByCountSameValueList.Add(new Utils.CountSquareList(block, squareSameValueList));
         }
-    }
 
-    private class CountSquareList
-    {
-        public SquareData square;
-        public List<SquareData> squareSameValueList;
-
-        public CountSquareList(SquareData square, List<SquareData> squareSameValueList)
-        {
-            this.square = square;
-            this.squareSameValueList = squareSameValueList;
-        }
+        squareMergeOrderByCountSameValueList
+            .Sort((a, b) => b.squareSameValueList.Count - a.squareSameValueList.Count);
+        return squareMergeOrderByCountSameValueList;
     }
 
     private void GetCountSquareSameValueList(SquareData block, List<SquareData> squareSameValueList)
@@ -404,12 +409,7 @@ public class BoardManager : Singleton<BoardManager>
     private void SortAllBlock()
     {
         _actionsList.Clear();
-        var emptyBlocksUpRowList = squaresData
-            .FindAll(item => item.value == 0 &&
-                             squaresData.Any(squareDownRow =>
-                                 squareDownRow.cell.Row == item.cell.Row + 1 &&
-                                 squareDownRow.cell.Column == item.cell.Column &&
-                                 squareDownRow.value > 0));
+        var emptyBlocksUpRowList = GetEmptyBlocksUpRowList();
 
         if (!emptyBlocksUpRowList.Any())
         {
@@ -430,6 +430,32 @@ public class BoardManager : Singleton<BoardManager>
     }
 
     #region SortBlock
+
+    private List<SquareData> GetEmptyBlocksUpRowList()
+    {
+        var emptyBlocksUpRowList = new List<SquareData>();
+        foreach (var item in squaresData)
+        {
+            if (item.value == 0 && IsSquareUpRow(item))
+            {
+                emptyBlocksUpRowList.Add(item);
+            }
+        }
+
+        return emptyBlocksUpRowList;
+    }
+
+    private bool IsSquareUpRow(SquareData item)
+    {
+        foreach (var squareDownRow in squaresData)
+        {
+            var isUpRow = squareDownRow.cell.Row == item.cell.Row + 1;
+            var isSameColumn = squareDownRow.cell.Column == item.cell.Column;
+            if (isUpRow && isSameColumn && squareDownRow.value > 0) return true;
+        }
+
+        return false;
+    }
 
     private void SortBlockBySquaresDataHasValueDownRowByCell(SquareData squareEmptyUpRow)
     {

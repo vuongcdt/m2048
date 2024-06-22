@@ -45,4 +45,16 @@ public static class Utils
         {
         }
     }
+    
+    public class CountSquareList
+    {
+        public SquareData square;
+        public List<SquareData> squareSameValueList;
+
+        public CountSquareList(SquareData square, List<SquareData> squareSameValueList)
+        {
+            this.square = square;
+            this.squareSameValueList = squareSameValueList;
+        }
+    }
 }
