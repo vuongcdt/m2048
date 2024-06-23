@@ -4,7 +4,6 @@ using System.Linq;
 using DG.Tweening;
 using Unity.Profiling;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using uPools;
 using Sequence = DG.Tweening.Sequence;
@@ -129,16 +128,22 @@ public class UIManager : Singleton<UIManager>
 
     public void RenderUI(List<BoardAction> actionsWrapList)
     {
+        _actionsWrapList = actionsWrapList;
+        Debug.Log($"_actionsWrapList.Count {_actionsWrapList.Count}");
+        foreach (var actionListWrap in _actionsWrapList)
+        {
+            Debug.Log(".....actionListWrap: " + JsonUtility.ToJson(actionListWrap));
+        }
+
+        if (_actionsWrapList.Count <= 0)
+        {
+            _boardManager.isProcessing = false;
+            return;
+        }
         InitNewSquareForShoot();
         _comboCount = 0;
         _sequence = DOTween.Sequence();
         
-        _actionsWrapList = actionsWrapList;
-
-        // foreach (var actionListWrap in _actionsWrapList)
-        // {
-        //     Debug.Log(".....actionListWrap: " + JsonUtility.ToJson(actionListWrap));
-        // }
 
         foreach (var actionListWrap in _actionsWrapList)
         {
@@ -210,6 +215,7 @@ public class UIManager : Singleton<UIManager>
     {
         var squarePool = FindSquarePoolById(stepAction.singleSquareSources.id);
 
+        Debug.Log($"id {stepAction.singleSquareSources.id}");
         squarePool.SetValue(stepAction.newSquareValue);
         squarePool.transform.position = stepAction.singleSquareSources.Position;
 
@@ -236,7 +242,7 @@ public class UIManager : Singleton<UIManager>
     private void InitNewSquareForShoot()
     {
         idCount++;
-        var newSquarePos = new Vector3(0, 6, 0);
+        var newSquarePos = new Vector3(0, -10, 0);
 
         var squarePool = InstanceNewSquareData(newSquarePos);
 
@@ -269,6 +275,7 @@ public class UIManager : Singleton<UIManager>
 
             mergerSequence.OnComplete(() =>
             {
+                Debug.Log("OnComplete");
                 _comboPos = mergerAction.squareTarget.Position;
                 _boardManager.score += mergerAction.newSquareValue;
                 SetScoreUI();

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using IngameDebugConsole;
 using Unity.Profiling;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -60,7 +61,7 @@ public class BoardManager : Singleton<BoardManager>
         }
 
         TestData.SetDataTest(squaresData);
-        
+
         if (nextSquareValue == 0)
         {
             nextSquareValue = 2;
@@ -110,25 +111,34 @@ public class BoardManager : Singleton<BoardManager>
         _actionsWrapList.Clear();
         yield return new WaitForNextFrameUnit();
 
-        ProcessingDataMaker.Begin();
+        // ProcessingDataMaker.Begin();
         ProcessingData(columnSelect);
-        ProcessingDataMaker.End();
+        // ProcessingDataMaker.End();
 
+        foreach (var actionListWrap in _actionsWrapList)
+        {
+            Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
+        }
+
+        if (_actionsWrapList.Count <= 0)
+        {
+            yield return null;
+        }
         yield return new WaitForNextFrameUnit();
         CheckGameOver();
-        if (!_isMaxItemColumn)
+        // if (!_isMaxItemColumn)
+        // {
+        //     SetRandomSquareValue();
+        // }
+        
+        // RenderUIMaker.Begin();
+        
+        _uiManager.RenderUI(_actionsWrapList);
+        if (_actionsWrapList.Count > 0)
         {
             SetRandomSquareValue();
         }
-
-        RenderUIMaker.Begin();
-        _uiManager.RenderUI(_actionsWrapList);
-        RenderUIMaker.End();
-
-        // foreach (var actionListWrap in _actionsWrapList)
-        // {
-        //     Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
-        // }
+        // RenderUIMaker.End();
     }
 
     #region ShootBlock
@@ -136,12 +146,10 @@ public class BoardManager : Singleton<BoardManager>
     private void ProcessingData(int column)
     {
         Shoot(column);
-
-        if (_isMaxItemColumn)
+        if (_actionsWrapList.Count <= 0)
         {
             return;
         }
-
         ProcessingLoop();
     }
 
@@ -165,12 +173,11 @@ public class BoardManager : Singleton<BoardManager>
         var squareTarget = GetEmptySquareDataTargetByColumn(column);
         if (squareTarget == null)
         {
-            _isMaxItemColumn = true;
+            CheckMergeWhenMaxItemColumn(column, action);
             return;
         }
 
         idCount++;
-
         var squareSource = new SquareData(
             new Utils.Cell(column, boardRow),
             idCount,
@@ -189,6 +196,37 @@ public class BoardManager : Singleton<BoardManager>
         squareSource.id = 0;
         squareTarget.value = nextSquareValue;
         _processingSquare = squareTarget;
+    }
+
+    private void CheckMergeWhenMaxItemColumn(int column, StepAction action)
+    {
+        foreach (var squareTarget in squaresData)
+        {
+            if (Mathf.Approximately(squareTarget.value, nextSquareValue) &&
+                squareTarget.cell.Column == column &&
+                squareTarget.cell.Row == boardRow - 1)
+            {
+                idCount++;
+                var squareSource = new SquareData(
+                    new Utils.Cell(column, boardRow),
+                    idCount,
+                    nextSquareValue
+                );
+
+                var newSquareValue = nextSquareValue * 2;
+                action.squareTarget = new SquareData(squareTarget.cell,  squareTarget.id, squareTarget.value);
+                action.multiSquareSources.Add(new SquareData(squareSource.cell, squareSource.id, squareSource.value));
+                action.newSquareValue = newSquareValue;
+
+                _actionsList.Add(action);
+                var item = new BoardAction(new List<StepAction>(_actionsList), ActionType.MergeAllBlock);
+                _actionsWrapList.Add(item);
+                squareTarget.value = newSquareValue;
+                _processingSquare = squareTarget;
+                
+                return;
+            }
+        }
     }
 
     private SquareData GetEmptySquareDataTargetByColumn(int column)
@@ -265,6 +303,8 @@ public class BoardManager : Singleton<BoardManager>
 
             List<SquareData> squareSameValueList = new();
             GetCountSquareSameValueList(block, squareSameValueList);
+            
+            // Debug.Log($"count {squareSameValueList.Count}");
 
             if (squareSameValueList.Count <= 0)
             {
@@ -276,6 +316,7 @@ public class BoardManager : Singleton<BoardManager>
 
         squareMergeOrderByCountSameValueList
             .Sort((a, b) => b.squareSameValueList.Count - a.squareSameValueList.Count);
+        
         return squareMergeOrderByCountSameValueList;
     }
 
@@ -283,6 +324,7 @@ public class BoardManager : Singleton<BoardManager>
     {
         foreach (var squareData in squaresData)
         {
+            // Debug.Log($"can merge {IsBlockCanMerge(squareData, block)}");
             if (IsBlockCanMerge(squareData, block))
             {
                 squareSameValueList.Add(squareData);
@@ -605,7 +647,7 @@ public class BoardManager : Singleton<BoardManager>
     private void OnApplicationFocus(bool hasFocus)
     {
         CheckSaveGame(!hasFocus);
-    } 
+    }
 
     #region SaveGame
 
