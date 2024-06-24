@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using IngameDebugConsole;
 using Unity.Profiling;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -34,7 +32,7 @@ public class BoardManager : Singleton<BoardManager>
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
-    private List<float> _squareValueList = new() { 2, 4 };
+    private List<float> _squareValueList = new() { 2 };
 
     // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
     private readonly int[] _probabilityList = { 1, 4, 10, 18, 28, 30, 44, 60, 78 };
@@ -49,7 +47,6 @@ public class BoardManager : Singleton<BoardManager>
         Application.targetFrameRate = 60;
         _uiManager = UIManager.Instance;
         RenderLineColumn();
-        RenderBoard();
 
         if (isClearData)
         {
@@ -57,6 +54,7 @@ public class BoardManager : Singleton<BoardManager>
         }
         else
         {
+            RenderBoard();
             LoadDataFromPrefs();
         }
 
@@ -86,12 +84,16 @@ public class BoardManager : Singleton<BoardManager>
 
     public void RestartGame()
     {
+        idCount = 0;
+        RenderBoard();
         LoadHighScore();
         SetRandomSquareValue();
     }
 
     private void RenderBoard()
     {
+        Debug.Log("RenderBoard");
+        squaresData = new();
         for (var y = boardRow; y > 0; y--)
         {
             for (var x = 0; x < boardCol; x++)
@@ -114,30 +116,21 @@ public class BoardManager : Singleton<BoardManager>
         // ProcessingDataMaker.Begin();
         ProcessingData(columnSelect);
         // ProcessingDataMaker.End();
-
-        foreach (var actionListWrap in _actionsWrapList)
-        {
-            Debug.Log("----actionListWrap: " + JsonUtility.ToJson(actionListWrap));
-        }
-
+        
         if (_actionsWrapList.Count <= 0)
         {
             yield return null;
         }
         yield return new WaitForNextFrameUnit();
-        CheckGameOver();
-        // if (!_isMaxItemColumn)
-        // {
-        //     SetRandomSquareValue();
-        // }
         
-        // RenderUIMaker.Begin();
-        
-        _uiManager.RenderUI(_actionsWrapList);
         if (_actionsWrapList.Count > 0)
         {
             SetRandomSquareValue();
         }
+        CheckGameOver();
+        
+        // RenderUIMaker.Begin();
+        _uiManager.RenderUI(_actionsWrapList);
         // RenderUIMaker.End();
     }
 
@@ -245,9 +238,11 @@ public class BoardManager : Singleton<BoardManager>
     private void CheckGameOver()
     {
         bool all = true;
-        foreach (var squareData in squaresData)
+        for (var index = 0; index < squaresData.Count; index++)
         {
-            if (!(squareData.value > 0))
+            var squareData = squaresData[index];
+            var isMaxItemColumnCanMerge = index >= 24 && Mathf.Approximately(squareData.value,nextSquareValue);
+            if (squareData.value <= 0 || isMaxItemColumnCanMerge)
             {
                 all = false;
                 break;
@@ -255,6 +250,7 @@ public class BoardManager : Singleton<BoardManager>
         }
 
         isGameOver = all;
+        Debug.Log($"isGameOver {isGameOver}");
     }
 
     #endregion

@@ -118,6 +118,10 @@ public class UIManager : Singleton<UIManager>
     {
         _boardManager.isProcessing = false;
         gameOverPopup.SetActive(false);
+        for (var i = 0; i < _squaresList.Count; i++)
+        {
+            _squaresList[i].SetActiveObj(false);
+        }
         _boardManager.RestartGame();
     }
 
@@ -129,10 +133,9 @@ public class UIManager : Singleton<UIManager>
     public void RenderUI(List<BoardAction> actionsWrapList)
     {
         _actionsWrapList = actionsWrapList;
-        Debug.Log($"_actionsWrapList.Count {_actionsWrapList.Count}");
         foreach (var actionListWrap in _actionsWrapList)
         {
-            Debug.Log(".....actionListWrap: " + JsonUtility.ToJson(actionListWrap));
+            Debug.Log("actionListWrap: " + JsonUtility.ToJson(actionListWrap));
         }
 
         if (_actionsWrapList.Count <= 0)
@@ -144,7 +147,6 @@ public class UIManager : Singleton<UIManager>
         _comboCount = 0;
         _sequence = DOTween.Sequence();
         
-
         foreach (var actionListWrap in _actionsWrapList)
         {
             switch (actionListWrap.actionType)
@@ -168,13 +170,12 @@ public class UIManager : Singleton<UIManager>
         {
             _boardManager.isProcessing = false;
             SetComboUI();
+            
+            if (_boardManager.isGameOver)
+            {
+                SetGameOverUI();
+            }
         });
-
-        if (_boardManager.isGameOver)
-        {
-            // Debug.Log("Game Over");
-            SetGameOverUI();
-        }
     }
 
     #region RenderUI
@@ -207,6 +208,7 @@ public class UIManager : Singleton<UIManager>
 
     private void SetGameOverUI()
     {
+        idCount = 30;
         gameOverPopup.SetActive(true);
         _boardManager.isProcessing = true;
     }
@@ -215,7 +217,6 @@ public class UIManager : Singleton<UIManager>
     {
         var squarePool = FindSquarePoolById(stepAction.singleSquareSources.id);
 
-        Debug.Log($"id {stepAction.singleSquareSources.id}");
         squarePool.SetValue(stepAction.newSquareValue);
         squarePool.transform.position = stepAction.singleSquareSources.Position;
 
@@ -275,7 +276,6 @@ public class UIManager : Singleton<UIManager>
 
             mergerSequence.OnComplete(() =>
             {
-                Debug.Log("OnComplete");
                 _comboPos = mergerAction.squareTarget.Position;
                 _boardManager.score += mergerAction.newSquareValue;
                 SetScoreUI();

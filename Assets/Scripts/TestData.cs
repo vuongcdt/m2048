@@ -78,17 +78,18 @@ public static class TestData
         squaresData[4 + 12].value = 4;
         squaresData[5 + 12].value = 2;
         
-        squaresData[18].value = 32;
+        squaresData[18].value = 16;
         squaresData[2 + 17].value = 4;
         squaresData[3 + 17].value = 2;
         squaresData[4 + 17].value = 4;
         squaresData[5 + 17].value = 2;
         squaresData[6 + 17].value = 4;
         
-        squaresData[0 + 24].value = 4;
+        squaresData[0 + 24].value = 8;
         squaresData[1 + 24].value = 2;
-        squaresData[2 + 24].value = 4;
-        squaresData[3 + 24].value = 2;
-        squaresData[4 + 24].value = 4;
+        squaresData[2 + 24].value = 8;
+        squaresData[3 + 24].value = 16;
+        squaresData[4 + 24].value = 8;
+        squaresData[5 + 24].value = 16;
     }
 }

@@ -1,0 +1,40 @@
+﻿using System;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
+using ZBase.UnityScreenNavigator.Core;
+using ZBase.UnityScreenNavigator.Core.Screens;
+using ZBase.UnityScreenNavigator.Core.Views;
+using ZBase.UnityScreenNavigator.Core.Windows;
+
+namespace UI
+{
+    public class Launcher : UnityScreenNavigatorLauncher
+    {
+        private static WindowContainerManager ContainerManager { get; set; }
+
+        protected override void OnAwake()
+        {
+            base.OnAwake();
+            ContainerManager = this;
+        }
+
+        protected override void OnPostCreateContainers()
+        {
+            base.OnPostCreateContainers();
+            ShowLoadingPage().Forget();
+            Debug.Log("Start Launcher");
+        }
+
+        private async UniTaskVoid ShowLoadingPage()
+        {
+            var options = new ViewOptions(ResourceKey.LoadingScreenPrefab(), false, loadAsync: false);
+            await ContainerManager.Find<ScreenContainer>(ContainerKey.Screens).PushAsync(options);
+            Invoke(nameof(ShowHomePage),1f);
+        }
+        private async UniTaskVoid ShowHomePage()
+        {
+            var options = new ViewOptions(ResourceKey.HomeScreenPrefab(), false, loadAsync: false);
+            await ContainerManager.Find<ScreenContainer>(ContainerKey.Screens).PushAsync(options);
+        }
+    }
+}
