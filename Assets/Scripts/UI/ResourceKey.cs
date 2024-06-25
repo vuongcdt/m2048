@@ -1,10 +1,13 @@
-﻿namespace UI
+﻿using ZBase.UnityScreenNavigator.Core.Views;
+
+namespace UI
 {
     public static class ResourceKey
     {
         private const string PrefabFormat = "prefab_{0}";
         private const string LoadingScreenPrefabName = "screen_loading";
         private const string HomeScreenPrefabName = "screen_home";
+        private const string PlayScreenPrefabName = "screen_game_play";
         private const string ShopScreenPrefabName = "screen_shop";
         private const string SettingsModalPrefabName = "modal_settings";
         private const string CharacterModalPrefabName = "modal_character";
@@ -27,6 +30,11 @@
             return string.Format(PrefabFormat, HomeScreenPrefabName);
         }
 
+        public static ViewOptions PlayScreenPrefab()
+        {
+            return string.Format(PrefabFormat, PlayScreenPrefabName);
+        }
+        
         public static string ShopScreenPrefab()
         {
             return string.Format(PrefabFormat, ShopScreenPrefabName);
@@ -76,5 +84,6 @@
         {
             return string.Format(PrefabFormat, ShopItemPrefabName);
         }
+
     }
 }

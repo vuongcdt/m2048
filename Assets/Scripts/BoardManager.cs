@@ -24,6 +24,7 @@ public class BoardManager : Singleton<BoardManager>
     public float nextSquareValue;
     public bool isClearData;
     public bool isGameOver;
+    public bool isPlaying;
 
     private bool _isSave;
     private bool _isMaxItemColumn;
@@ -39,8 +40,8 @@ public class BoardManager : Singleton<BoardManager>
 
     private const int MAX_COUNT_QUARE_VALUE_LIST = 9;
 
-    private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
-    private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
+    // private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
+    // private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
 
     private void Start()
     {
@@ -58,7 +59,7 @@ public class BoardManager : Singleton<BoardManager>
             LoadDataFromPrefs();
         }
 
-        TestData.SetDataTest(squaresData);
+        // TestData.SetDataTest(squaresData);
 
         if (nextSquareValue == 0)
         {
@@ -92,7 +93,6 @@ public class BoardManager : Singleton<BoardManager>
 
     private void RenderBoard()
     {
-        Debug.Log("RenderBoard");
         squaresData = new();
         for (var y = boardRow; y > 0; y--)
         {

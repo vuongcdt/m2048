@@ -27,6 +27,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bdca8c746b9d5a248bba33ba461a653b
+    m_Address: Assets/Prefabs/prefab_screen_game_play.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d27cdc8965307a84ab2482a45b57e15d, type: 2}
   m_SchemaSet:

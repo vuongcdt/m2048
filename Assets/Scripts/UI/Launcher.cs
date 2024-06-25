@@ -11,7 +11,7 @@ namespace UI
     public class Launcher : UnityScreenNavigatorLauncher
     {
         private static WindowContainerManager ContainerManager { get; set; }
-
+        private BoardManager _boardManager;
         protected override void OnAwake()
         {
             base.OnAwake();
@@ -21,8 +21,8 @@ namespace UI
         protected override void OnPostCreateContainers()
         {
             base.OnPostCreateContainers();
+            _boardManager = BoardManager.Instance;
             ShowLoadingPage().Forget();
-            Debug.Log("Start Launcher");
         }
 
         private async UniTaskVoid ShowLoadingPage()
@@ -35,6 +35,11 @@ namespace UI
         {
             var options = new ViewOptions(ResourceKey.HomeScreenPrefab(), false, loadAsync: false);
             await ContainerManager.Find<ScreenContainer>(ContainerKey.Screens).PushAsync(options);
+        }
+        
+        public void PlayingGame()
+        {
+            _boardManager.isPlaying = true;
         }
     }
 }
