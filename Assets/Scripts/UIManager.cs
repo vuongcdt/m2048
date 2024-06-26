@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
+using UI;
 using Unity.Profiling;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using uPools;
 using Sequence = DG.Tweening.Sequence;
@@ -12,26 +14,20 @@ public class UIManager : Singleton<UIManager>
 {
     [SerializeField] private GameObject squarePrefab;
     [SerializeField] private Transform squareParentTransform;
-    [SerializeField] private Text scoreText;
-    [SerializeField] private Text highScoreText;
-    [SerializeField] private GameObject comboPrefab;
-    [SerializeField] private Text comboText;
-    [SerializeField] private GameObject gameOverPopup;
-    [SerializeField] private Camera cameraMain;
 
+    public Vector2 comboPos;
+    public int comboCount;
+    
     private BoardManager _boardManager;
     private Square _squareScript;
     private List<Square> _squaresList = new();
     private List<BoardAction> _actionsWrapList = new();
     private Sequence _sequence;
     public int idCount = 30;
-    private int _comboCount;
     private bool _isSave;
-    private Vector2 _comboPos;
-    private GameObjectPool blockPool;
-
-    private const string FORMAT_SCORE = "0";
-    private const string COMBO_TEXT_FORMAT = "Combo x{0}";
+    private GameObjectPool _blockPool;
+    private GamePlayScreen _gamePlayScreen;
+    
     private const float MERGE_DURATION = 0.1f;
     private const float TIME_DELAY = 0.1f;
 
@@ -41,10 +37,10 @@ public class UIManager : Singleton<UIManager>
     {
         _boardManager = BoardManager.Instance;
 
-        comboPrefab.SetActive(false);
-        gameOverPopup.SetActive(false);
+        // comboPrefab.SetActive(false);
+        // gameOverPopup.SetActive(false);
 
-        SetScoreUI();
+        // SetScoreUI();
     }
 
     public void StartUI(List<SquareData> squaresData)
@@ -117,11 +113,13 @@ public class UIManager : Singleton<UIManager>
     public void RePlayGame()
     {
         _boardManager.isProcessing = false;
-        gameOverPopup.SetActive(false);
+        _gamePlayScreen.SetActiveGameOverPopup(false);
+        // gameOverPopup.SetActive(false);
         for (var i = 0; i < _squaresList.Count; i++)
         {
             _squaresList[i].SetActiveObj(false);
         }
+
         _boardManager.RestartGame();
     }
 
@@ -143,10 +141,11 @@ public class UIManager : Singleton<UIManager>
             _boardManager.isProcessing = false;
             return;
         }
+
         InitNewSquareForShoot();
-        _comboCount = 0;
+        comboCount = 0;
         _sequence = DOTween.Sequence();
-        
+
         foreach (var actionListWrap in _actionsWrapList)
         {
             switch (actionListWrap.actionType)
@@ -170,7 +169,7 @@ public class UIManager : Singleton<UIManager>
         {
             _boardManager.isProcessing = false;
             SetComboUI();
-            
+
             if (_boardManager.isGameOver)
             {
                 SetGameOverUI();
@@ -182,34 +181,30 @@ public class UIManager : Singleton<UIManager>
 
     private void SetComboUI()
     {
-        if (_comboCount > 2)
+        if (comboCount > 2)
         {
-            comboText.text = string.Format(COMBO_TEXT_FORMAT, _comboCount);
-            var targetWorldPos = new Vector2(_comboPos.x, _comboPos.y - 1.3f);
-            comboPrefab.transform.position = cameraMain.WorldToScreenPoint(targetWorldPos);
-            comboPrefab.SetActive(true);
+            // comboText.text = string.Format(COMBO_TEXT_FORMAT, _comboCount);
+            // var targetWorldPos = new Vector2(_comboPos.x, _comboPos.y - 1.3f);
+            // comboPrefab.transform.position = cameraMain.WorldToScreenPoint(targetWorldPos);
+            // comboPrefab.SetActive(true);
+            _gamePlayScreen.ShowCombo();
 
             var endNewValueMerge = _actionsWrapList
                 .Where(boardAction => boardAction.actionType == ActionType.MergeAllBlock)
                 .Select(boardAction => boardAction.stepActionList[^1].newSquareValue)
                 .Last();
 
-            _boardManager.score += _comboCount * endNewValueMerge;
+            _boardManager.score += comboCount * endNewValueMerge;
             SetScoreUI();
-            StartCoroutine(DeActiveComboIE());
+            // StartCoroutine(DeActiveComboIE());
         }
-    }
-
-    private IEnumerator DeActiveComboIE()
-    {
-        yield return new WaitForSeconds(1);
-        comboPrefab.SetActive(false);
     }
 
     private void SetGameOverUI()
     {
         idCount = 30;
-        gameOverPopup.SetActive(true);
+        // gameOverPopup.SetActive(true);
+        _gamePlayScreen.SetActiveGameOverPopup(true);
         _boardManager.isProcessing = true;
     }
 
@@ -253,7 +248,7 @@ public class UIManager : Singleton<UIManager>
     private void MergeUI(Sequence sequence, List<StepAction> mergerActionList)
     {
         Sequence mergerSequence = DOTween.Sequence();
-        _comboCount++;
+        comboCount++;
 
         foreach (var mergerAction in mergerActionList)
         {
@@ -276,7 +271,7 @@ public class UIManager : Singleton<UIManager>
 
             mergerSequence.OnComplete(() =>
             {
-                _comboPos = mergerAction.squareTarget.Position;
+                comboPos = mergerAction.squareTarget.Position;
                 _boardManager.score += mergerAction.newSquareValue;
                 SetScoreUI();
             });
@@ -315,15 +310,30 @@ public class UIManager : Singleton<UIManager>
         return isSquareActiveSameIndex;
     }
 
-    private void SetScoreUI()
+    public void SetScoreUI(GamePlayScreen gamePlayScreen = null)
     {
-        scoreText.text = _boardManager.score.ToString(FORMAT_SCORE);
         if (_boardManager.score > _boardManager.highScore)
         {
             _boardManager.highScore = _boardManager.score;
         }
+        
+        if (gamePlayScreen is not null)
+        {
+            _gamePlayScreen ??= gamePlayScreen;
+        }
 
-        highScoreText.text = _boardManager.highScore.ToString(FORMAT_SCORE);
+        _gamePlayScreen.SetScore();
+
+        // scoreText.text = _boardManager.score.ToString(FORMAT_SCORE);
+        // highScoreText.text = _boardManager.highScore.ToString(FORMAT_SCORE);
+
+        // if (ScreenContainer.Find(ContainerKey.Screens).Current.View is null)
+        // {
+        //     return;
+        // }
+        // var screenContainer = (GamePlayScreen)ScreenContainer.Find(ContainerKey.Screens).Current.View;
+        // screenContainer.scoreText.text = _boardManager.score.ToString(FORMAT_SCORE);   
+        // screenContainer.highScoreText.text = _boardManager.highScore.ToString(FORMAT_SCORE);
     }
 
     private void SortUI(Sequence sequence, List<StepAction> mergerActionList)
@@ -341,9 +351,9 @@ public class UIManager : Singleton<UIManager>
                 {
                     var mergeEndPos = mergerAction.singleSquareSources.Position;
                     squareSourceGameObject.SetValue(mergerAction.newSquareValue);
-                    if ((mergeEndPos - _comboPos).sqrMagnitude == 0 )
+                    if ((mergeEndPos - comboPos).sqrMagnitude == 0)
                     {
-                        _comboPos = mergerAction.squareTarget.Position;
+                        comboPos = mergerAction.squareTarget.Position;
                     }
                 })
             );

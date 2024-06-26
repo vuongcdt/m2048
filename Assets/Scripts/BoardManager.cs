@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Profiling;
+using UI;
 using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -10,7 +10,6 @@ public class BoardManager : Singleton<BoardManager>
 {
     [SerializeField] private GameObject lineColumn;
     [SerializeField] private Transform lineParentTransform;
-    [SerializeField] private Square nextSquare;
 
     public List<SquareData> squaresData = new();
     public int boardRow = 5;
@@ -27,16 +26,16 @@ public class BoardManager : Singleton<BoardManager>
     public bool isPlaying;
 
     private bool _isSave;
-    private bool _isMaxItemColumn;
     private UIManager _uiManager;
     private SquareData _processingSquare;
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
-    private List<float> _squareValueList = new() { 2 };
+    private List<float> _squareValueList = new() { 2, 4 };
 
     // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
     private readonly int[] _probabilityList = { 1, 4, 10, 18, 28, 30, 44, 60, 78 };
+    private GamePlayScreen _gamePlayScreen;
 
     private const int MAX_COUNT_QUARE_VALUE_LIST = 9;
 
@@ -55,7 +54,6 @@ public class BoardManager : Singleton<BoardManager>
         }
         else
         {
-            RenderBoard();
             LoadDataFromPrefs();
         }
 
@@ -66,7 +64,6 @@ public class BoardManager : Singleton<BoardManager>
             nextSquareValue = 2;
         }
 
-        nextSquare.SetValue(nextSquareValue);
         _uiManager.StartUI(squaresData);
     }
 
@@ -116,19 +113,21 @@ public class BoardManager : Singleton<BoardManager>
         // ProcessingDataMaker.Begin();
         ProcessingData(columnSelect);
         // ProcessingDataMaker.End();
-        
+
         if (_actionsWrapList.Count <= 0)
         {
             yield return null;
         }
+
         yield return new WaitForNextFrameUnit();
-        
+
         if (_actionsWrapList.Count > 0)
         {
             SetRandomSquareValue();
         }
+
         CheckGameOver();
-        
+
         // RenderUIMaker.Begin();
         _uiManager.RenderUI(_actionsWrapList);
         // RenderUIMaker.End();
@@ -143,6 +142,7 @@ public class BoardManager : Singleton<BoardManager>
         {
             return;
         }
+
         ProcessingLoop();
     }
 
@@ -161,7 +161,6 @@ public class BoardManager : Singleton<BoardManager>
     private void Shoot(int column)
     {
         _actionsList.Clear();
-        _isMaxItemColumn = false;
         var action = new StepAction();
         var squareTarget = GetEmptySquareDataTargetByColumn(column);
         if (squareTarget == null)
@@ -207,7 +206,7 @@ public class BoardManager : Singleton<BoardManager>
                 );
 
                 var newSquareValue = nextSquareValue * 2;
-                action.squareTarget = new SquareData(squareTarget.cell,  squareTarget.id, squareTarget.value);
+                action.squareTarget = new SquareData(squareTarget.cell, squareTarget.id, squareTarget.value);
                 action.multiSquareSources.Add(new SquareData(squareSource.cell, squareSource.id, squareSource.value));
                 action.newSquareValue = newSquareValue;
 
@@ -216,7 +215,7 @@ public class BoardManager : Singleton<BoardManager>
                 _actionsWrapList.Add(item);
                 squareTarget.value = newSquareValue;
                 _processingSquare = squareTarget;
-                
+
                 return;
             }
         }
@@ -241,7 +240,7 @@ public class BoardManager : Singleton<BoardManager>
         for (var index = 0; index < squaresData.Count; index++)
         {
             var squareData = squaresData[index];
-            var isMaxItemColumnCanMerge = index >= 24 && Mathf.Approximately(squareData.value,nextSquareValue);
+            var isMaxItemColumnCanMerge = index >= 24 && Mathf.Approximately(squareData.value, nextSquareValue);
             if (squareData.value <= 0 || isMaxItemColumnCanMerge)
             {
                 all = false;
@@ -299,7 +298,7 @@ public class BoardManager : Singleton<BoardManager>
 
             List<SquareData> squareSameValueList = new();
             GetCountSquareSameValueList(block, squareSameValueList);
-            
+
             // Debug.Log($"count {squareSameValueList.Count}");
 
             if (squareSameValueList.Count <= 0)
@@ -312,7 +311,7 @@ public class BoardManager : Singleton<BoardManager>
 
         squareMergeOrderByCountSameValueList
             .Sort((a, b) => b.squareSameValueList.Count - a.squareSameValueList.Count);
-        
+
         return squareMergeOrderByCountSameValueList;
     }
 
@@ -554,6 +553,16 @@ public class BoardManager : Singleton<BoardManager>
 
     #endregion
 
+    public void SetNextSquareValue(GamePlayScreen gamePlayScreen = null)
+    {
+        if (gamePlayScreen is not null)
+        {
+            _gamePlayScreen ??= gamePlayScreen;
+        }
+
+        _gamePlayScreen.SetNextSquare();
+    }
+
     private void SetRandomSquareValue()
     {
         SetNewValueInSquareValueList();
@@ -575,7 +584,11 @@ public class BoardManager : Singleton<BoardManager>
             {
                 var value = _squareValueList[countValueList - 1 - i];
                 nextSquareValue = value;
-                nextSquare.SetValue(value);
+                if (_gamePlayScreen is not null)
+                {
+                    SetNextSquareValue();
+                }
+                // SetNextValue();
                 return;
             }
         }
@@ -684,9 +697,12 @@ public class BoardManager : Singleton<BoardManager>
 
     private void LoadDataFromPrefs()
     {
-        squaresData = string.IsNullOrEmpty(Prefs.SquaresData)
-            ? new List<SquareData>()
-            : JsonUtility.FromJson<Utils.JsonHelper<SquareData>>(Prefs.SquaresData).data;
+        RenderBoard();
+        if (!string.IsNullOrEmpty(Prefs.SquaresData))
+        {
+            squaresData = JsonUtility.FromJson<Utils.JsonHelper<SquareData>>(Prefs.SquaresData).data;
+        }
+
         score = Prefs.Score;
         idCount = Prefs.IdCount;
         _uiManager.idCount = idCount;
@@ -695,9 +711,8 @@ public class BoardManager : Singleton<BoardManager>
         LoadSquareValueList();
 
         nextSquareValue = Prefs.NextSquareValue;
-        nextSquare.SetValue(nextSquareValue);
+        // SetNextValue();
     }
-
 
     #region LoadGame
 

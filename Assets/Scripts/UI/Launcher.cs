@@ -29,7 +29,7 @@ namespace UI
         {
             var options = new ViewOptions(ResourceKey.LoadingScreenPrefab(), false, loadAsync: false);
             await ContainerManager.Find<ScreenContainer>(ContainerKey.Screens).PushAsync(options);
-            Invoke(nameof(ShowHomePage),1f);
+            Invoke(nameof(ShowHomePage),0.1f);
         }
         private async UniTaskVoid ShowHomePage()
         {

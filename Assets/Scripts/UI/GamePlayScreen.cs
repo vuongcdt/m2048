@@ -1,9 +1,79 @@
-﻿using ZBase.UnityScreenNavigator.Core.Screens;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+using Screen = ZBase.UnityScreenNavigator.Core.Screens.Screen;
 
 namespace UI
 {
-    public class GamePlayScreen:Screen
+    public class GamePlayScreen : Screen
     {
-        
+        [SerializeField] internal TMP_Text scoreText;
+        [SerializeField] internal TMP_Text highScoreText;
+        [SerializeField] internal TMP_Text nextSquareText;
+        [SerializeField] internal Image background;
+        [SerializeField] private GameObject comboPrefab;
+        [SerializeField] private Text comboText;
+        [SerializeField] private GameObject gameOverPopup;
+
+        private Camera _cameraMain;
+        private UIManager _uiManager;
+        private BoardManager _boardManager;
+        private const string FORMAT_SCORE = "0";
+
+        private const string COMBO_TEXT_FORMAT = "Combo x{0}";
+        // private void OnPostRender()
+        // {
+        //     _uiManager = UIManager.Instance;
+        //     _boardManager = BoardManager.Instance;
+        //     _uiManager.SetScoreUI();
+        //     SetNextSquareValue();
+        // }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            _cameraMain = Camera.main;
+            _uiManager = UIManager.Instance;
+            _boardManager = BoardManager.Instance;
+            comboPrefab.SetActive(false);
+            SetActiveGameOverPopup(false);
+            _uiManager.SetScoreUI(this);
+            _boardManager.SetNextSquareValue(this);
+        }
+
+        public void SetActiveGameOverPopup(bool isActive)
+        {
+            gameOverPopup.SetActive(isActive);
+        }
+
+        public void ShowCombo()
+        {
+            comboText.text = string.Format(COMBO_TEXT_FORMAT, _uiManager.comboCount);
+            var targetWorldPos = new Vector2(_uiManager.comboPos.x, _uiManager.comboPos.y - 1.3f);
+            comboPrefab.transform.position = targetWorldPos;
+            comboPrefab.SetActive(true);
+            StartCoroutine(DeActiveComboIE());
+        }
+
+        private IEnumerator DeActiveComboIE()
+        {
+            yield return new WaitForSeconds(1);
+            comboPrefab.SetActive(false);
+        }
+
+        public void SetNextSquare()
+        {
+            background.color = Utils.GetColor(_boardManager.nextSquareValue);
+            nextSquareText.text = Utils.GetText(_boardManager.nextSquareValue);
+        }
+
+        public void SetScore()
+        {
+            scoreText.text = _boardManager.score.ToString(FORMAT_SCORE);
+            highScoreText.text = _boardManager.highScore.ToString(FORMAT_SCORE);
+        }
     }
 }
