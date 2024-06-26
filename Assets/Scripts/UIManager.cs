@@ -17,7 +17,7 @@ public class UIManager : Singleton<UIManager>
 
     public Vector2 comboPos;
     public int comboCount;
-    
+
     private List<Square> _squaresList = new();
     private BoardManager _boardManager;
     private Square _squareScript;
@@ -27,16 +27,17 @@ public class UIManager : Singleton<UIManager>
     private bool _isSave;
     private GameObjectPool _blockPool;
     private GamePlayScreen _gamePlayScreen;
-    
+
     private const float MERGE_DURATION = 0.1f;
     private const float TIME_DELAY = 0.1f;
 
-    private static readonly ProfilerMarker ProcessingTweenMaker = new("MyMaker.DOTweenSequence");
+    // private static readonly ProfilerMarker ProcessingTweenMaker = new("MyMaker.DOTweenSequence");
 
     private void Start()
     {
         _boardManager = BoardManager.Instance;
     }
+
     public void ResetGame()
     {
         _boardManager.isProcessing = false;
@@ -44,8 +45,11 @@ public class UIManager : Singleton<UIManager>
         {
             _squaresList[i].SetActiveObj(false);
         }
+
         _boardManager.RestartGame();
+        SetScoreUI();
     }
+
     public void StartUI(List<SquareData> squaresData)
     {
         _squareScript = squarePrefab.GetComponent<Square>();
@@ -131,6 +135,7 @@ public class UIManager : Singleton<UIManager>
             _boardManager.isProcessing = false;
             return;
         }
+        SoundManager.Instance.PlaySoundShoot();
 
         InitNewSquareForShoot();
         comboCount = 0;
@@ -300,7 +305,7 @@ public class UIManager : Singleton<UIManager>
         {
             _boardManager.highScore = _boardManager.score;
         }
-        
+
         if (gamePlayScreen is not null)
         {
             _gamePlayScreen ??= gamePlayScreen;

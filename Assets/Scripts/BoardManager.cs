@@ -31,7 +31,7 @@ public class BoardManager : Singleton<BoardManager>
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
-    private List<float> _squareValueList = new() { 2};
+    private List<float> _squareValueList = new() { 2 };
 
     // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
     private readonly int[] _probabilityList = { 1, 4, 10, 18, 28, 30, 44, 60, 78 };
@@ -84,6 +84,7 @@ public class BoardManager : Singleton<BoardManager>
     {
         idCount = 0;
         RenderBoard();
+        score = 0;
         LoadHighScore();
         _squareValueList = new() { 2 };
         SetRandomSquareValue();

@@ -40,13 +40,13 @@ public static class Prefs
 
     public static float VolumeMusic
     {
-        get => PlayerPrefs.GetFloat(Constants.PrefConsts.VOLUMME_MUSIC);
+        get => PlayerPrefs.GetFloat(Constants.PrefConsts.VOLUMME_MUSIC,-1);
         set => PlayerPrefs.SetFloat(Constants.PrefConsts.VOLUMME_MUSIC, value);
     }
 
     public static float VolumeSfx
     {
-        get => PlayerPrefs.GetFloat(Constants.PrefConsts.VOLUMME_SFX);
+        get => PlayerPrefs.GetFloat(Constants.PrefConsts.VOLUMME_SFX,-1);
         set => PlayerPrefs.SetFloat(Constants.PrefConsts.VOLUMME_SFX, value);
     }
 

@@ -21,9 +21,22 @@ namespace UI
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(OnCloseBtnClick);
 
-            sliderMusic.value = Prefs.VolumeMusic;
-            sliderSfx.value = Prefs.VolumeSfx;
+            SetVolumeUI();
             return UniTask.CompletedTask;
+        }
+
+        private void SetVolumeUI()
+        {
+            if (Mathf.Approximately(Prefs.VolumeMusic, -1) || Mathf.Approximately(Prefs.VolumeSfx, -1))
+            {
+                sliderMusic.value = 0.5f;
+                sliderSfx.value = 0.5f;
+            }
+            else
+            {
+                sliderMusic.value = Prefs.VolumeMusic;
+                sliderSfx.value = Prefs.VolumeSfx;
+            }
         }
 
         public void OnChangeVolumeMusic()
