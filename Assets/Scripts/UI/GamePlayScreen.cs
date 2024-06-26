@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using ZBase.UnityScreenNavigator.Core.Modals;
+using ZBase.UnityScreenNavigator.Core.Screens;
 using Screen = ZBase.UnityScreenNavigator.Core.Screens.Screen;
 
 namespace UI
@@ -18,6 +20,7 @@ namespace UI
         [SerializeField] private GameObject comboPrefab;
         [SerializeField] private Text comboText;
         [SerializeField] private GameObject gameOverPopup;
+        [SerializeField] private Button backToHomeBtn;
 
         private Camera _cameraMain;
         private UIManager _uiManager;
@@ -33,8 +36,12 @@ namespace UI
         //     SetNextSquareValue();
         // }
 
-        protected override void OnEnable()
+        public override UniTask Initialize(Memory<object> args)
         {
+            _uiManager = UIManager.Instance;
+            backToHomeBtn.onClick.RemoveAllListeners();
+            backToHomeBtn.onClick.AddListener(OnBackToHomeBtnClick);
+            
             base.OnEnable();
             _cameraMain = Camera.main;
             _uiManager = UIManager.Instance;
@@ -44,7 +51,27 @@ namespace UI
             SetActiveGameOverPopup(false);
             _uiManager.SetScoreUI(this);
             _boardManager.SetNextSquareValue(this);
+            return UniTask.CompletedTask;
         }
+
+        private void OnBackToHomeBtnClick()
+        {
+            _boardManager.isPlaying = false;
+            ScreenContainer.Of(transform).Pop(true);
+        }
+
+        // protected override void OnEnable()
+        // {
+        //     base.OnEnable();
+        //     _cameraMain = Camera.main;
+        //     _uiManager = UIManager.Instance;
+        //     _boardManager = BoardManager.Instance;
+        //     
+        //     comboPrefab.SetActive(false);
+        //     SetActiveGameOverPopup(false);
+        //     _uiManager.SetScoreUI(this);
+        //     _boardManager.SetNextSquareValue(this);
+        // }
 
         public void SetActiveGameOverPopup(bool isActive)
         {

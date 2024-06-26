@@ -38,6 +38,18 @@ public static class Prefs
         set => PlayerPrefs.SetFloat(Constants.PrefConsts.NEXT_SQUARE_VALUE_KEY, value);
     }
 
+    public static float VolumeMusic
+    {
+        get => PlayerPrefs.GetFloat(Constants.PrefConsts.VOLUMME_MUSIC);
+        set => PlayerPrefs.SetFloat(Constants.PrefConsts.VOLUMME_MUSIC, value);
+    }
+
+    public static float VolumeSfx
+    {
+        get => PlayerPrefs.GetFloat(Constants.PrefConsts.VOLUMME_SFX);
+        set => PlayerPrefs.SetFloat(Constants.PrefConsts.VOLUMME_SFX, value);
+    }
+
     public static void ClearPrefs()
     {
         PlayerPrefs.DeleteAll();
