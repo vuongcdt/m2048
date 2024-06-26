@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using ZBase.UnityScreenNavigator.Core.Modals;
 using Screen = ZBase.UnityScreenNavigator.Core.Screens.Screen;
 
 namespace UI
@@ -38,6 +39,7 @@ namespace UI
             _cameraMain = Camera.main;
             _uiManager = UIManager.Instance;
             _boardManager = BoardManager.Instance;
+            
             comboPrefab.SetActive(false);
             SetActiveGameOverPopup(false);
             _uiManager.SetScoreUI(this);
@@ -47,6 +49,12 @@ namespace UI
         public void SetActiveGameOverPopup(bool isActive)
         {
             gameOverPopup.SetActive(isActive);
+        }
+        
+        public void ShowGameOverPopup()
+        {
+            var options = new ModalOptions(ResourceKey.GameOverModalPrefab());
+            ModalContainer.Find(ContainerKey.Modals).Push(options);
         }
 
         public void ShowCombo()
@@ -74,12 +82,6 @@ namespace UI
         {
             scoreText.text = _boardManager.score.ToString(FORMAT_SCORE);
             highScoreText.text = _boardManager.highScore.ToString(FORMAT_SCORE);
-        }
-        
-        public void RePlayGame()
-        {
-            _uiManager.ResetGame();
-            SetActiveGameOverPopup(false);
         }
     }
 }

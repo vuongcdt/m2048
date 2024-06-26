@@ -713,7 +713,6 @@ public class BoardManager : Singleton<BoardManager>
         LoadSquareValueList();
 
         nextSquareValue = Prefs.NextSquareValue;
-        // SetNextValue();
     }
 
     #region LoadGame

@@ -186,7 +186,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lineColumn: {fileID: 5260937453536865864, guid: cf7e610a94cbff54b9f5025cf4c4f629, type: 3}
   lineParentTransform: {fileID: 1166859083}
-  nextSquare: {fileID: 0}
   squaresData: []
   boardRow: 5
   boardCol: 6
@@ -696,7 +695,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -883,12 +882,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   squarePrefab: {fileID: 1501351254502025820, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
   squareParentTransform: {fileID: 386745771}
-  scoreText: {fileID: 0}
-  highScoreText: {fileID: 0}
-  comboPrefab: {fileID: 0}
-  comboText: {fileID: 0}
-  gameOverPopup: {fileID: 0}
-  cameraMain: {fileID: 519420031}
+  comboPos: {x: 0, y: 0}
+  comboCount: 0
   idCount: 30
 --- !u!1 &1166859082
 GameObject:

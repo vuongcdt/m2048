@@ -173,10 +173,6 @@ public class UIManager : Singleton<UIManager>
     {
         if (comboCount > 2)
         {
-            // comboText.text = string.Format(COMBO_TEXT_FORMAT, _comboCount);
-            // var targetWorldPos = new Vector2(_comboPos.x, _comboPos.y - 1.3f);
-            // comboPrefab.transform.position = cameraMain.WorldToScreenPoint(targetWorldPos);
-            // comboPrefab.SetActive(true);
             _gamePlayScreen.ShowCombo();
 
             var endNewValueMerge = _actionsWrapList
@@ -186,15 +182,13 @@ public class UIManager : Singleton<UIManager>
 
             _boardManager.score += comboCount * endNewValueMerge;
             SetScoreUI();
-            // StartCoroutine(DeActiveComboIE());
         }
     }
 
     private void SetGameOverUI()
     {
         idCount = 30;
-        // gameOverPopup.SetActive(true);
-        _gamePlayScreen.SetActiveGameOverPopup(true);
+        _gamePlayScreen.ShowGameOverPopup();
         _boardManager.isProcessing = true;
     }
 

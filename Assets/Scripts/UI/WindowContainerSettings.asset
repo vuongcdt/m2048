@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: WindowContainerSettings
   m_EditorClassIdentifier: 
   containers:
-  - name: Models
+  - name: Modals
     containerType: 0
-    overrideSorting: 0
+    overrideSorting: 1
     sortingLayer:
       id: 0
-    orderInLayer: 0
+    orderInLayer: 6
   - name: Screens
     containerType: 1
     overrideSorting: 0
