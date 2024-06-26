@@ -18,9 +18,9 @@ public class UIManager : Singleton<UIManager>
     public Vector2 comboPos;
     public int comboCount;
     
+    private List<Square> _squaresList = new();
     private BoardManager _boardManager;
     private Square _squareScript;
-    private List<Square> _squaresList = new();
     private List<BoardAction> _actionsWrapList = new();
     private Sequence _sequence;
     public int idCount = 30;
@@ -36,13 +36,16 @@ public class UIManager : Singleton<UIManager>
     private void Start()
     {
         _boardManager = BoardManager.Instance;
-
-        // comboPrefab.SetActive(false);
-        // gameOverPopup.SetActive(false);
-
-        // SetScoreUI();
     }
-
+    public void ResetGame()
+    {
+        _boardManager.isProcessing = false;
+        for (var i = 0; i < _squaresList.Count; i++)
+        {
+            _squaresList[i].SetActiveObj(false);
+        }
+        _boardManager.RestartGame();
+    }
     public void StartUI(List<SquareData> squaresData)
     {
         _squareScript = squarePrefab.GetComponent<Square>();
@@ -109,19 +112,6 @@ public class UIManager : Singleton<UIManager>
     }
 
     #endregion
-
-    public void RePlayGame()
-    {
-        _boardManager.isProcessing = false;
-        _gamePlayScreen.SetActiveGameOverPopup(false);
-        // gameOverPopup.SetActive(false);
-        for (var i = 0; i < _squaresList.Count; i++)
-        {
-            _squaresList[i].SetActiveObj(false);
-        }
-
-        _boardManager.RestartGame();
-    }
 
     public void ReturnPool(GameObject insObj)
     {

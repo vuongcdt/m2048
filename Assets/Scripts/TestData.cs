@@ -56,7 +56,7 @@ public static class TestData
         // squaresData[6].value = 8;
         // squaresData[7].value = 2;
 
-        //
+        ////
         squaresData[0].value = 4;
         squaresData[1].value = 2;
         squaresData[2].value = 4;
@@ -86,10 +86,10 @@ public static class TestData
         squaresData[6 + 17].value = 4;
         
         squaresData[0 + 24].value = 8;
-        squaresData[1 + 24].value = 2;
+        squaresData[1 + 24].value = 16;
         squaresData[2 + 24].value = 8;
         squaresData[3 + 24].value = 16;
         squaresData[4 + 24].value = 8;
-        squaresData[5 + 24].value = 16;
+        // squaresData[5 + 24].value = 16;
     }
 }

@@ -53,7 +53,7 @@ namespace UI
         {
             comboText.text = string.Format(COMBO_TEXT_FORMAT, _uiManager.comboCount);
             var targetWorldPos = new Vector2(_uiManager.comboPos.x, _uiManager.comboPos.y - 1.3f);
-            comboPrefab.transform.position = targetWorldPos;
+            comboPrefab.transform.position = _cameraMain.WorldToScreenPoint(targetWorldPos);
             comboPrefab.SetActive(true);
             StartCoroutine(DeActiveComboIE());
         }
@@ -74,6 +74,12 @@ namespace UI
         {
             scoreText.text = _boardManager.score.ToString(FORMAT_SCORE);
             highScoreText.text = _boardManager.highScore.ToString(FORMAT_SCORE);
+        }
+        
+        public void RePlayGame()
+        {
+            _uiManager.ResetGame();
+            SetActiveGameOverPopup(false);
         }
     }
 }
