@@ -83,12 +83,11 @@ namespace UI
 
         public void SetNextSquare()
         {
-            if (background is not null)
+            nextSquareText.text = Utils.GetText(_boardManager.nextSquareValue);
+            if (background != null)
             {
-                Debug.Log($"VAR {Utils.GetColor(_boardManager.nextSquareValue)}");
                 background.color = Utils.GetColor(_boardManager.nextSquareValue);
             }
-            nextSquareText.text = Utils.GetText(_boardManager.nextSquareValue);
         }
 
         public void SetScore()

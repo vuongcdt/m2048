@@ -17,7 +17,7 @@ public static class Utils
         new(116, 185, 255, 255),
         new(162, 155, 254, 255),
     };
-    
+
     public static Vector2 GridToPos(int row, int col)
     {
         return new Vector2(-5 + col * 2, 4 - row * 2);
@@ -25,7 +25,7 @@ public static class Utils
 
     public static Cell PosToGrid(Vector2 pos)
     {
-        return new Cell((int)((pos.x + 5) / 2), (int)((4- pos.y) / 2));
+        return new Cell((int)((pos.x + 5) / 2), (int)((4 - pos.y) / 2));
     }
 
     public static string GetText(float value)
@@ -43,10 +43,11 @@ public static class Utils
                 valueFormat = value / 1024 + "K";
                 break;
         }
+
         return valueFormat;
-    }   
-    
-    public static Color32 GetColor(float value)
+    }
+
+    public static Color GetColor(float value)
     {
         var exponent = GetExponent(value);
 
@@ -71,8 +72,8 @@ public static class Utils
             Column = column;
         }
     }
-    
-    
+
+
     public class JsonHelper<T>
     {
         public List<T> data;
@@ -81,11 +82,12 @@ public static class Utils
         {
             this.data = data;
         }
+
         public JsonHelper()
         {
         }
     }
-    
+
     public class CountSquareList
     {
         public SquareData square;
@@ -95,6 +97,17 @@ public static class Utils
         {
             this.square = square;
             this.squareSameValueList = squareSameValueList;
+        }
+    }
+
+    public class ChartScore
+    {
+        public int index;
+        public int score;
+
+        public ChartScore(int score)
+        {
+            this.score = score;
         }
     }
 }
