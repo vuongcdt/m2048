@@ -1,7 +1,6 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using ZBase.UnityScreenNavigator.Core.Modals;
 
@@ -29,8 +28,8 @@ namespace UI
         {
             if (Mathf.Approximately(Prefs.VolumeMusic, -1) || Mathf.Approximately(Prefs.VolumeSfx, -1))
             {
-                sliderMusic.value = 0.5f;
-                sliderSfx.value = 0.5f;
+                sliderMusic.value = Constants.Volume.VOLUME_DEFAULT;
+                sliderSfx.value = Constants.Volume.VOLUME_DEFAULT;
             }
             else
             {
@@ -46,7 +45,7 @@ namespace UI
 
         public void OnChangeVolumeSFX()
         {
-            _soundManager.SetVolumeSoundSfx(sliderSfx.value);
+            _soundManager.SetVolumeSoundShootSfx(sliderSfx.value);
         }
 
         private void OnCloseBtnClick()

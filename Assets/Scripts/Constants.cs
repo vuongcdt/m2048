@@ -13,6 +13,10 @@ public class Constants
         public const string VOLUMME_SFX = nameof(VOLUMME_SFX);
     }
 
+    public class Volume
+    {
+        public const float VOLUME_DEFAULT = 0.7f;
+    }
     public class SquareColor
     {
         public static readonly Color White = Color.white;

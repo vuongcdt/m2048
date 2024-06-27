@@ -1,34 +1,75 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Serialization;
-using UnityEngine.UI;
 
 public class SoundManager : Singleton<SoundManager>
 {
-    [SerializeField] private AudioSource audioSourceSfx;
+    [SerializeField] private AudioSource audioSourceMusic;
+    [SerializeField] private AudioSource audioSourceShootSfx;
+    [SerializeField] private AudioSource audioSourceMergeSfx;
+    [SerializeField] private AudioSource audioSourceSortSfx;
+    [SerializeField] private AudioSource audioSourceComboSfx;
+    [SerializeField] private AudioSource audioSourceGameOverSfx;
+    [SerializeField] private AudioSource audioSourceMaxItemColumnSfx;
+    [SerializeField] private AudioSource audioSourceClickSfx;
 
-    private AudioSource audioSourceMusic;
+    private float _volumeSfx;
 
     private void Start()
     {
-        audioSourceMusic = GetComponent<AudioSource>();
         if (Mathf.Approximately(Prefs.VolumeMusic, -1) || Mathf.Approximately(Prefs.VolumeSfx, -1))
         {
-            audioSourceMusic.volume = 0.5f;
-            audioSourceSfx.volume = 0.5f;
+            audioSourceMusic.volume = Constants.Volume.VOLUME_DEFAULT;
+            _volumeSfx = Constants.Volume.VOLUME_DEFAULT;
         }
         else
         {
             audioSourceMusic.volume = Prefs.VolumeMusic;
-            audioSourceSfx.volume = Prefs.VolumeSfx;
+            _volumeSfx = Prefs.VolumeSfx;
         }
 
         audioSourceMusic.Play();
     }
 
-    public void PlaySoundShoot()
+    public void PlaySoundShootSfx()
     {
-        audioSourceSfx.Play();
+        audioSourceShootSfx.volume = _volumeSfx;
+        audioSourceShootSfx.Play();
+    }
+
+    public void PlaySoundSortSfx()
+    {
+        audioSourceSortSfx.volume = _volumeSfx;
+        audioSourceSortSfx.Play();
+    }
+
+    public void PlaySoundMergeSfx()
+    {
+        audioSourceMergeSfx.volume = _volumeSfx;
+        audioSourceMergeSfx.Play();
+    }
+
+    public void PlaySoundComboSfx()
+    {
+        audioSourceComboSfx.volume = _volumeSfx;
+        audioSourceComboSfx.Play();
+    }
+
+    public void PlaySoundGameOverSfx()
+    {
+        audioSourceGameOverSfx.volume = _volumeSfx;
+        audioSourceGameOverSfx.Play();
+    }
+
+    public void PlaySoundMaxItemColumnSfx()
+    {
+        audioSourceMaxItemColumnSfx.volume = _volumeSfx;
+        audioSourceMaxItemColumnSfx.Play();
+    }
+
+    public void PlaySoundClickSfx()
+    {
+        audioSourceClickSfx.volume = _volumeSfx;
+        audioSourceClickSfx.Play();
     }
 
     public void SetVolumeMusic(float value)
@@ -36,10 +77,10 @@ public class SoundManager : Singleton<SoundManager>
         audioSourceMusic.volume = value;
     }
 
-    public void SetVolumeSoundSfx(float value)
+    public void SetVolumeSoundShootSfx(float value)
     {
-        audioSourceSfx.volume = value;
-        PlaySoundShoot();
+        _volumeSfx = value;
+        PlaySoundShootSfx();
     }
 
     public void SaveVolume(float sliderMusicValue, float sliderSfxValue)

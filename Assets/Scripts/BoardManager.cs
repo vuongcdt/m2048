@@ -27,6 +27,7 @@ public class BoardManager : Singleton<BoardManager>
 
     private bool _isSave;
     private UIManager _uiManager;
+    private SoundManager _soundManager;
     private SquareData _processingSquare;
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
@@ -46,6 +47,7 @@ public class BoardManager : Singleton<BoardManager>
     {
         Application.targetFrameRate = 60;
         _uiManager = UIManager.Instance;
+        _soundManager = SoundManager.Instance;
         RenderLineColumn();
 
         if (isClearData)
@@ -142,6 +144,7 @@ public class BoardManager : Singleton<BoardManager>
         Shoot(column);
         if (_actionsWrapList.Count <= 0)
         {
+            _soundManager.PlaySoundMaxItemColumnSfx();
             return;
         }
 

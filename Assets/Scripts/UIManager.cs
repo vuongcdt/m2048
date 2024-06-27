@@ -27,6 +27,7 @@ public class UIManager : Singleton<UIManager>
     private bool _isSave;
     private GameObjectPool _blockPool;
     private GamePlayScreen _gamePlayScreen;
+    private SoundManager _soundManager;
 
     private const float MERGE_DURATION = 0.1f;
     private const float TIME_DELAY = 0.1f;
@@ -36,6 +37,7 @@ public class UIManager : Singleton<UIManager>
     private void Start()
     {
         _boardManager = BoardManager.Instance;
+        _soundManager = SoundManager.Instance;
     }
 
     public void ResetGame()
@@ -135,7 +137,6 @@ public class UIManager : Singleton<UIManager>
             _boardManager.isProcessing = false;
             return;
         }
-        SoundManager.Instance.PlaySoundShoot();
 
         InitNewSquareForShoot();
         comboCount = 0;
@@ -178,6 +179,7 @@ public class UIManager : Singleton<UIManager>
     {
         if (comboCount > 2)
         {
+            _soundManager.PlaySoundComboSfx();
             _gamePlayScreen.ShowCombo();
 
             var endNewValueMerge = _actionsWrapList
@@ -193,12 +195,14 @@ public class UIManager : Singleton<UIManager>
     private void SetGameOverUI()
     {
         idCount = 30;
+        _soundManager.PlaySoundGameOverSfx();
         _gamePlayScreen.ShowGameOverPopup();
         _boardManager.isProcessing = true;
     }
 
     private void ShootUI(Sequence sequence, StepAction stepAction)
     {
+        sequence.OnStart(() => { _soundManager.PlaySoundShootSfx(); });
         var squarePool = FindSquarePoolById(stepAction.singleSquareSources.id);
 
         squarePool.SetValue(stepAction.newSquareValue);
@@ -239,6 +243,7 @@ public class UIManager : Singleton<UIManager>
         Sequence mergerSequence = DOTween.Sequence();
         comboCount++;
 
+        mergerSequence.OnStart(() => { _soundManager.PlaySoundMergeSfx(); });
         foreach (var mergerAction in mergerActionList)
         {
             var squareSourceGameObjectsList = FindAllSquareGameObjectsActiveSameValue(mergerAction);
@@ -327,6 +332,7 @@ public class UIManager : Singleton<UIManager>
 
     private void SortUI(Sequence sequence, List<StepAction> mergerActionList)
     {
+        sequence.OnStart(() => { _soundManager.PlaySoundSortSfx(); });
         Sequence sortSequence = DOTween.Sequence();
 
         foreach (var mergerAction in mergerActionList)
