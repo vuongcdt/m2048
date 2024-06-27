@@ -14,6 +14,8 @@ namespace UI
         [SerializeField] private Button playButton;
         [SerializeField] private Button settingButton;
         [SerializeField] private Button newGameButton;
+         [SerializeField] private Button rankingRewardsButton;
+        [SerializeField] private Button exitButton;
  
         private BoardManager _boardManager;
         private UIManager _uiManager;
@@ -24,12 +26,30 @@ namespace UI
             
             playButton.onClick.RemoveAllListeners();
             playButton.onClick.AddListener(OnClickPlay);
+            
             settingButton.onClick.RemoveAllListeners();
             settingButton.onClick.AddListener(OnSettingsBtnClick);
+            
             newGameButton.onClick.RemoveAllListeners();
             newGameButton.onClick.AddListener(OnNewGameBtnClick);
             
+            rankingRewardsButton.onClick.RemoveAllListeners();
+            rankingRewardsButton.onClick.AddListener(OnRankingRewardsBtnClick);
+            
+            exitButton.onClick.RemoveAllListeners();
+            exitButton.onClick.AddListener(OnExitBtnClick);
+            
             return UniTask.CompletedTask;
+        }
+
+        private void OnExitBtnClick()
+        {
+        }
+
+        private void OnRankingRewardsBtnClick()
+        {
+            var options = new ModalOptions(ResourceKey.RankingRewardsPrefab());
+            ModalContainer.Find(ContainerKey.Modals).Push(options);
         }
 
         private void OnNewGameBtnClick()
@@ -38,13 +58,13 @@ namespace UI
             _boardManager.isClearData = true;
             _uiManager.ResetGame();
             
-            ScreenContainer.Of(transform).Push(new ScreenOptions(ResourceKey.PlayScreenPrefab(),false));
+            ScreenContainer.Of(transform).Push(new ScreenOptions(ResourceKey.PlayScreenPrefab()));
         }
 
         private void OnClickPlay()
         {
             _boardManager.isPlaying = true;
-            ScreenContainer.Of(transform).Push(new ScreenOptions(ResourceKey.PlayScreenPrefab(),false));
+            ScreenContainer.Of(transform).Push(new ScreenOptions(ResourceKey.PlayScreenPrefab()));
         }    
 
         private void OnSettingsBtnClick()

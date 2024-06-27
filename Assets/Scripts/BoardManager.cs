@@ -89,6 +89,7 @@ public class BoardManager : Singleton<BoardManager>
         score = 0;
         LoadHighScore();
         _squareValueList = new() { 2 };
+
         SetRandomSquareValue();
     }
 

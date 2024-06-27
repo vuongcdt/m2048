@@ -318,12 +318,10 @@ public class UIManager : Singleton<UIManager>
             _gamePlayScreen = gamePlayScreen;
         }
 
-        if (_gamePlayScreen is null)
+        if (_gamePlayScreen is not null)
         {
-            return;
+            _gamePlayScreen.SetScore();
         }
-
-        _gamePlayScreen.SetScore();
     }
 
     private void SortUI(Sequence sequence, List<StepAction> mergerActionList)
