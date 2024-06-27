@@ -13,17 +13,32 @@ namespace UI
     {
         [SerializeField] private Button playButton;
         [SerializeField] private Button settingButton;
+        [SerializeField] private Button newGameButton;
  
         private BoardManager _boardManager;
+        private UIManager _uiManager;
         public override UniTask Initialize(Memory<object> args)
         {
             _boardManager = BoardManager.Instance;
+            _uiManager = UIManager.Instance;
+            
             playButton.onClick.RemoveAllListeners();
             playButton.onClick.AddListener(OnClickPlay);
             settingButton.onClick.RemoveAllListeners();
             settingButton.onClick.AddListener(OnSettingsBtnClick);
+            newGameButton.onClick.RemoveAllListeners();
+            newGameButton.onClick.AddListener(OnNewGameBtnClick);
             
             return UniTask.CompletedTask;
+        }
+
+        private void OnNewGameBtnClick()
+        {
+            _boardManager.isPlaying = true;
+            _boardManager.isClearData = true;
+            _uiManager.ResetGame();
+            
+            ScreenContainer.Of(transform).Push(new ScreenOptions(ResourceKey.PlayScreenPrefab(),false));
         }
 
         private void OnClickPlay()

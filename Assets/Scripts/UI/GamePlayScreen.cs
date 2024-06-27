@@ -25,32 +25,27 @@ namespace UI
         private Camera _cameraMain;
         private UIManager _uiManager;
         private BoardManager _boardManager;
-        private const string FORMAT_SCORE = "0";
 
+        private const string FORMAT_SCORE = "0";
         private const string COMBO_TEXT_FORMAT = "Combo x{0}";
-        // private void OnPostRender()
-        // {
-        //     _uiManager = UIManager.Instance;
-        //     _boardManager = BoardManager.Instance;
-        //     _uiManager.SetScoreUI();
-        //     SetNextSquareValue();
-        // }
 
         public override UniTask Initialize(Memory<object> args)
         {
             _uiManager = UIManager.Instance;
             backToHomeBtn.onClick.RemoveAllListeners();
             backToHomeBtn.onClick.AddListener(OnBackToHomeBtnClick);
-            
+
             base.OnEnable();
             _cameraMain = Camera.main;
             _uiManager = UIManager.Instance;
             _boardManager = BoardManager.Instance;
-            
+
             comboPrefab.SetActive(false);
             SetActiveGameOverPopup(false);
+
             _uiManager.SetScoreUI(this);
             _boardManager.SetNextSquareValue(this);
+
             return UniTask.CompletedTask;
         }
 
@@ -60,24 +55,11 @@ namespace UI
             ScreenContainer.Of(transform).Pop(true);
         }
 
-        // protected override void OnEnable()
-        // {
-        //     base.OnEnable();
-        //     _cameraMain = Camera.main;
-        //     _uiManager = UIManager.Instance;
-        //     _boardManager = BoardManager.Instance;
-        //     
-        //     comboPrefab.SetActive(false);
-        //     SetActiveGameOverPopup(false);
-        //     _uiManager.SetScoreUI(this);
-        //     _boardManager.SetNextSquareValue(this);
-        // }
-
-        public void SetActiveGameOverPopup(bool isActive)
+        private void SetActiveGameOverPopup(bool isActive)
         {
             gameOverPopup.SetActive(isActive);
         }
-        
+
         public void ShowGameOverPopup()
         {
             var options = new ModalOptions(ResourceKey.GameOverModalPrefab());

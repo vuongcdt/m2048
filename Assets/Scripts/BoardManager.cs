@@ -562,7 +562,7 @@ public class BoardManager : Singleton<BoardManager>
     {
         if (gamePlayScreen is not null)
         {
-            _gamePlayScreen ??= gamePlayScreen;
+            _gamePlayScreen = gamePlayScreen;
         }
 
         _gamePlayScreen.SetNextSquare();
@@ -594,7 +594,6 @@ public class BoardManager : Singleton<BoardManager>
                     SetNextSquareValue();
                 }
 
-                // SetNextValue();
                 return;
             }
         }

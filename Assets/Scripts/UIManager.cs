@@ -42,7 +42,6 @@ public class UIManager : Singleton<UIManager>
 
     public void ResetGame()
     {
-        _boardManager.isProcessing = false;
         for (var i = 0; i < _squaresList.Count; i++)
         {
             _squaresList[i].SetActiveObj(false);
@@ -50,6 +49,7 @@ public class UIManager : Singleton<UIManager>
 
         _boardManager.RestartGame();
         SetScoreUI();
+        _boardManager.isProcessing = false;
     }
 
     public void StartUI(List<SquareData> squaresData)
@@ -313,21 +313,10 @@ public class UIManager : Singleton<UIManager>
 
         if (gamePlayScreen is not null)
         {
-            _gamePlayScreen ??= gamePlayScreen;
+            _gamePlayScreen = gamePlayScreen;
         }
 
         _gamePlayScreen.SetScore();
-
-        // scoreText.text = _boardManager.score.ToString(FORMAT_SCORE);
-        // highScoreText.text = _boardManager.highScore.ToString(FORMAT_SCORE);
-
-        // if (ScreenContainer.Find(ContainerKey.Screens).Current.View is null)
-        // {
-        //     return;
-        // }
-        // var screenContainer = (GamePlayScreen)ScreenContainer.Find(ContainerKey.Screens).Current.View;
-        // screenContainer.scoreText.text = _boardManager.score.ToString(FORMAT_SCORE);   
-        // screenContainer.highScoreText.text = _boardManager.highScore.ToString(FORMAT_SCORE);
     }
 
     private void SortUI(Sequence sequence, List<StepAction> mergerActionList)

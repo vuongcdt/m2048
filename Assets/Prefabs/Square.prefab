@@ -150,6 +150,7 @@ GameObject:
   - component: {fileID: 8368824184596124494}
   - component: {fileID: 8874836035955344884}
   - component: {fileID: 8398601290067623227}
+  - component: {fileID: 4708646997917250908}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -157,14 +158,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6342382873852974709
-Transform:
+--- !u!224 &6342382873852974709
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8095989468771563157}
-  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -172,6 +172,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8274783866398326369}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 200, y: 50}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &8368824184596124494
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -192,7 +197,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10100, guid: 0000000000000000e000000000000000, type: 0}
+  - {fileID: 2100000, guid: c8e065a266a274eeebccb4ae0f64b3d9, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -222,7 +227,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8095989468771563157}
-  m_Text: 4
+  m_Text: 1
   m_OffsetZ: 0
   m_CharacterSize: 0.04
   m_LineSpacing: 1
@@ -230,9 +235,9 @@ TextMesh:
   m_Alignment: 0
   m_TabSize: 4
   m_FontSize: 80
-  m_FontStyle: 1
+  m_FontStyle: 0
   m_RichText: 1
-  m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Font: {fileID: 12800000, guid: c8e065a266a274eeebccb4ae0f64b3d9, type: 3}
   m_Color:
     serializedVersion: 2
     rgba: 4294967295
@@ -248,3 +253,11 @@ SortingGroup:
   m_SortingLayer: 0
   m_SortingOrder: 3
   m_SortAtRoot: 0
+--- !u!222 &4708646997917250908
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8095989468771563157}
+  m_CullTransparentMesh: 1
