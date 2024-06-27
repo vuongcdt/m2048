@@ -59,7 +59,7 @@ public class BoardManager : Singleton<BoardManager>
             LoadDataFromPrefs();
         }
 
-        TestData.SetDataTest(squaresData);
+        // TestData.SetDataTest(squaresData);
 
         if (nextSquareValue == 0)
         {

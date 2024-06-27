@@ -42,6 +42,7 @@ public class UIManager : Singleton<UIManager>
 
     public void ResetGame()
     {
+        idCount = 30;
         for (var i = 0; i < _squaresList.Count; i++)
         {
             _squaresList[i].SetActiveObj(false);
@@ -65,6 +66,7 @@ public class UIManager : Singleton<UIManager>
         {
             var squarePool = Instantiate(_squareScript, Vector2.zero, Quaternion.identity, squareParentTransform);
             squarePool.SetActiveObj(false);
+            _squaresList.Add(squarePool);
         }
     }
 
@@ -314,6 +316,11 @@ public class UIManager : Singleton<UIManager>
         if (gamePlayScreen is not null)
         {
             _gamePlayScreen = gamePlayScreen;
+        }
+
+        if (_gamePlayScreen is null)
+        {
+            return;
         }
 
         _gamePlayScreen.SetScore();
