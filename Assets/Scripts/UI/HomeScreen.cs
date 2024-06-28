@@ -44,6 +44,7 @@ namespace UI
 
         private void OnExitBtnClick()
         {
+            Application.Quit();
         }
 
         private void OnRankingRewardsBtnClick()

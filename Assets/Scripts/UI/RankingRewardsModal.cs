@@ -55,7 +55,7 @@ namespace UI
             List<Utils.ChartScore> charts = new();
             var myScore = (int)_boardManager.highScore;
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 7; i++)
             {
                 var random = Random.Range(0, myScore * 3);
                 charts.Add(new Utils.ChartScore(random));

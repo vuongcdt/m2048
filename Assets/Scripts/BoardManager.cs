@@ -255,7 +255,7 @@ public class BoardManager : Singleton<BoardManager>
         }
 
         isGameOver = all;
-        Debug.Log($"isGameOver {isGameOver}");
+        // Debug.Log($"isGameOver {isGameOver}");
     }
 
     #endregion
@@ -580,7 +580,13 @@ public class BoardManager : Singleton<BoardManager>
     private void SetRandomValue()
     {
         var countValueList = _squareValueList.Count;
-        var probabilityList = _probabilityList.Take(countValueList).ToList();
+        // var probabilityList = _probabilityList.Take(countValueList).ToList();
+        List<int> probabilityList = new();
+        for (var i = 0; i < countValueList; i++)
+        {
+            probabilityList.Add(_probabilityList[i]);
+        }
+        
         var maxValue = probabilityList[^1];
         var randomNum = Random.Range(0, 1f) * maxValue;
 
