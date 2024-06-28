@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -31,15 +30,15 @@ namespace UI
 
         public override UniTask Initialize(Memory<object> args)
         {
-            _uiManager = UIManager.Instance;
-            backToHomeBtn.onClick.RemoveAllListeners();
-            backToHomeBtn.onClick.AddListener(OnBackToHomeBtnClick);
-
             base.OnEnable();
+
             _cameraMain = Camera.main;
             _uiManager = UIManager.Instance;
             _boardManager = BoardManager.Instance;
 
+            backToHomeBtn.onClick.RemoveAllListeners();
+            backToHomeBtn.onClick.AddListener(OnBackToHomeBtnClick);
+ 
             comboPrefab.SetActive(false);
             SetActiveGameOverPopup(false);
 

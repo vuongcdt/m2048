@@ -1,12 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using UI;
-using Unity.Profiling;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
 using uPools;
 using Sequence = DG.Tweening.Sequence;
 
