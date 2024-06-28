@@ -54,8 +54,8 @@ namespace UI
 
         private void OnNewGameBtnClick()
         {
+            Prefs.HighScore = _boardManager.highScore;
             _boardManager.isPlaying = true;
-            _boardManager.isClearData = true;
             _uiManager.ResetGame();
             
             ScreenContainer.Of(transform).Push(new ScreenOptions(ResourceKey.PlayScreenPrefab()));
