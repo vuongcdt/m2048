@@ -268,7 +268,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 858.9, y: 1000}
+  m_SizeDelta: {x: 858.9, y: 1020}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2546258630354508891
 GameObject:
@@ -536,7 +536,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 114}
+  m_AnchoredPosition: {x: 0, y: 120}
   m_SizeDelta: {x: 117, y: 118}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7097382729772115437
@@ -1091,7 +1091,6 @@ MonoBehaviour:
     _enterAnimations: []
     _exitAnimations: []
   closeButton: {fileID: 2665155566134817250}
-  chartItem: {fileID: 2382471995597311089, guid: f7bdcddf368742d41b1411f76a10fd49, type: 3}
   chartItems:
   - {fileID: 108780587300898616}
   - {fileID: 5328326962856526699}
@@ -1113,7 +1112,6 @@ MonoBehaviour:
   - {fileID: 2890822109793266698}
   - {fileID: 1993844050938629978}
   - {fileID: 6543458107090447131}
-  parent: {fileID: 2375616704058109078}
   dataName: {fileID: 4900000, guid: 95dbfb4746644ef3a8f4bcc52d3aead6, type: 3}
   maxData: 50
 --- !u!1 &8747587342873745430

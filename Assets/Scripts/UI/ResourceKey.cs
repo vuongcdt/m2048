@@ -9,6 +9,7 @@ namespace UI
         private const string HomeScreenPrefabName = "screen_home";
         private const string PlayScreenPrefabName = "screen_game_play";
         private const string SettingsModalPrefabName = "modal_settings";
+        private const string PauseModalPrefabName = "modal_pause";
         private const string GameOverModalPrefabName = "modal_game_over";
         private const string RankingRewardsModalPrefabName = "modal_ranking_rewards";
 
@@ -30,6 +31,11 @@ namespace UI
         public static ViewOptions SettingsModalPrefab()
         {
             return string.Format(PrefabFormat, SettingsModalPrefabName);
+        }   
+        
+        public static ViewOptions PauseModalPrefab()
+        {
+            return string.Format(PrefabFormat, PauseModalPrefabName);
         }
 
         public static ViewOptions GameOverModalPrefab()

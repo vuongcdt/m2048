@@ -3,6 +3,7 @@ using System.Collections;
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using ZBase.UnityScreenNavigator.Core.Modals;
 using ZBase.UnityScreenNavigator.Core.Screens;
@@ -18,8 +19,7 @@ namespace UI
         [SerializeField] internal Image background;
         [SerializeField] private GameObject comboPrefab;
         [SerializeField] private Text comboText;
-        [SerializeField] private GameObject gameOverPopup;
-        [SerializeField] private Button backToHomeBtn;
+        [SerializeField] private Button pauseBtn;
 
         private Camera _cameraMain;
         private UIManager _uiManager;
@@ -36,11 +36,10 @@ namespace UI
             _uiManager = UIManager.Instance;
             _boardManager = BoardManager.Instance;
 
-            backToHomeBtn.onClick.RemoveAllListeners();
-            backToHomeBtn.onClick.AddListener(OnBackToHomeBtnClick);
+            pauseBtn.onClick.RemoveAllListeners();
+            pauseBtn.onClick.AddListener(OnPauseBtnClick);
  
             comboPrefab.SetActive(false);
-            SetActiveGameOverPopup(false);
 
             _uiManager.SetScoreUI(this);
             _boardManager.SetNextSquareValue(this);
@@ -48,15 +47,12 @@ namespace UI
             return UniTask.CompletedTask;
         }
 
-        private void OnBackToHomeBtnClick()
+        private void OnPauseBtnClick()
         {
             _boardManager.isPlaying = false;
-            ScreenContainer.Of(transform).Pop(true);
-        }
-
-        private void SetActiveGameOverPopup(bool isActive)
-        {
-            gameOverPopup.SetActive(isActive);
+            // ScreenContainer.Of(transform).Pop(true);
+            var options = new ModalOptions(ResourceKey.PauseModalPrefab());
+            ModalContainer.Find(ContainerKey.Modals).Push(options);
         }
 
         public void ShowGameOverPopup()
