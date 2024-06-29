@@ -1650,6 +1650,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   squarePrefab: {fileID: 1501351254502025820, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
   squareParentTransform: {fileID: 386745771}
+  dataName: {fileID: 4900000, guid: 95dbfb4746644ef3a8f4bcc52d3aead6, type: 3}
+  startRankData: {fileID: 4900000, guid: 3fe92679e47b4194bc1f6217dcbb8b91, type: 3}
+  maxData: 50
   comboPos: {x: 0, y: 0}
   comboCount: 0
   idCount: 30
@@ -1732,7 +1735,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 9, y: 9, z: 0}
+  m_LocalScale: {x: 11, y: 11, z: 0}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}

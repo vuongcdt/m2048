@@ -21,9 +21,9 @@ namespace UI
             new(0.0117f, 0.247f, 0.6431f, 1)
         };
 
-        public void RenderChartUI(Utils.ChartScore chartScore)
+        public void RenderChartUI(Utils.ChartScore chartScore,float highScore)
         {
-            scoreText.text = chartScore.score.ToString();
+            scoreText.text = chartScore.score.ToString(Constants.FomatText.FORMAT_SCORE);
             nameText.text = chartScore.fullName;
 
             if (chartScore.index < 4)
@@ -35,10 +35,10 @@ namespace UI
             {
                 background.color = _colors[^1];
                 iconList[^1].SetActive(true);
-                iconList[^1].GetComponentInChildren<TMP_Text>().text = $"{chartScore.index}";
+                iconList[^1].GetComponentInChildren<TMP_Text>().text = chartScore.index.ToString();
             }
 
-            if (chartScore.score == (int)Prefs.HighScore)
+            if (Mathf.Approximately(chartScore.score ,highScore))
             {
                 background.color = _myColor;
             }

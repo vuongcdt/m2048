@@ -19,12 +19,12 @@ public class BoardManager : Singleton<BoardManager>
     public bool isProcessing;
     public float score;
     public float highScore;
-    public int idCount;
     public float nextSquareValue;
     public bool isClearData;
     public bool isGameOver;
     public bool isPlaying;
 
+    private int idCount;
     private bool _isSave;
     private UIManager _uiManager;
     private SoundManager _soundManager;
@@ -67,6 +67,7 @@ public class BoardManager : Singleton<BoardManager>
         }
 
         _uiManager.StartUI(squaresData);
+        Debug.Log($"idCount1  {idCount}");
     }
 
     private void RenderLineColumn()
@@ -175,6 +176,7 @@ public class BoardManager : Singleton<BoardManager>
             return;
         }
 
+        Debug.Log($"idCount {idCount}");
         idCount++;
         var squareSource = new SquareData(
             new Utils.Cell(column, boardRow),
@@ -586,7 +588,7 @@ public class BoardManager : Singleton<BoardManager>
         {
             probabilityList.Add(_probabilityList[i]);
         }
-        
+
         var maxValue = probabilityList[^1];
         var randomNum = Random.Range(0, 1f) * maxValue;
 
@@ -716,7 +718,7 @@ public class BoardManager : Singleton<BoardManager>
         }
 
         score = Prefs.Score;
-        idCount = Prefs.IdCount;
+        idCount = Prefs.IdCount == 0 ? 30 : Prefs.IdCount;
         _uiManager.idCount = idCount;
 
         LoadHighScore();

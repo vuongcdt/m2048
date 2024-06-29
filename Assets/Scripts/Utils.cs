@@ -73,7 +73,6 @@ public static class Utils
         }
     }
 
-
     public class JsonHelper<T>
     {
         public List<T> data;
@@ -81,10 +80,23 @@ public static class Utils
         public JsonHelper(List<T> data)
         {
             this.data = data;
-        }
-
+        }  
         public JsonHelper()
         {
+        }
+    }
+    
+    public class RankData
+    {
+        public string dateTime;
+        public List<ChartScore> chartScores;
+        public float highScore;
+
+        public RankData(List<ChartScore> chartScores, string dateTime, float highScore)
+        {
+            this.chartScores = chartScores;
+            this.dateTime = dateTime;
+            this.highScore = highScore;
         }
     }
 
@@ -100,13 +112,14 @@ public static class Utils
         }
     }
 
+    [Serializable]
     public class ChartScore
     {
         public int index;
-        public int score;
+        public float score;
         public string fullName;
 
-        public ChartScore(int score,string fullName)
+        public ChartScore(float score, string fullName)
         {
             this.score = score;
             this.fullName = fullName;

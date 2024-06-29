@@ -43,13 +43,14 @@ namespace UI
             Prefs.HighScore = _boardManager.highScore;
             _boardManager.isPlaying = true;
             _uiManager.ResetGame();
-
+            _soundManager.SaveVolume(sliderMusic.value, sliderSfx.value);
             ModalContainer.Find(ContainerKey.Modals).Pop(true);
         }
 
         private void OnHomeBtnClick()
         {
             _boardManager.isPlaying = false;
+            _soundManager.SaveVolume(sliderMusic.value, sliderSfx.value);
             ModalContainer.Find(ContainerKey.Modals).Pop(true);
             ScreenContainer.Find(ContainerKey.Screens).Pop(true);
         }

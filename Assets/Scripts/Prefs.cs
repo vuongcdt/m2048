@@ -14,6 +14,12 @@ public static class Prefs
         set => PlayerPrefs.SetString(Constants.PrefConsts.NEXT_SQUARE_VALUE_KEY, value);
     }
 
+    public static string RankData
+    {
+        get => PlayerPrefs.GetString(Constants.PrefConsts.RANK_KEY);
+        set => PlayerPrefs.SetString(Constants.PrefConsts.RANK_KEY, value);
+    }
+
     public static int IdCount
     {
         get => PlayerPrefs.GetInt(Constants.PrefConsts.ID_COUNT_KEY);

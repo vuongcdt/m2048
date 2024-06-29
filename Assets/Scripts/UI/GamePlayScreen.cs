@@ -3,10 +3,8 @@ using System.Collections;
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using ZBase.UnityScreenNavigator.Core.Modals;
-using ZBase.UnityScreenNavigator.Core.Screens;
 using Screen = ZBase.UnityScreenNavigator.Core.Screens.Screen;
 
 namespace UI
@@ -24,9 +22,6 @@ namespace UI
         private Camera _cameraMain;
         private UIManager _uiManager;
         private BoardManager _boardManager;
-
-        private const string FORMAT_SCORE = "0";
-        private const string COMBO_TEXT_FORMAT = "Combo x{0}";
 
         public override UniTask Initialize(Memory<object> args)
         {
@@ -63,7 +58,7 @@ namespace UI
 
         public void ShowCombo()
         {
-            comboText.text = string.Format(COMBO_TEXT_FORMAT, _uiManager.comboCount);
+            comboText.text = string.Format(Constants.FomatText.COMBO_TEXT_FORMAT, _uiManager.comboCount);
             var targetWorldPos = new Vector2(_uiManager.comboPos.x, _uiManager.comboPos.y - 1.3f);
             comboPrefab.transform.position = _cameraMain.WorldToScreenPoint(targetWorldPos);
             comboPrefab.SetActive(true);
@@ -87,8 +82,8 @@ namespace UI
 
         public void SetScore()
         {
-            scoreText.text = _boardManager.score.ToString(FORMAT_SCORE);
-            highScoreText.text = _boardManager.highScore.ToString(FORMAT_SCORE);
+            scoreText.text = _boardManager.score.ToString(Constants.FomatText.FORMAT_SCORE);
+            highScoreText.text = _boardManager.highScore.ToString(Constants.FomatText.FORMAT_SCORE);
         }
     }
 }

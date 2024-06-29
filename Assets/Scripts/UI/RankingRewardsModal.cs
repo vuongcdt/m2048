@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,17 +13,10 @@ namespace UI
     {
         [SerializeField] private Button closeButton;
         [SerializeField] private ChartItem[] chartItems;
-        [SerializeField] private TextAsset dataName;
-        [SerializeField] private int maxData;
-
-        private BoardManager _boardManager;
-        private List<ChartItem> _chartItems;
-        private int _indexMyScore;
 
         public override UniTask Initialize(Memory<object> args)
         {
-            _boardManager = BoardManager.Instance;
-
+            Debug.Log("RankingRewardsModal");
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(OnCloseBtnClick);
 
@@ -33,46 +27,17 @@ namespace UI
 
         private void RenderChartsUI()
         {
-            var nameList = JsonUtility.FromJson<Utils.JsonHelper<string>>(dataName.text).data;
+            var rankData = JsonUtility.FromJson<Utils.RankData>(Prefs.RankData);
+            var chartScores = rankData.chartScores;
 
-            List<Utils.ChartScore> chartScores = new();
-            var myScore = (int)_boardManager.highScore;
-
-            for (var i = 0; i < maxData; i++)
+            if (chartScores is null)
             {
-                var random = Random.Range(0, myScore * 3);
-                var randomName = Random.Range(0, nameList.Count);
-                chartScores.Add(new Utils.ChartScore(random, nameList[randomName]));
+                return;
             }
 
-            var myChartScore = new Utils.ChartScore(myScore, "You");
-            chartScores.Add(myChartScore);
-
-            chartScores.Sort((a, b) => b.score - a.score);
-
-            ChartItem endChartItem = null;
-
-            for (var i = 0; i < chartScores.Count; i++)
+            for (var i = 0; i < chartItems.Length; i++)
             {
-                if (chartScores[i].score == myScore)
-                {
-                    _indexMyScore = i + 1;
-                }
-
-                chartScores[i].index = i + 1;
-
-                if (i >= 20)
-                {
-                    continue;
-                }
-
-                chartItems[i].RenderChartUI(chartScores[i]);
-                endChartItem = chartItems[i];
-            }
-
-            if (_indexMyScore > 20)
-            {
-                endChartItem.RenderChartUI(myChartScore);
+                chartItems[i].RenderChartUI(chartScores[i], rankData.highScore);
             }
         }
 

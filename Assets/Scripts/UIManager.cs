@@ -1,15 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using UI;
 using UnityEngine;
 using uPools;
+using Random = UnityEngine.Random;
 using Sequence = DG.Tweening.Sequence;
 
 public class UIManager : Singleton<UIManager>
 {
     [SerializeField] private GameObject squarePrefab;
     [SerializeField] private Transform squareParentTransform;
+    [SerializeField] private TextAsset dataName;
+    [SerializeField] private TextAsset startRankData;
+    [SerializeField] private int maxData;
 
     public Vector2 comboPos;
     public int comboCount;
@@ -24,7 +29,10 @@ public class UIManager : Singleton<UIManager>
     private GameObjectPool _blockPool;
     private GamePlayScreen _gamePlayScreen;
     private SoundManager _soundManager;
+    private int _indexMyScore;
 
+    private const string YOUR_NAME = "You";
+    private const string SHORT_DATE_FORMAT = "d";
     private const float MERGE_DURATION = 0.1f;
     private const float TIME_DELAY = 0.1f;
 
@@ -34,6 +42,7 @@ public class UIManager : Singleton<UIManager>
     {
         _boardManager = BoardManager.Instance;
         _soundManager = SoundManager.Instance;
+        GenerateChartScores();
     }
 
     public void ResetGame()
@@ -48,6 +57,84 @@ public class UIManager : Singleton<UIManager>
         SetScoreUI();
         _boardManager.isProcessing = false;
     }
+
+    #region GenerateRank
+
+    private void GenerateChartScores()
+    {
+        var rankData = JsonUtility.FromJson<Utils.RankData>(Prefs.RankData);
+        if (rankData is null)
+        {
+            Prefs.RankData = startRankData.text;
+            return;
+        }
+
+        if (rankData.dateTime.Contains(DateTime.Now.Date.ToString(SHORT_DATE_FORMAT)))
+        {
+            return;
+        }
+
+        var nameList = JsonUtility.FromJson<Utils.JsonHelper<string>>(dataName.text).data;
+
+        List<Utils.ChartScore> chartScores = new();
+        var myScore = (int)_boardManager.highScore;
+
+        for (var i = 0; i < maxData; i++)
+        {
+            var random = Random.Range(0, myScore * 3);
+            var randomName = Random.Range(0, nameList.Count);
+            chartScores.Add(new Utils.ChartScore(random, nameList[randomName]));
+        }
+
+        var myChartScore = new Utils.ChartScore(myScore, YOUR_NAME);
+        chartScores.Add(myChartScore);
+        chartScores.Sort((a, b) => (int)(b.score - a.score));
+
+        var highScore = Prefs.HighScore;
+
+        SetIndexChartScores(chartScores, myScore);
+
+        if (_indexMyScore > 20)
+        {
+            chartScores[19] = myChartScore;
+        }
+
+        List<Utils.ChartScore> chartScoresSave = GetDataSave(chartScores);
+
+        var dataSave = new Utils.RankData(chartScoresSave, DateTime.Now.Date.ToString(SHORT_DATE_FORMAT), highScore);
+        Prefs.RankData = JsonUtility.ToJson(dataSave);
+    }
+
+    private void SetIndexChartScores(List<Utils.ChartScore> chartScores, int myScore)
+    {
+        for (var i = 0; i < chartScores.Count; i++)
+        {
+            if (Mathf.Approximately(chartScores[i].score, myScore))
+            {
+                _indexMyScore = i + 1;
+            }
+
+            chartScores[i].index = i + 1;
+        }
+    }
+
+    private List<Utils.ChartScore> GetDataSave(List<Utils.ChartScore> chartScores)
+    {
+        List<Utils.ChartScore> chartScoresSave = new();
+        for (var i = 0; i < chartScores.Count; i++)
+        {
+            if (i > 19)
+            {
+                return chartScoresSave;
+            }
+
+            chartScoresSave.Add(chartScores[i]);
+        }
+
+        return chartScoresSave;
+    }
+
+    #endregion
 
     public void StartUI(List<SquareData> squaresData)
     {
@@ -125,10 +212,10 @@ public class UIManager : Singleton<UIManager>
     public void RenderUI(List<BoardAction> actionsWrapList)
     {
         _actionsWrapList = actionsWrapList;
-        // foreach (var actionListWrap in _actionsWrapList)
-        // {
-        //     Debug.Log("actionListWrap: " + JsonUtility.ToJson(actionListWrap));
-        // }
+        foreach (var actionListWrap in _actionsWrapList)
+        {
+            Debug.Log("actionListWrap: " + JsonUtility.ToJson(actionListWrap));
+        }
 
         if (_actionsWrapList.Count <= 0)
         {
@@ -200,7 +287,7 @@ public class UIManager : Singleton<UIManager>
 
     private void ShootUI(Sequence sequence, StepAction stepAction)
     {
-        sequence.OnStart(() => { _soundManager.PlaySoundShootSfx(); });
+        sequence.OnStart(_soundManager.PlaySoundShootSfx);
         var squarePool = FindSquarePoolById(stepAction.singleSquareSources.id);
 
         squarePool.SetValue(stepAction.newSquareValue);
@@ -241,7 +328,7 @@ public class UIManager : Singleton<UIManager>
         Sequence mergerSequence = DOTween.Sequence();
         comboCount++;
 
-        mergerSequence.OnStart(() => { _soundManager.PlaySoundMergeSfx(); });
+        mergerSequence.OnStart(_soundManager.PlaySoundMergeSfx);
         foreach (var mergerAction in mergerActionList)
         {
             var squareSourceGameObjectsList = FindAllSquareGameObjectsActiveSameValue(mergerAction);
@@ -322,7 +409,7 @@ public class UIManager : Singleton<UIManager>
 
     private void SortUI(Sequence sequence, List<StepAction> mergerActionList)
     {
-        sequence.OnStart(() => { _soundManager.PlaySoundSortSfx(); });
+        sequence.OnStart(_soundManager.PlaySoundSortSfx);
         Sequence sortSequence = DOTween.Sequence();
 
         foreach (var mergerAction in mergerActionList)
