@@ -42,7 +42,7 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d121371e9ec6809469a0b52f8ef48734
+  - m_GUID: ecc80153909dc05469c99a88a6b6c439
     m_Address: prefab_modal_ranking_rewards
     m_ReadOnly: 0
     m_SerializedLabels: []

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using ZBase.UnityScreenNavigator.Core;
@@ -12,12 +13,14 @@ namespace UI
     {
         private static WindowContainerManager ContainerManager { get; set; }
         private BoardManager _boardManager;
+        
         protected override void OnAwake()
         {
             base.OnAwake();
             ContainerManager = this;
         }
 
+        
         protected override void OnPostCreateContainers()
         {
             base.OnPostCreateContainers();

@@ -104,10 +104,12 @@ public static class Utils
     {
         public int index;
         public int score;
+        public string fullName;
 
-        public ChartScore(int score)
+        public ChartScore(int score,string fullName)
         {
             this.score = score;
+            this.fullName = fullName;
         }
     }
 }

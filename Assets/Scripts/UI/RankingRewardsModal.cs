@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,9 +11,12 @@ namespace UI
     public class RankingRewardsModal : Modal
     {
         [SerializeField] private Button closeButton;
-        [SerializeField] private List<ChartItem> chartItems;
+        [SerializeField] private ChartItem[] chartItems;
+        [SerializeField] private TextAsset dataName;
+        [SerializeField] private int maxData;
 
         private BoardManager _boardManager;
+        private List<ChartItem> _chartItems;
         private int _indexMyScore;
 
         public override UniTask Initialize(Memory<object> args)
@@ -31,50 +33,52 @@ namespace UI
 
         private void RenderChartsUI()
         {
-            var charts = GetCharts();
+            var nameList = JsonUtility.FromJson<Utils.JsonHelper<string>>(dataName.text).data;
 
-            for (var i = 0; i < 3; i++)
+            List<Utils.ChartScore> chartScores = new();
+            var myScore = (int)_boardManager.highScore;
+
+            for (var i = 0; i < maxData; i++)
             {
-                chartItems[i].SetScore(charts[i].score);
+                var random = Random.Range(0, myScore * 3);
+                var randomName = Random.Range(0, nameList.Count);
+                chartScores.Add(new Utils.ChartScore(random, nameList[randomName]));
             }
 
-            for (var i = 3; i < chartItems.Count; i++)
+            var myChartScore = new Utils.ChartScore(myScore, "You");
+            chartScores.Add(myChartScore);
+
+            chartScores.Sort((a, b) => b.score - a.score);
+
+            ChartItem endChartItem = null;
+
+            for (var i = 0; i < chartScores.Count; i++)
             {
-                chartItems[i].SetIndex(charts[i].index);
-                chartItems[i].SetScore(charts[i].score);
+                if (chartScores[i].score == myScore)
+                {
+                    _indexMyScore = i + 1;
+                }
+
+                chartScores[i].index = i + 1;
+
+                if (i >= 20)
+                {
+                    continue;
+                }
+
+                chartItems[i].RenderChartUI(chartScores[i]);
+                endChartItem = chartItems[i];
+            }
+
+            if (_indexMyScore > 20)
+            {
+                endChartItem.RenderChartUI(myChartScore);
             }
         }
 
         private void OnCloseBtnClick()
         {
             ModalContainer.Of(transform).Pop(true);
-        }
-
-        private List<Utils.ChartScore> GetCharts()
-        {
-            List<Utils.ChartScore> charts = new();
-            var myScore = (int)_boardManager.highScore;
-
-            for (int i = 0; i < 7; i++)
-            {
-                var random = Random.Range(0, myScore * 3);
-                charts.Add(new Utils.ChartScore(random));
-            }
-            charts.Add(new Utils.ChartScore(myScore));
-
-            charts.Sort((a, b) => b.score - a.score);
-            Debug.Log(string.Join(", ", charts.Select(e => e.score)));
-            for (var i = 0; i < charts.Count; i++)
-            {
-                if (charts[i].score == myScore)
-                {
-                    _indexMyScore = i + 1;
-                }
-
-                charts[i].index = i + 1;
-            }
-
-            return charts;
         }
     }
 }
