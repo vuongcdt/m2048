@@ -14,7 +14,6 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private Transform squareParentTransform;
     [SerializeField] private TextAsset dataName;
     [SerializeField] private TextAsset startRankData;
-    [SerializeField] private int maxData;
 
     public Vector2 comboPos;
     public int comboCount;
@@ -54,6 +53,7 @@ public class UIManager : Singleton<UIManager>
         }
         // SetScoreUI();
     }
+
     public void ResetGame()
     {
         // idCount = 30;
@@ -72,7 +72,9 @@ public class UIManager : Singleton<UIManager>
 
     private void GenerateChartScores()
     {
+        var myScore = (int)_boardManager.highScore;
         var rankData = JsonUtility.FromJson<Utils.RankData>(Prefs.RankData);
+
         if (rankData is null)
         {
             Prefs.RankData = startRankData.text;
@@ -84,16 +86,19 @@ public class UIManager : Singleton<UIManager>
             return;
         }
 
+        if (myScore < 1000)
+        {
+            return;
+        }
+
         var nameList = JsonUtility.FromJson<Utils.JsonHelper<string>>(dataName.text).data;
 
         List<Utils.ChartScore> chartScores = new();
-        var myScore = (int)_boardManager.highScore;
 
-        for (var i = 0; i < maxData; i++)
+        for (var i = 0; i < 50; i++)
         {
             var random = Random.Range(0, myScore * 3);
-            var randomName = Random.Range(0, nameList.Count);
-            chartScores.Add(new Utils.ChartScore(random, nameList[randomName]));
+            chartScores.Add(new Utils.ChartScore(random, nameList[i]));
         }
 
         var myChartScore = new Utils.ChartScore(myScore, YOUR_NAME);

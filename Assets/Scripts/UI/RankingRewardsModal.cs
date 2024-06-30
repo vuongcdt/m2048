@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using ZBase.UnityScreenNavigator.Core.Modals;
-using Random = UnityEngine.Random;
 
 namespace UI
 {
@@ -16,7 +13,6 @@ namespace UI
 
         public override UniTask Initialize(Memory<object> args)
         {
-            Debug.Log("RankingRewardsModal");
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(OnCloseBtnClick);
 
@@ -28,12 +24,16 @@ namespace UI
         private void RenderChartsUI()
         {
             var rankData = JsonUtility.FromJson<Utils.RankData>(Prefs.RankData);
-            var chartScores = rankData.chartScores;
-
-            if (chartScores is null)
+            if (rankData is null)
             {
                 return;
             }
+            Debug.Log(Prefs.RankData);
+            var chartScores = rankData.chartScores;
+            // if (chartScores is null)
+            // {
+            //     return;
+            // }
 
             for (var i = 0; i < chartItems.Length; i++)
             {
