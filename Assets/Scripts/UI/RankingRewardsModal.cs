@@ -33,13 +33,16 @@ namespace UI
             var myScore = (int)_boardManager.highScore;
             var rankData = JsonUtility.FromJson<Utils.RankData>(Prefs.RankData);
 
-            // SetRankScoreByDay(rankData);
-            
             if (rankData is null)
             {
                 return;
             }
 
+            if (!DateTime.Now.Date.ToString(Constants.FomatText.SHORT_DATE_FORMAT).Equals(rankData.dateTimeString))
+            {
+                SetRankScoreByDay(rankData);
+            }
+            
             var chartScores = rankData.chartScores;
             var myChartScore = new Utils.ChartScore(myScore, YOUR_NAME);
             chartScores.Add(myChartScore);
@@ -59,7 +62,7 @@ namespace UI
             var chartScores = rankData.chartScores;
             for (var i = 0; i < chartScores.Count; i++)
             {
-                chartScores[i].score *= 100000 / chartScores[i].score > Random.value ? Random.value / 5 + 1 : 1;
+                chartScores[i].score *= 100000 / chartScores[i].score > Random.value ? Random.value + 1 : 1;
             }
 
             var dataSave = new Utils.RankData(chartScores, DateTime.Now.Date.ToString("d"));

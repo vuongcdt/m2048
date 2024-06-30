@@ -28,7 +28,6 @@ public class UIManager : Singleton<UIManager>
     private GamePlayScreen _gamePlayScreen;
     private SoundManager _soundManager;
 
-    private const string SHORT_DATE_FORMAT = "d";
     private const float MERGE_DURATION = 0.1f;
     private const float TIME_DELAY = 0.1f;
 
@@ -38,7 +37,7 @@ public class UIManager : Singleton<UIManager>
     {
         _boardManager = BoardManager.Instance;
         _soundManager = SoundManager.Instance;
-        GenerateChartScores();
+        GenerateStartChartScores();
     }
 
     public void ResetGameUI()
@@ -67,18 +66,12 @@ public class UIManager : Singleton<UIManager>
 
     #region GenerateRank
 
-    private void GenerateChartScores()
+    private void GenerateStartChartScores()
     {
         var rankData = JsonUtility.FromJson<Utils.RankData>(Prefs.RankData);
 
-        if (rankData != null)
+        if (rankData != null && DateTime.Now.Date.ToString(Constants.FomatText.SHORT_DATE_FORMAT).Equals(rankData.dateTimeString))
         {
-            if (DateTime.Now.Date.ToString(SHORT_DATE_FORMAT).Equals(rankData.dateTimeString))
-            {
-                return;
-            }
-
-            SetRankScoreByDay(rankData);
             return;
         }
 
@@ -92,24 +85,8 @@ public class UIManager : Singleton<UIManager>
             chartScores.Add(new Utils.ChartScore(random, nameList[i]));
         }
 
-        SaveRank(chartScores);
-    }
-
-    private static void SaveRank(List<Utils.ChartScore> chartScores)
-    {
-        var dataSave = new Utils.RankData(chartScores, DateTime.Now.Date.ToString(SHORT_DATE_FORMAT));
+        var dataSave = new Utils.RankData(chartScores, DateTime.Now.Date.ToString(Constants.FomatText.SHORT_DATE_FORMAT));
         Prefs.RankData = JsonUtility.ToJson(dataSave);
-    }
-
-    private void SetRankScoreByDay(Utils.RankData rankData)
-    {
-        var chartScores = rankData.chartScores;
-        for (var i = 0; i < chartScores.Count; i++)
-        {
-            chartScores[i].score *= 100000 / chartScores[i].score > Random.value ? Random.value / 5 + 1 : 1;
-        }
-
-        SaveRank(chartScores);
     }
 
     #endregion

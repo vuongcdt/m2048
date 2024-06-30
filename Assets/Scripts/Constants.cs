@@ -4,6 +4,7 @@
     {
         public const string FORMAT_SCORE = "0";
         public const string COMBO_TEXT_FORMAT = "Combo x{0}";
+        public const string SHORT_DATE_FORMAT = "d";
     }
 
     public class PrefConsts
