@@ -28,12 +28,7 @@ namespace UI
             {
                 return;
             }
-            Debug.Log(Prefs.RankData);
             var chartScores = rankData.chartScores;
-            // if (chartScores is null)
-            // {
-            //     return;
-            // }
 
             for (var i = 0; i < chartItems.Length; i++)
             {

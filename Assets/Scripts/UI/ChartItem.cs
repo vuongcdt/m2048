@@ -30,11 +30,11 @@ namespace UI
             {
                 background.color = _colors[chartScore.index - 1];
                 iconList[chartScore.index - 1].SetActive(true);
+                iconList[^1].SetActive(false);
             }
             else
             {
                 background.color = _colors[^1];
-                iconList[^1].SetActive(true);
                 iconList[^1].GetComponentInChildren<TMP_Text>().text = chartScore.index.ToString();
                 iconList[^1].transform.position = new Vector3(iconList[^1].transform.position.x + 2,
                     iconList[^1].transform.position.y);
