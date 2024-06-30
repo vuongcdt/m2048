@@ -45,15 +45,25 @@ public class UIManager : Singleton<UIManager>
         GenerateChartScores();
     }
 
-    public void ResetGame()
+    public void ResetGameUI()
     {
         idCount = 30;
         for (var i = 0; i < _squaresList.Count; i++)
         {
             _squaresList[i].SetActiveObj(false);
         }
+        // SetScoreUI();
+    }
+    public void ResetGame()
+    {
+        // idCount = 30;
+        // for (var i = 0; i < _squaresList.Count; i++)
+        // {
+        //     _squaresList[i].SetActiveObj(false);
+        // }
 
         _boardManager.RestartGame();
+        ResetGameUI();
         SetScoreUI();
         _boardManager.isProcessing = false;
     }
@@ -212,10 +222,10 @@ public class UIManager : Singleton<UIManager>
     public void RenderUI(List<BoardAction> actionsWrapList)
     {
         _actionsWrapList = actionsWrapList;
-        foreach (var actionListWrap in _actionsWrapList)
-        {
-            Debug.Log("actionListWrap: " + JsonUtility.ToJson(actionListWrap));
-        }
+        // foreach (var actionListWrap in _actionsWrapList)
+        // {
+        //     Debug.Log("actionListWrap: " + JsonUtility.ToJson(actionListWrap));
+        // }
 
         if (_actionsWrapList.Count <= 0)
         {

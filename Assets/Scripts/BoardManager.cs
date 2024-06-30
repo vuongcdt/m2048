@@ -49,16 +49,16 @@ public class BoardManager : Singleton<BoardManager>
         _uiManager = UIManager.Instance;
         _soundManager = SoundManager.Instance;
         RenderLineColumn();
-
-        if (isClearData)
+        LoadDataFromPrefs();
+        CheckGameOver();
+        if (isGameOver)
         {
+            _uiManager.ResetGameUI();
             RestartGame();
+            isProcessing = false;
+            isGameOver = false;
         }
-        else
-        {
-            LoadDataFromPrefs();
-        }
-
+        
         // TestData.SetDataTest(squaresData);
 
         if (nextSquareValue == 0)
@@ -67,7 +67,6 @@ public class BoardManager : Singleton<BoardManager>
         }
 
         _uiManager.StartUI(squaresData);
-        Debug.Log($"idCount1  {idCount}");
     }
 
     private void RenderLineColumn()
@@ -176,7 +175,6 @@ public class BoardManager : Singleton<BoardManager>
             return;
         }
 
-        Debug.Log($"idCount {idCount}");
         idCount++;
         var squareSource = new SquareData(
             new Utils.Cell(column, boardRow),
