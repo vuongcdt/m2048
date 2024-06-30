@@ -88,15 +88,13 @@ public static class Utils
     
     public class RankData
     {
-        public string dateTime;
+        public string dateTimeString;
         public List<ChartScore> chartScores;
-        public float highScore;
 
-        public RankData(List<ChartScore> chartScores, string dateTime, float highScore)
+        public RankData(List<ChartScore> chartScores, string dateTimeString)
         {
             this.chartScores = chartScores;
-            this.dateTime = dateTime;
-            this.highScore = highScore;
+            this.dateTimeString = dateTimeString;
         }
     }
 

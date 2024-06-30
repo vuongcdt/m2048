@@ -13,7 +13,6 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private GameObject squarePrefab;
     [SerializeField] private Transform squareParentTransform;
     [SerializeField] private TextAsset dataName;
-    [SerializeField] private TextAsset startRankData;
 
     public Vector2 comboPos;
     public int comboCount;
@@ -28,9 +27,7 @@ public class UIManager : Singleton<UIManager>
     private GameObjectPool _blockPool;
     private GamePlayScreen _gamePlayScreen;
     private SoundManager _soundManager;
-    private int _indexMyScore;
 
-    private const string YOUR_NAME = "You";
     private const string SHORT_DATE_FORMAT = "d";
     private const float MERGE_DURATION = 0.1f;
     private const float TIME_DELAY = 0.1f;
@@ -72,22 +69,16 @@ public class UIManager : Singleton<UIManager>
 
     private void GenerateChartScores()
     {
-        var myScore = (int)_boardManager.highScore;
         var rankData = JsonUtility.FromJson<Utils.RankData>(Prefs.RankData);
 
-        if (rankData is null)
+        if (rankData != null)
         {
-            Prefs.RankData = startRankData.text;
-            return;
-        }
+            if (DateTime.Now.Date.ToString(SHORT_DATE_FORMAT).Equals(rankData.dateTimeString))
+            {
+                return;
+            }
 
-        if (rankData.dateTime.Contains(DateTime.Now.Date.ToString(SHORT_DATE_FORMAT)))
-        {
-            return;
-        }
-
-        if (myScore < 1000)
-        {
+            SetRankScoreByDay(rankData);
             return;
         }
 
@@ -95,58 +86,30 @@ public class UIManager : Singleton<UIManager>
 
         List<Utils.ChartScore> chartScores = new();
 
-        for (var i = 0; i < 50; i++)
+        for (var i = 0; i < 19; i++)
         {
-            var random = Random.Range(0, myScore * 3);
+            var random = Random.Range(1000, 100000);
             chartScores.Add(new Utils.ChartScore(random, nameList[i]));
         }
 
-        var myChartScore = new Utils.ChartScore(myScore, YOUR_NAME);
-        chartScores.Add(myChartScore);
-        chartScores.Sort((a, b) => (int)(b.score - a.score));
+        SaveRank(chartScores);
+    }
 
-        var highScore = Prefs.HighScore;
-
-        SetIndexChartScores(chartScores, myScore);
-
-        if (_indexMyScore > 20)
-        {
-            chartScores[19] = myChartScore;
-        }
-
-        List<Utils.ChartScore> chartScoresSave = GetDataSave(chartScores);
-
-        var dataSave = new Utils.RankData(chartScoresSave, DateTime.Now.Date.ToString(SHORT_DATE_FORMAT), highScore);
+    private static void SaveRank(List<Utils.ChartScore> chartScores)
+    {
+        var dataSave = new Utils.RankData(chartScores, DateTime.Now.Date.ToString(SHORT_DATE_FORMAT));
         Prefs.RankData = JsonUtility.ToJson(dataSave);
     }
 
-    private void SetIndexChartScores(List<Utils.ChartScore> chartScores, int myScore)
+    private void SetRankScoreByDay(Utils.RankData rankData)
     {
+        var chartScores = rankData.chartScores;
         for (var i = 0; i < chartScores.Count; i++)
         {
-            if (Mathf.Approximately(chartScores[i].score, myScore))
-            {
-                _indexMyScore = i + 1;
-            }
-
-            chartScores[i].index = i + 1;
-        }
-    }
-
-    private List<Utils.ChartScore> GetDataSave(List<Utils.ChartScore> chartScores)
-    {
-        List<Utils.ChartScore> chartScoresSave = new();
-        for (var i = 0; i < chartScores.Count; i++)
-        {
-            if (i > 19)
-            {
-                return chartScoresSave;
-            }
-
-            chartScoresSave.Add(chartScores[i]);
+            chartScores[i].score *= 100000 / chartScores[i].score > Random.value ? Random.value / 5 + 1 : 1;
         }
 
-        return chartScoresSave;
+        SaveRank(chartScores);
     }
 
     #endregion
