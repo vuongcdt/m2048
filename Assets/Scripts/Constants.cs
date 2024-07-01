@@ -15,6 +15,7 @@
         public const string HIGH_SCORE_KEY = nameof(HIGH_SCORE_KEY);
         public const string ID_COUNT_KEY = nameof(ID_COUNT_KEY);
         public const string NEXT_SQUARE_VALUE_KEY = nameof(NEXT_SQUARE_VALUE_KEY);
+        public const string SQUARE_VALUE_LIST_KEY = nameof(SQUARE_VALUE_LIST_KEY);
         public const string VOLUMME_MUSIC = nameof(VOLUMME_MUSIC);
         public const string VOLUMME_SFX = nameof(VOLUMME_SFX);
     }

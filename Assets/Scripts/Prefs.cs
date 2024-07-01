@@ -10,8 +10,8 @@ public static class Prefs
 
     public static string SquareValueList
     {
-        get => PlayerPrefs.GetString(Constants.PrefConsts.NEXT_SQUARE_VALUE_KEY);
-        set => PlayerPrefs.SetString(Constants.PrefConsts.NEXT_SQUARE_VALUE_KEY, value);
+        get => PlayerPrefs.GetString(Constants.PrefConsts.SQUARE_VALUE_LIST_KEY);
+        set => PlayerPrefs.SetString(Constants.PrefConsts.SQUARE_VALUE_LIST_KEY, value);
     }
 
     public static string RankData
