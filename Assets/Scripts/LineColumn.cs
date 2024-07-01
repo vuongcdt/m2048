@@ -5,9 +5,14 @@ public class LineColumn : MonoCache
     [SerializeField] private SpriteRenderer bg;
     
     public int column;
+    private bool _isPlaying;
     
     private void OnMouseDown()
     {
+        if(!boardManager.isPlaying)
+        {
+            return;
+        }
         SetActiveLine(true);
         boardManager.columnSelect = column;
         boardManager.isTouchLine = true;
@@ -15,6 +20,10 @@ public class LineColumn : MonoCache
 
     private void OnMouseUp()
     {
+        if(!boardManager.isPlaying)
+        {
+            return;
+        }
         boardManager.isTouchLine = false;
         
         if (boardManager.isProcessing)
@@ -27,13 +36,24 @@ public class LineColumn : MonoCache
 
     private void OnMouseEnter()
     {
-        if (!boardManager.isTouchLine) return;
+        if(!boardManager.isPlaying)
+        {
+            return;
+        }
+        if (!boardManager.isTouchLine)
+        {
+            return;
+        }
         boardManager.columnSelect = column;
         SetActiveLine(true);
     }
 
     private void OnMouseExit()
     {
+        if(!boardManager.isPlaying)
+        {
+            return;
+        }
         SetActiveLine(false);
     }
     
