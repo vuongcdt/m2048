@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1ea17c0feac3479eb38d0f18c4ce6c95
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - _rectTransform: {instanceID: 0}
+  - _canvasGroup: {instanceID: 0}
+  - unityScreenNavigatorSettings: {fileID: 11400000, guid: a7d20a60662b1fd43b7e33340397983e, type: 2}
+  - windowContainerSettings: {fileID: 11400000, guid: dea5a909ea7f87440a80b75b9a61d61b, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
