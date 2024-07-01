@@ -957,7 +957,7 @@ MonoBehaviour:
   m_StartCorner: 0
   m_StartAxis: 0
   m_CellSize: {x: 200, y: 1000}
-  m_Spacing: {x: 1300, y: 0}
+  m_Spacing: {x: 1500, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
 --- !u!1 &8421423332468115003
@@ -1398,6 +1398,8 @@ MonoBehaviour:
   comboText: {fileID: 167323340471992256}
   pauseBtn: {fileID: 1272731129043707536}
   gridLayoutGroup: {fileID: 4686826407897858916}
+  width: {fileID: 0}
+  height: {fileID: 0}
 --- !u!1001 &8023509609252635236
 PrefabInstance:
   m_ObjectHideFlags: 0
