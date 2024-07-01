@@ -58,7 +58,7 @@ public class BoardManager : Singleton<BoardManager>
             isGameOver = false;
         }
 
-        TestData.SetDataTest(squaresData);
+        // TestData.SetDataTest(squaresData);
 
         if (nextSquareValue == 0)
         {
