@@ -20,7 +20,6 @@ public class BoardManager : Singleton<BoardManager>
     public float score;
     public float highScore;
     public float nextSquareValue;
-    public bool isClearData;
     public bool isGameOver;
     public bool isPlaying;
 
@@ -32,12 +31,13 @@ public class BoardManager : Singleton<BoardManager>
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
-    private List<float> _squareValueList = new() { 2 };
+    private List<float> _squareValueList = new() { 2, 4 };
 
-    private readonly int[] _probabilityList = { 1, 4, 10, 18, 28, 30, 44, 60, 78 };
+    private readonly int[] _probabilityList = { 1, 3, 6, 12, 20, 30, 42, 56, 72 };
+    // private readonly int[] _probabilityList = { 1, 4, 10, 18, 28, 30, 44, 60, 78 };
     private GamePlayScreen _gamePlayScreen;
 
-    private const int MAX_COUNT_QUARE_VALUE_LIST = 9;
+    private const int MAX_COUNT_QUARE_VALUE_LIST = 7;
 
     // private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
     // private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
@@ -57,8 +57,8 @@ public class BoardManager : Singleton<BoardManager>
             isProcessing = false;
             isGameOver = false;
         }
-        
-        // TestData.SetDataTest(squaresData);
+
+        TestData.SetDataTest(squaresData);
 
         if (nextSquareValue == 0)
         {

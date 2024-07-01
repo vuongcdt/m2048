@@ -37,6 +37,7 @@ public class UIManager : Singleton<UIManager>
     {
         _boardManager = BoardManager.Instance;
         _soundManager = SoundManager.Instance;
+
         GenerateStartChartScores();
     }
 
@@ -372,7 +373,7 @@ public class UIManager : Singleton<UIManager>
                 {
                     var mergeEndPos = mergerAction.singleSquareSources.Position;
                     squareSourceGameObject.SetValue(mergerAction.newSquareValue);
-                    if ((mergeEndPos - comboPos).sqrMagnitude == 0)
+                    if ((mergeEndPos - comboPos).sqrMagnitude == 0 )
                     {
                         comboPos = mergerAction.squareTarget.Position;
                     }

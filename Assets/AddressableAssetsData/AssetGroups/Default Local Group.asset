@@ -52,6 +52,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 85054390c74020b4db5e8387648a5afd
+    m_Address: prefab_modal_ranking_rewards1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d27cdc8965307a84ab2482a45b57e15d, type: 2}
   m_SchemaSet:

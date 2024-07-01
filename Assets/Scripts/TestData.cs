@@ -35,17 +35,17 @@ public static class TestData
         // squaresData[11].value = 4;
 
         ////
-        // squaresData[0].value = 2;
-        // squaresData[1].value = 8;
-        // squaresData[2].value = 2;
-        //
-        // squaresData[6].value = 8;
-        // squaresData[7].value = 2;
-        //
-        // squaresData[12].value = 4;
-        // squaresData[13].value = 8;
-        //
-        // squaresData[19].value = 4;
+        squaresData[0].value = 2;
+        squaresData[1].value = 8;
+        squaresData[2].value = 2;
+        
+        squaresData[6].value = 8;
+        squaresData[7].value = 2;
+        
+        squaresData[12].value = 4;
+        squaresData[13].value = 8;
+        
+        squaresData[19].value = 4;
 
         ////
         // squaresData[0].value = 2;
@@ -93,16 +93,16 @@ public static class TestData
         // // squaresData[5 + 24].value = 16;
         
         //
-        squaresData[0].value = 1024;
-        squaresData[1].value = 128;
-        squaresData[2].value = 64;
-        
-        squaresData[1 + 5].value = 128;
-        squaresData[2 + 5].value = 16;
-        squaresData[3 + 5].value = 128;
-        
-        squaresData[0 + 12].value = 16;
-        squaresData[1 + 12].value = 8;
-        squaresData[2 + 12].value = 16;
+        // squaresData[0].value = 1024;
+        // squaresData[1].value = 128;
+        // squaresData[2].value = 64;
+        //
+        // squaresData[1 + 5].value = 128;
+        // squaresData[2 + 5].value = 16;
+        // squaresData[3 + 5].value = 128;
+        //
+        // squaresData[0 + 12].value = 16;
+        // squaresData[1 + 12].value = 8;
+        // squaresData[2 + 12].value = 16;
     }
 }

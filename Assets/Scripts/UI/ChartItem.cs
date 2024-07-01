@@ -26,20 +26,6 @@ namespace UI
             scoreText.text = chartScore.score.ToString(Constants.FomatText.FORMAT_SCORE);
             nameText.text = chartScore.fullName;
 
-            if (chartScore.index < 4)
-            {
-                background.color = _colors[chartScore.index - 1];
-                iconList[chartScore.index - 1].SetActive(true);
-                iconList[^1].SetActive(false);
-            }
-            else
-            {
-                background.color = _colors[^1];
-                iconList[^1].GetComponentInChildren<TMP_Text>().text = chartScore.index.ToString();
-                iconList[^1].transform.position = new Vector3(iconList[^1].transform.position.x + 2,
-                    iconList[^1].transform.position.y);
-            }
-
             if (Mathf.Approximately(chartScore.score, highScore))
             {
                 background.color = _myColor;

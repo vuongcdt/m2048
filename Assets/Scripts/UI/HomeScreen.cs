@@ -11,39 +11,23 @@ namespace UI
     public class HomeScreen : Screen
     {
         [SerializeField] private Button playButton;
-        [SerializeField] private Button settingButton;
-        [SerializeField] private Button newGameButton;
-         [SerializeField] private Button rankingRewardsButton;
-        [SerializeField] private Button exitButton;
- 
+        [SerializeField] private Button rankingRewardsButton;
+
         private BoardManager _boardManager;
         private UIManager _uiManager;
+
         public override UniTask Initialize(Memory<object> args)
         {
             _boardManager = BoardManager.Instance;
             _uiManager = UIManager.Instance;
-            
+
             playButton.onClick.RemoveAllListeners();
             playButton.onClick.AddListener(OnClickPlay);
-            
-            settingButton.onClick.RemoveAllListeners();
-            settingButton.onClick.AddListener(OnSettingsBtnClick);
-            
-            newGameButton.onClick.RemoveAllListeners();
-            newGameButton.onClick.AddListener(OnNewGameBtnClick);
-            
+
             rankingRewardsButton.onClick.RemoveAllListeners();
             rankingRewardsButton.onClick.AddListener(OnRankingRewardsBtnClick);
-            
-            exitButton.onClick.RemoveAllListeners();
-            exitButton.onClick.AddListener(OnExitBtnClick);
-            
-            return UniTask.CompletedTask;
-        }
 
-        private void OnExitBtnClick()
-        {
-            Application.Quit();
+            return UniTask.CompletedTask;
         }
 
         private void OnRankingRewardsBtnClick()
@@ -52,25 +36,10 @@ namespace UI
             ModalContainer.Find(ContainerKey.Modals).Push(options);
         }
 
-        private void OnNewGameBtnClick()
-        {
-            Prefs.HighScore = _boardManager.highScore;
-            _boardManager.isPlaying = true;
-            _uiManager.ResetGame();
-            
-            ScreenContainer.Of(transform).Push(new ScreenOptions(ResourceKey.PlayScreenPrefab()));
-        }
-
         private void OnClickPlay()
         {
             _boardManager.isPlaying = true;
             ScreenContainer.Of(transform).Push(new ScreenOptions(ResourceKey.PlayScreenPrefab()));
-        }    
-
-        private void OnSettingsBtnClick()
-        {
-            var options = new ModalOptions(ResourceKey.SettingsModalPrefab());
-            ModalContainer.Find(ContainerKey.Modals).Push(options);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections;
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using ZBase.UnityScreenNavigator.Core.Modals;
 using Screen = ZBase.UnityScreenNavigator.Core.Screens.Screen;
@@ -18,6 +19,7 @@ namespace UI
         [SerializeField] private GameObject comboPrefab;
         [SerializeField] private Text comboText;
         [SerializeField] private Button pauseBtn;
+        [SerializeField] private GridLayoutGroup gridLayoutGroup;
 
         private Camera _cameraMain;
         private UIManager _uiManager;
@@ -31,9 +33,11 @@ namespace UI
             _uiManager = UIManager.Instance;
             _boardManager = BoardManager.Instance;
 
+            SetLayout();
+
             pauseBtn.onClick.RemoveAllListeners();
             pauseBtn.onClick.AddListener(OnPauseBtnClick);
- 
+
             comboPrefab.SetActive(false);
 
             _uiManager.SetScoreUI(this);
@@ -42,10 +46,19 @@ namespace UI
             return UniTask.CompletedTask;
         }
 
+        private void SetLayout()
+        {
+            var cameraMainPixelWidth = (float)_cameraMain.pixelWidth;
+            var scaleX = cameraMainPixelWidth / 1920;
+            var spacingX = gridLayoutGroup.spacing.x;
+            var spacing = new Vector2((cameraMainPixelWidth - 200 * 2 - spacingX * scaleX) / 2 + spacingX,
+                    gridLayoutGroup.spacing.y);
+            gridLayoutGroup.spacing = spacing;
+        }
+
         private void OnPauseBtnClick()
         {
             _boardManager.isPlaying = false;
-            // ScreenContainer.Of(transform).Pop(true);
             var options = new ModalOptions(ResourceKey.PauseModalPrefab());
             ModalContainer.Find(ContainerKey.Modals).Push(options);
         }

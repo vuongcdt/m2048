@@ -23,27 +23,27 @@ namespace UI
             return string.Format(PrefabFormat, HomeScreenPrefabName);
         }
 
-        public static ViewOptions PlayScreenPrefab()
+        public static string PlayScreenPrefab()
         {
             return string.Format(PrefabFormat, PlayScreenPrefabName);
         }
         
-        public static ViewOptions SettingsModalPrefab()
+        public static string SettingsModalPrefab()
         {
             return string.Format(PrefabFormat, SettingsModalPrefabName);
         }   
         
-        public static ViewOptions PauseModalPrefab()
+        public static string PauseModalPrefab()
         {
             return string.Format(PrefabFormat, PauseModalPrefabName);
         }
 
-        public static ViewOptions GameOverModalPrefab()
+        public static string GameOverModalPrefab()
         {
             return string.Format(PrefabFormat, GameOverModalPrefabName);
         }
 
-        public static ViewOptions RankingRewardsPrefab()
+        public static string RankingRewardsPrefab()
         {
             return string.Format(PrefabFormat, RankingRewardsModalPrefabName);
         }

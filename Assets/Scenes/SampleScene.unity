@@ -322,9 +322,7 @@ MonoBehaviour:
   isProcessing: 0
   score: 0
   highScore: 0
-  idCount: 0
   nextSquareValue: 0
-  isClearData: 0
   isGameOver: 0
   isPlaying: 0
 --- !u!4 &457360940
@@ -1651,8 +1649,6 @@ MonoBehaviour:
   squarePrefab: {fileID: 1501351254502025820, guid: 64c6c1db802b99c4aa61b827fb61c54b, type: 3}
   squareParentTransform: {fileID: 386745771}
   dataName: {fileID: 4900000, guid: 95dbfb4746644ef3a8f4bcc52d3aead6, type: 3}
-  startRankData: {fileID: 4900000, guid: 3fe92679e47b4194bc1f6217dcbb8b91, type: 3}
-  maxData: 50
   comboPos: {x: 0, y: 0}
   comboCount: 0
   idCount: 30
