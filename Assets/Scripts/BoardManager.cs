@@ -34,7 +34,6 @@ public class BoardManager : Singleton<BoardManager>
     private List<BoardAction> _actionsWrapList = new();
     private List<float> _squareValueList = new() { 2 };
 
-    // private List<int> _squareValueList = new() { 2, 4, 8, 16, 32, 64, 128 };
     private readonly int[] _probabilityList = { 1, 4, 10, 18, 28, 30, 44, 60, 78 };
     private GamePlayScreen _gamePlayScreen;
 
@@ -255,7 +254,6 @@ public class BoardManager : Singleton<BoardManager>
         }
 
         isGameOver = all;
-        // Debug.Log($"isGameOver {isGameOver}");
     }
 
     #endregion
@@ -305,8 +303,6 @@ public class BoardManager : Singleton<BoardManager>
             List<SquareData> squareSameValueList = new();
             GetCountSquareSameValueList(block, squareSameValueList);
 
-            // Debug.Log($"count {squareSameValueList.Count}");
-
             if (squareSameValueList.Count <= 0)
             {
                 continue;
@@ -325,7 +321,6 @@ public class BoardManager : Singleton<BoardManager>
     {
         foreach (var squareData in squaresData)
         {
-            // Debug.Log($"can merge {IsBlockCanMerge(squareData, block)}");
             if (IsBlockCanMerge(squareData, block))
             {
                 squareSameValueList.Add(squareData);
@@ -580,7 +575,6 @@ public class BoardManager : Singleton<BoardManager>
     private void SetRandomValue()
     {
         var countValueList = _squareValueList.Count;
-        // var probabilityList = _probabilityList.Take(countValueList).ToList();
         List<int> probabilityList = new();
         for (var i = 0; i < countValueList; i++)
         {

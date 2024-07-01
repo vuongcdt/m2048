@@ -57,39 +57,52 @@ public static class TestData
         // squaresData[7].value = 2;
 
         ////
-        squaresData[0].value = 4;
-        squaresData[1].value = 2;
-        squaresData[2].value = 4;
-        squaresData[3].value = 2;
-        squaresData[4].value = 4;
-        squaresData[5].value = 2;
+        // squaresData[0].value = 4;
+        // squaresData[1].value = 2;
+        // squaresData[2].value = 4;
+        // squaresData[3].value = 2;
+        // squaresData[4].value = 4;
+        // squaresData[5].value = 2;
+        //
+        // squaresData[1 + 5].value = 2;
+        // squaresData[2 + 5].value = 4;
+        // squaresData[3 + 5].value = 2;
+        // squaresData[4 + 5].value = 4;
+        // squaresData[5 + 5].value = 2;
+        // squaresData[6 + 5].value = 4;
+        //
+        // squaresData[0 + 12].value = 4;
+        // squaresData[1 + 12].value = 2;
+        // squaresData[2 + 12].value = 4;
+        // squaresData[3 + 12].value = 2;
+        // squaresData[4 + 12].value = 4;
+        // squaresData[5 + 12].value = 2;
+        //
+        // squaresData[18].value = 16;
+        // squaresData[2 + 17].value = 4;
+        // squaresData[3 + 17].value = 2;
+        // squaresData[4 + 17].value = 4;
+        // squaresData[5 + 17].value = 2;
+        // squaresData[6 + 17].value = 4;
+        //
+        // squaresData[0 + 24].value = 8;
+        // squaresData[1 + 24].value = 16;
+        // squaresData[2 + 24].value = 8;
+        // squaresData[3 + 24].value = 16;
+        // squaresData[4 + 24].value = 8;
+        // // squaresData[5 + 24].value = 16;
         
-        squaresData[1 + 5].value = 2;
-        squaresData[2 + 5].value = 4;
-        squaresData[3 + 5].value = 2;
-        squaresData[4 + 5].value = 4;
-        squaresData[5 + 5].value = 2;
-        squaresData[6 + 5].value = 4;
+        //
+        squaresData[0].value = 1024;
+        squaresData[1].value = 128;
+        squaresData[2].value = 64;
         
-        squaresData[0 + 12].value = 4;
-        squaresData[1 + 12].value = 2;
-        squaresData[2 + 12].value = 4;
-        squaresData[3 + 12].value = 2;
-        squaresData[4 + 12].value = 4;
-        squaresData[5 + 12].value = 2;
+        squaresData[1 + 5].value = 128;
+        squaresData[2 + 5].value = 16;
+        squaresData[3 + 5].value = 128;
         
-        squaresData[18].value = 16;
-        squaresData[2 + 17].value = 4;
-        squaresData[3 + 17].value = 2;
-        squaresData[4 + 17].value = 4;
-        squaresData[5 + 17].value = 2;
-        squaresData[6 + 17].value = 4;
-        
-        squaresData[0 + 24].value = 8;
-        squaresData[1 + 24].value = 16;
-        squaresData[2 + 24].value = 8;
-        squaresData[3 + 24].value = 16;
-        squaresData[4 + 24].value = 8;
-        // squaresData[5 + 24].value = 16;
+        squaresData[0 + 12].value = 16;
+        squaresData[1 + 12].value = 8;
+        squaresData[2 + 12].value = 16;
     }
 }

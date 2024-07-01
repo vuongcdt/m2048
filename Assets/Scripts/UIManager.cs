@@ -47,17 +47,10 @@ public class UIManager : Singleton<UIManager>
         {
             _squaresList[i].SetActiveObj(false);
         }
-        // SetScoreUI();
     }
 
     public void ResetGame()
     {
-        // idCount = 30;
-        // for (var i = 0; i < _squaresList.Count; i++)
-        // {
-        //     _squaresList[i].SetActiveObj(false);
-        // }
-
         _boardManager.RestartGame();
         ResetGameUI();
         SetScoreUI();
@@ -167,6 +160,7 @@ public class UIManager : Singleton<UIManager>
     public void RenderUI(List<BoardAction> actionsWrapList)
     {
         _actionsWrapList = actionsWrapList;
+        
         // foreach (var actionListWrap in _actionsWrapList)
         // {
         //     Debug.Log("actionListWrap: " + JsonUtility.ToJson(actionListWrap));
