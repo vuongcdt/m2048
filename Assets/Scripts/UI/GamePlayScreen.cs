@@ -20,6 +20,8 @@ namespace UI
         [SerializeField] private Text comboText;
         [SerializeField] private Button pauseBtn;
         [SerializeField] private GridLayoutGroup gridLayoutGroup;
+        [SerializeField] private TMP_Text width;
+        [SerializeField] private TMP_Text height;
 
         private Camera _cameraMain;
         private UIManager _uiManager;
@@ -49,11 +51,14 @@ namespace UI
         private void SetLayout()
         {
             var cameraMainPixelWidth = (float)_cameraMain.pixelWidth;
+            var cameraMainPixelHeight = (float)_cameraMain.pixelHeight;
             var scaleX = cameraMainPixelWidth / 1920;
-            var spacingX = gridLayoutGroup.spacing.x;
-            var spacing = new Vector2((cameraMainPixelWidth - 200 * 2 - spacingX * scaleX) / 2 + spacingX,
-                    gridLayoutGroup.spacing.y);
-            gridLayoutGroup.spacing = spacing;
+            var scaleY = cameraMainPixelHeight / 1080;
+            var scale = scaleX / scaleY;
+
+            var boardWidth = 1080 * 1.2f ;
+            var mainPixelWidth = (1920 * scale - 200 * 2 - boardWidth) / 2 + boardWidth;
+            gridLayoutGroup.spacing = new Vector2(mainPixelWidth, 0);
         }
 
         private void OnPauseBtnClick()

@@ -33,11 +33,10 @@ public class BoardManager : Singleton<BoardManager>
     private List<BoardAction> _actionsWrapList = new();
     private List<float> _squareValueList = new() { 2, 4 };
 
-    private readonly int[] _probabilityList = { 1, 3, 6, 12, 20, 30, 42, 56, 72 };
-    // private readonly int[] _probabilityList = { 1, 4, 10, 18, 28, 30, 44, 60, 78 };
+    private readonly int[] _probabilityList = { 1, 4, 10, 18, 28, 40, 54, 70, 88 };
     private GamePlayScreen _gamePlayScreen;
 
-    private const int MAX_COUNT_QUARE_VALUE_LIST = 7;
+    private const int MAX_COUNT_QUARE_VALUE_LIST = 9;
 
     // private static readonly ProfilerMarker ProcessingDataMaker = new("MyMaker.ProcessingData");
     // private static readonly ProfilerMarker RenderUIMaker = new("MyMaker.RenderUI");
@@ -58,7 +57,7 @@ public class BoardManager : Singleton<BoardManager>
             isGameOver = false;
         }
 
-        TestData.SetDataTest(squaresData);
+        // TestData.SetDataTest(squaresData);
 
         if (nextSquareValue == 0)
         {
