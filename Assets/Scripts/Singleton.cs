@@ -10,13 +10,13 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
     {
         if (!_instance)
         {
-            _instance = this.GetComponent<T>();
+            _instance = GetComponent<T>();
             return;
         }
 
-        if (this.gameObject.GetInstanceID() != _instance.GetInstanceID())
+        if (gameObject.GetInstanceID() != _instance.GetInstanceID())
         {
-            Destroy(this.gameObject);
+            Destroy(gameObject);
         }
 
         AwakeCustom();

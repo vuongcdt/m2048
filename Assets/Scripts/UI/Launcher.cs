@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using ZBase.UnityScreenNavigator.Core;
 using ZBase.UnityScreenNavigator.Core.Modals;
 using ZBase.UnityScreenNavigator.Core.Screens;
@@ -36,24 +38,23 @@ namespace UI
             screenContainer.Preload(ResourceKey.LoadingScreenPrefab());
             screenContainer.Preload(ResourceKey.HomeScreenPrefab());
             screenContainer.Preload(ResourceKey.PlayScreenPrefab());
-            
+
             modalContainer.Preload(ResourceKey.RankingRewardsPrefab());
             modalContainer.Preload(ResourceKey.PauseModalPrefab());
             modalContainer.Preload(ResourceKey.GameOverModalPrefab());
-
         }
 
-        private async UniTaskVoid ShowLoadingPage()
+        private async UniTask ShowLoadingPage()
         {
-            var options = new ViewOptions(ResourceKey.LoadingScreenPrefab(), false, loadAsync: false);
+            LoadingScreen loadingScreen = null;
+            var options = new ViewOptions(ResourceKey.LoadingScreenPrefab(), false, loadAsync: false, onLoaded: (view, _) => { loadingScreen = (LoadingScreen)view; });
             await screenContainer.PushAsync(options);
-            Invoke(nameof(ShowHomePage), 1);
+            DOVirtual.Float(0, 1, 4, value => { loadingScreen.SetLoading(value); }).OnComplete(ShowHomePage);
         }
 
-        private async UniTaskVoid ShowHomePage()
+        private void ShowHomePage()
         {
-            var options = new ViewOptions(ResourceKey.HomeScreenPrefab(), false, loadAsync: false);
-            await screenContainer.PushAsync(options);
+            screenContainer.Push(new ViewOptions(ResourceKey.HomeScreenPrefab(), false, loadAsync: false));
         }
     }
 }

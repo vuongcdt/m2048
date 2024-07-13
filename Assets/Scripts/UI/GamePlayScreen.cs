@@ -58,7 +58,7 @@ namespace UI
 
             var boardWidth = 1080 * 1.2f ;
             var mainPixelWidth = (1920 * scale - 200 * 2 - boardWidth) / 2 + boardWidth;
-            gridLayoutGroup.spacing = new Vector2(mainPixelWidth, 0);
+            // gridLayoutGroup.spacing = new Vector2(mainPixelWidth, 0);
         }
 
         private void OnPauseBtnClick()
