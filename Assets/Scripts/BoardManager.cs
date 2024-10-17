@@ -22,12 +22,12 @@ public class BoardManager : Singleton<BoardManager>
     public float nextSquareValue;
     public bool isGameOver;
     public bool isPlaying;
+    public int idCount;
+    public SquareData processingSquare;
 
-    private int idCount;
     private bool _isSave;
     private UIManager _uiManager;
     private SoundManager _soundManager;
-    private SquareData _processingSquare;
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
@@ -46,8 +46,13 @@ public class BoardManager : Singleton<BoardManager>
         Application.targetFrameRate = 60;
         _uiManager = UIManager.Instance;
         _soundManager = SoundManager.Instance;
+
         RenderLineColumn();
-        LoadDataFromPrefs();
+
+        // LoadDataFromPrefs();
+        var loadGameCommand = new LoadGameCommand(_squareValueList);
+        loadGameCommand.Excute();
+
         CheckGameOver();
         if (isGameOver)
         {
@@ -65,6 +70,7 @@ public class BoardManager : Singleton<BoardManager>
         }
 
         _uiManager.StartUI(squaresData);
+        isPlaying = true;
     }
 
     private void RenderLineColumn()
@@ -82,8 +88,12 @@ public class BoardManager : Singleton<BoardManager>
 
     public void RestartGame()
     {
+        var renderBoardCommand = new RenderBoardCommand();
         idCount = 0;
-        RenderBoard();
+
+        // RenderBoard();
+        renderBoardCommand.Excute();
+
         score = 0;
         LoadHighScore();
         _squareValueList = new() { 2 };
@@ -93,16 +103,13 @@ public class BoardManager : Singleton<BoardManager>
 
     private void RenderBoard()
     {
-        squaresData = new();
+        squaresData.Clear();
         for (var y = boardRow; y > 0; y--)
         {
             for (var x = 0; x < boardCol; x++)
             {
                 idCount++;
-                squaresData.Add(new SquareData(
-                    new Utils.Cell(x, boardRow - y),
-                    idCount,
-                    0));
+                squaresData.Add(new SquareData(new Utils.Cell(x, boardRow - y), idCount, 0));
             }
         }
     }
@@ -136,11 +143,14 @@ public class BoardManager : Singleton<BoardManager>
         // RenderUIMaker.End();
     }
 
-    #region ShootBlock
 
     private void ProcessingData(int column)
     {
-        Shoot(column);
+        var shootCommand = new ShootCommand(squaresData, ref processingSquare, _actionsList, _actionsWrapList, column, nextSquareValue, ref idCount, boardRow);
+
+        shootCommand.Excute();
+        // Shoot(column);
+
         if (_actionsWrapList.Count <= 0)
         {
             _soundManager.PlaySoundMaxItemColumnSfx();
@@ -153,15 +163,21 @@ public class BoardManager : Singleton<BoardManager>
     private void ProcessingLoop()
     {
         int countActionsList;
+
+        var mergeCommand = new MergeCommand(squaresData, processingSquare, _actionsList, _actionsWrapList);
+        var sortCommand = new SortCommand(squaresData, processingSquare, _actionsList, _actionsWrapList, boardCol);
         do
         {
             countActionsList = _actionsWrapList.Count;
 
-            MergeAllBlock();
-            SortAllBlock();
+            mergeCommand.Excute();
+            sortCommand.Excute();
+            // MergeAllBlock();
+            // SortAllBlock();
         } while (countActionsList < _actionsWrapList.Count);
     }
 
+    #region ShootBlock
     private void Shoot(int column)
     {
         _actionsList.Clear();
@@ -191,7 +207,7 @@ public class BoardManager : Singleton<BoardManager>
         squareTarget.id = squareSource.id;
         squareSource.id = 0;
         squareTarget.value = nextSquareValue;
-        _processingSquare = squareTarget;
+        processingSquare = squareTarget;
     }
 
     private void CheckMergeWhenMaxItemColumn(int column, StepAction action)
@@ -218,7 +234,7 @@ public class BoardManager : Singleton<BoardManager>
                 var item = new BoardAction(new List<StepAction>(_actionsList), ActionType.MergeAllBlock);
                 _actionsWrapList.Add(item);
                 squareTarget.value = newSquareValue;
-                _processingSquare = squareTarget;
+                processingSquare = squareTarget;
 
                 return;
             }
@@ -257,6 +273,7 @@ public class BoardManager : Singleton<BoardManager>
 
     #endregion
 
+    #region MergeBlock
     private void MergeAllBlock()
     {
         _actionsList.Clear();
@@ -272,7 +289,6 @@ public class BoardManager : Singleton<BoardManager>
         }
     }
 
-    #region MergeBlock
 
     private void CreateActionByMergeType(List<Utils.CountSquareList> squareMergeOrderByCountSameValueList)
     {
@@ -359,9 +375,9 @@ public class BoardManager : Singleton<BoardManager>
         var newValue = squareDataTarget.value * 2;
         var isSameColumn = squareDataSource.cell.Row == squareDataTarget.cell.Row - 1;
         var isSameRowRight = squareDataTarget.cell.Column > squareDataSource.cell.Column &&
-                             squareDataSource.cell.Column >= _processingSquare.cell.Column;
+                             squareDataSource.cell.Column >= processingSquare.cell.Column;
         var isSameRowLeft = squareDataTarget.cell.Column < squareDataSource.cell.Column &&
-                            squareDataSource.cell.Column <= _processingSquare.cell.Column;
+                            squareDataSource.cell.Column <= processingSquare.cell.Column;
 
         if (isSameColumn || isSameRowRight || isSameRowLeft)
         {
@@ -382,9 +398,9 @@ public class BoardManager : Singleton<BoardManager>
         squareTarget.value = newValue;
         squareSource.value = 0;
 
-        if (squareSource == _processingSquare)
+        if (squareSource == processingSquare)
         {
-            _processingSquare = squareTarget;
+            processingSquare = squareTarget;
         }
     }
 
@@ -418,9 +434,9 @@ public class BoardManager : Singleton<BoardManager>
         {
             action.multiSquareSources.Add(new SquareData(squareData.cell, squareData.id, squareData.value));
             squareData.value = 0;
-            if (squareData == _processingSquare)
+            if (squareData == processingSquare)
             {
-                _processingSquare = squareTarget;
+                processingSquare = squareTarget;
             }
         }
 
@@ -442,6 +458,8 @@ public class BoardManager : Singleton<BoardManager>
     }
 
     #endregion
+
+    #region SortBlock
 
     private void SortAllBlock()
     {
@@ -466,7 +484,6 @@ public class BoardManager : Singleton<BoardManager>
         _actionsWrapList.Add(new BoardAction(new List<StepAction>(_actionsList), ActionType.SortAllBlock));
     }
 
-    #region SortBlock
 
     private List<SquareData> GetEmptyBlocksUpRowList()
     {
@@ -527,9 +544,9 @@ public class BoardManager : Singleton<BoardManager>
         squareTarget.id = squareSource.id;
         squareSource.id = GetSquareSourceID(squareSource);
 
-        if (squareSource == _processingSquare)
+        if (squareSource == processingSquare)
         {
-            _processingSquare = squareTarget;
+            processingSquare = squareTarget;
         }
     }
 
@@ -553,6 +570,7 @@ public class BoardManager : Singleton<BoardManager>
 
     #endregion
 
+    #region NextSquareValue
     public void SetNextSquareValue(GamePlayScreen gamePlayScreen = null)
     {
         if (gamePlayScreen is not null)
@@ -568,8 +586,6 @@ public class BoardManager : Singleton<BoardManager>
         SetNewValueInSquareValueList();
         SetRandomValue();
     }
-
-    #region NextSquareValue
 
     private void SetRandomValue()
     {
@@ -650,7 +666,9 @@ public class BoardManager : Singleton<BoardManager>
 
     private void OnApplicationQuit()
     {
-        SaveGame();
+        // SaveGame();
+        var saveGameCommand = new SaveGameCommand(_squareValueList, _isSave);
+        saveGameCommand.Excute();
     }
 
     private void OnApplicationPause(bool pauseStatus)
@@ -663,13 +681,13 @@ public class BoardManager : Singleton<BoardManager>
         CheckSaveGame(!hasFocus);
     }
 
-    #region SaveGame
-
     private void CheckSaveGame(bool isPause)
     {
         if (isPause)
         {
-            SaveGame();
+            // SaveGame();
+            var saveGameCommand = new SaveGameCommand(_squareValueList, _isSave);
+            saveGameCommand.Excute();
         }
 
         if (!isPause)
@@ -678,6 +696,7 @@ public class BoardManager : Singleton<BoardManager>
         }
     }
 
+    #region SaveGame
     private void SaveGame()
     {
         if (_isSave)
@@ -700,6 +719,7 @@ public class BoardManager : Singleton<BoardManager>
 
     #endregion
 
+    #region LoadGame
     private void LoadDataFromPrefs()
     {
         RenderBoard();
@@ -717,8 +737,6 @@ public class BoardManager : Singleton<BoardManager>
 
         nextSquareValue = Prefs.NextSquareValue;
     }
-
-    #region LoadGame
 
     private void LoadSquareValueList()
     {

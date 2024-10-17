@@ -49,7 +49,7 @@ namespace UI
             LoadingScreen loadingScreen = null;
             var options = new ViewOptions(ResourceKey.LoadingScreenPrefab(), false, loadAsync: false, onLoaded: (view, _) => { loadingScreen = (LoadingScreen)view; });
             await screenContainer.PushAsync(options);
-            DOVirtual.Float(0, 1, 4, value => { loadingScreen.SetLoading(value); }).OnComplete(ShowHomePage);
+            DOVirtual.Float(0, 1, 1, value => { loadingScreen.SetLoading(value); }).OnComplete(ShowHomePage);
         }
 
         private void ShowHomePage()
