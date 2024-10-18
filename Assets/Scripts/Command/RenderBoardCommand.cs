@@ -1,5 +1,5 @@
 
-public class RenderBoardCommand : CommandBase
+public class RenderBoardCommand : CommandBase<bool>
 {
     private BoardManager _boardManager;
 
@@ -12,9 +12,10 @@ public class RenderBoardCommand : CommandBase
     {
     }
 
-    public override void Excute()
+    public override bool Excute()
     {
         RenderBoard();
+        return true;
     }
 
     private void RenderBoard()

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SaveGameCommand : CommandBase
+public class SaveGameCommand : CommandBase<bool>
 {
     private List<float> _squareValueList = new();
     private bool _isSave;
@@ -18,9 +18,10 @@ public class SaveGameCommand : CommandBase
     {
     }
 
-    public override void Excute()
+    public override bool Excute()
     {
         SaveGame();
+        return true;
     }
 
     private void SaveGame()

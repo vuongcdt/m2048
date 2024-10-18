@@ -36,5 +36,10 @@
         public const string COMBO = nameof(COMBO);
         public const string SCORE = nameof(SCORE);
         public const string NEXT_SQUARE = nameof(NEXT_SQUARE);
+
+        public const string START_UI = nameof(START_UI);
+        public const string RESET_GAME_UI = nameof(RESET_GAME_UI);
+        public const string RENDER_UI = nameof(RENDER_UI);
+
     }
 }

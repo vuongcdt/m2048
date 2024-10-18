@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SortCommand : CommandBase
+public class SortCommand : CommandBase<bool>
 {
     private List<SquareData> _squaresData = new();
     private SquareData _processingSquare;
@@ -18,9 +18,10 @@ public class SortCommand : CommandBase
         _boardCol = boardCol;
     }
 
-    public override void Excute()
+    public override bool Excute()
     {
         SortAllBlock();
+        return true;
     }
 
     protected override void Init()

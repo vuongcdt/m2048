@@ -1,6 +1,6 @@
 
-public abstract class CommandBase
+public abstract class CommandBase<T> 
 {
     protected abstract void Init();
-    public abstract void Excute();
+    public abstract T Excute();
 }

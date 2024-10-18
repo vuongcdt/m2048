@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LoadGameCommand : CommandBase
+public class LoadGameCommand : CommandBase<bool>
 {
     private List<float> _squareValueList = new();
     private BoardManager _boardManager;
@@ -17,9 +17,10 @@ public class LoadGameCommand : CommandBase
     {
     }
 
-    public override void Excute()
+    public override bool Excute()
     {
         LoadDataFromPrefs();
+        return true;
     }
 
     private void LoadDataFromPrefs()

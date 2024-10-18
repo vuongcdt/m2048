@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShootCommand : CommandBase
+public class ShootCommand : CommandBase<bool>
 {
     private List<SquareData> _squaresData = new();
     private List<StepAction> _actionsList = new();
@@ -23,9 +23,10 @@ public class ShootCommand : CommandBase
         _boardManager = BoardManager.Instance;
     }
 
-    public override void Excute()
+    public override bool Excute()
     {
         Shoot(_columnSelect);
+        return true;
     }
 
     protected override void Init()

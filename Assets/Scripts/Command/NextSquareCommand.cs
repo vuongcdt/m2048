@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class NextSquareCommand : CommandBase
+public class NextSquareCommand : CommandBase<bool>
 {
     private List<SquareData> _squaresData = new();
     private SquareData _processingSquare;
@@ -26,9 +26,10 @@ public class NextSquareCommand : CommandBase
     {
     }
 
-    public override void Excute()
+    public override bool Excute()
     {
         SetRandomSquareValue();
+        return true;
     }
 
 

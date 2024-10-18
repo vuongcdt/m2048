@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MergeCommand : CommandBase
+public class MergeCommand : CommandBase<bool>
 {
     private List<SquareData> _squaresData = new();
     private SquareData _processingSquare;
@@ -16,9 +16,10 @@ public class MergeCommand : CommandBase
         _processingSquare = processingSquare;
     }
 
-    public override void Excute()
+    public override bool Excute()
     {
         MergeAllBlock();
+        return true;
     }
 
     protected override void Init()
