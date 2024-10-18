@@ -1,25 +1,24 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using ZBase.UnityScreenNavigator.Core.Modals;
-using ZBase.UnityScreenNavigator.Core.Screens;
-using Screen = ZBase.UnityScreenNavigator.Core.Screens.Screen;
 
 namespace UI
 {
-    public class HomeScreen : Screen
+    public class HomeScreen : MonoBehaviour
     {
         [SerializeField] private Button playButton;
         [SerializeField] private Button rankingRewardsButton;
 
         private BoardManager _boardManager;
-        private UIManager _uiManager;
 
-        public override UniTask Initialize(Memory<object> args)
+        public void Start()
         {
+            Initialize();
+        }
+
+        public void Initialize()
+        {
+            Observer.On(Constants.EventKey.HOME_SCREEN, e => ShowHomeScreen());
             _boardManager = BoardManager.Instance;
-            _uiManager = UIManager.Instance;
 
             playButton.onClick.RemoveAllListeners();
             playButton.onClick.AddListener(OnClickPlay);
@@ -27,19 +26,24 @@ namespace UI
             rankingRewardsButton.onClick.RemoveAllListeners();
             rankingRewardsButton.onClick.AddListener(OnRankingRewardsBtnClick);
 
-            return UniTask.CompletedTask;
+            gameObject.SetActive(false);
         }
 
         private void OnRankingRewardsBtnClick()
         {
-            var options = new ModalOptions(ResourceKey.RankingRewardsPrefab());
-            ModalContainer.Find(ContainerKey.Modals).Push(options);
+            Observer.Emit(Constants.EventKey.RANKING_POPUP);
         }
 
         private void OnClickPlay()
         {
             _boardManager.isPlaying = true;
-            ScreenContainer.Of(transform).Push(new ScreenOptions(ResourceKey.PlayScreenPrefab()));
+            gameObject.SetActive(false);
+            Observer.Emit(Constants.EventKey.GAME_PLAY_SCREEN);
+        }
+
+        private void ShowHomeScreen()
+        {
+            gameObject.SetActive(true);
         }
     }
 }

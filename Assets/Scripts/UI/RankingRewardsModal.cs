@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
-using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.UI;
-using ZBase.UnityScreenNavigator.Core.Modals;
 using Random = UnityEngine.Random;
 
 namespace UI
 {
-    public class RankingRewardsModal : Modal
+    public class RankingRewardsModal : MonoBehaviour
     {
         [SerializeField] private Button closeButton;
         [SerializeField] private ChartItem[] chartItems;
@@ -17,20 +13,22 @@ namespace UI
         private BoardManager _boardManager;
         private const string YOUR_NAME = "You";
 
-        private static readonly ProfilerMarker PauseModelMaker = new("MyMaker.PauseModel");
-
-        public override UniTask Initialize(Memory<object> args)
+        public void Start()
         {
-            PauseModelMaker.Begin();
-            
+            Initialize();
+        }
+
+
+        public void Initialize()
+        {
+            Observer.On(Constants.EventKey.RANKING_POPUP, e => ShowRankingPopup());
+
             _boardManager = BoardManager.Instance;
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(OnCloseBtnClick);
             RenderChartsUI();
-            
-            PauseModelMaker.End();
 
-            return UniTask.CompletedTask;
+            gameObject.SetActive(false);
         }
 
         private void RenderChartsUI()
@@ -47,7 +45,7 @@ namespace UI
             {
                 SetRankScoreByDay(rankData);
             }
-            
+
             var chartScores = rankData.chartScores;
             var myChartScore = new Utils.ChartScore(myScore, YOUR_NAME);
             chartScores.Add(myChartScore);
@@ -72,9 +70,16 @@ namespace UI
             Prefs.RankData = JsonUtility.ToJson(dataSave);
         }
 
+
         private void OnCloseBtnClick()
         {
-            ModalContainer.Of(transform).Pop(true);
+            gameObject.SetActive(false);
+        }
+
+        private void ShowRankingPopup()
+        {
+            RenderChartsUI();
+            gameObject.SetActive(true);
         }
     }
 }

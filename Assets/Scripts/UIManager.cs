@@ -199,7 +199,7 @@ public class UIManager : Singleton<UIManager>
         _sequence.OnComplete(() =>
         {
             _boardManager.isProcessing = false;
-            SetComboUI();
+            // SetComboUI();
 
             if (_boardManager.isGameOver)
             {
@@ -341,6 +341,7 @@ public class UIManager : Singleton<UIManager>
 
     public void SetScoreUI(GamePlayScreen gamePlayScreen = null)
     {
+        _boardManager = BoardManager.Instance;
         if (_boardManager.score > _boardManager.highScore)
         {
             _boardManager.highScore = _boardManager.score;

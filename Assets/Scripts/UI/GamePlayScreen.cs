@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections;
-using Cysharp.Threading.Tasks;
+﻿using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using ZBase.UnityScreenNavigator.Core.Modals;
-using Screen = ZBase.UnityScreenNavigator.Core.Screens.Screen;
 
 namespace UI
 {
-    public class GamePlayScreen : Screen
+    public class GamePlayScreen : MonoBehaviour
     {
         [SerializeField] internal TMP_Text scoreText;
         [SerializeField] internal TMP_Text highScoreText;
@@ -27,15 +23,20 @@ namespace UI
         private UIManager _uiManager;
         private BoardManager _boardManager;
 
-        public override UniTask Initialize(Memory<object> args)
+        public void Start()
         {
-            base.OnEnable();
+            Initialize();
+        }
 
+        public void Initialize()
+        {
+            Observer.On(Constants.EventKey.GAME_PLAY_SCREEN, e => ShowGamePlayScreen());
+            Observer.On(Constants.EventKey.COMBO, e => ShowCombo());
             _cameraMain = Camera.main;
             _uiManager = UIManager.Instance;
             _boardManager = BoardManager.Instance;
 
-            SetLayout();
+            // SetLayout();
 
             pauseBtn.onClick.RemoveAllListeners();
             pauseBtn.onClick.AddListener(OnPauseBtnClick);
@@ -45,33 +46,22 @@ namespace UI
             _uiManager.SetScoreUI(this);
             _boardManager.SetNextSquareValue(this);
 
-            return UniTask.CompletedTask;
-        }
-
-        private void SetLayout()
-        {
-            var cameraMainPixelWidth = (float)_cameraMain.pixelWidth;
-            var cameraMainPixelHeight = (float)_cameraMain.pixelHeight;
-            var scaleX = cameraMainPixelWidth / 1920;
-            var scaleY = cameraMainPixelHeight / 1080;
-            var scale = scaleX / scaleY;
-
-            var boardWidth = 1080 * 1.2f ;
-            var mainPixelWidth = (1920 * scale - 200 * 2 - boardWidth) / 2 + boardWidth;
-            // gridLayoutGroup.spacing = new Vector2(mainPixelWidth, 0);
+            gameObject.SetActive(false);
         }
 
         private void OnPauseBtnClick()
         {
             _boardManager.isPlaying = false;
-            var options = new ModalOptions(ResourceKey.PauseModalPrefab());
-            ModalContainer.Find(ContainerKey.Modals).Push(options);
+            // var options = new ModalOptions(ResourceKey.PauseModalPrefab());
+            // ModalContainer.Find(ContainerKey.Modals).Push(options);
+            Observer.Emit(Constants.EventKey.PAUSE_POPUP);
         }
 
         public void ShowGameOverPopup()
         {
-            var options = new ModalOptions(ResourceKey.GameOverModalPrefab());
-            ModalContainer.Find(ContainerKey.Modals).Push(options);
+            // var options = new ModalOptions(ResourceKey.GameOverModalPrefab());
+            // ModalContainer.Find(ContainerKey.Modals).Push(options);
+            Observer.Emit(Constants.EventKey.GAME_OVER_POPUP);
         }
 
         public void ShowCombo()
@@ -102,6 +92,11 @@ namespace UI
         {
             scoreText.text = _boardManager.score.ToString(Constants.FomatText.FORMAT_SCORE);
             highScoreText.text = _boardManager.highScore.ToString(Constants.FomatText.FORMAT_SCORE);
+        }
+
+        public void ShowGamePlayScreen()
+        {
+            gameObject.SetActive(true);
         }
     }
 }

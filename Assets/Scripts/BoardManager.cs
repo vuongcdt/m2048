@@ -70,7 +70,6 @@ public class BoardManager : Singleton<BoardManager>
         }
 
         _uiManager.StartUI(squaresData);
-        isPlaying = true;
     }
 
     private void RenderLineColumn()

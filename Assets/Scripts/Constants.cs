@@ -24,4 +24,15 @@
     {
         public const float VOLUME_DEFAULT = 0.5f;
     }
+
+    public class EventKey
+    {
+        public const string HOME_SCREEN = nameof(HOME_SCREEN);
+        public const string GAME_PLAY_SCREEN = nameof(GAME_PLAY_SCREEN);
+        public const string GAME_OVER_POPUP = nameof(GAME_OVER_POPUP);
+        public const string SETTING_POPUP = nameof(SETTING_POPUP);
+        public const string PAUSE_POPUP = nameof(PAUSE_POPUP);
+        public const string RANKING_POPUP = nameof(RANKING_POPUP);
+        public const string COMBO = nameof(COMBO);
+    }
 }
