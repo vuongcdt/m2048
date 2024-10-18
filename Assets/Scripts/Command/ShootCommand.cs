@@ -4,7 +4,6 @@ using UnityEngine;
 public class ShootCommand : CommandBase
 {
     private List<SquareData> _squaresData = new();
-    private SquareData _processingSquare;
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
     private int _columnSelect;
@@ -12,8 +11,8 @@ public class ShootCommand : CommandBase
     private BoardManager _boardManager;
     public int _boardRow;
 
-    public ShootCommand(List<SquareData> squaresData, ref SquareData processingSquare, List<StepAction> actionsList,
-     List<BoardAction> actionsWrapList, int columnSelect, float nextSquareValue, ref int idCount, int boardRow)
+    public ShootCommand(List<SquareData> squaresData, List<StepAction> actionsList,
+     List<BoardAction> actionsWrapList, int columnSelect, float nextSquareValue, int boardRow)
     {
         _squaresData = squaresData;
         _actionsList = actionsList;
@@ -21,7 +20,6 @@ public class ShootCommand : CommandBase
         _columnSelect = columnSelect;
         _nextSquareValue = nextSquareValue;
         _boardRow = boardRow;
-        _processingSquare = processingSquare;
         _boardManager = BoardManager.Instance;
     }
 

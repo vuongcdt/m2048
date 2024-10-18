@@ -34,5 +34,7 @@
         public const string PAUSE_POPUP = nameof(PAUSE_POPUP);
         public const string RANKING_POPUP = nameof(RANKING_POPUP);
         public const string COMBO = nameof(COMBO);
+        public const string SCORE = nameof(SCORE);
+        public const string NEXT_SQUARE = nameof(NEXT_SQUARE);
     }
 }

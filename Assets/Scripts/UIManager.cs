@@ -4,7 +4,6 @@ using System.Linq;
 using DG.Tweening;
 using UI;
 using UnityEngine;
-using uPools;
 using Random = UnityEngine.Random;
 using Sequence = DG.Tweening.Sequence;
 
@@ -23,15 +22,10 @@ public class UIManager : Singleton<UIManager>
     private List<BoardAction> _actionsWrapList = new();
     private Sequence _sequence;
     public int idCount = 30;
-    private bool _isSave;
-    private GameObjectPool _blockPool;
-    private GamePlayScreen _gamePlayScreen;
     private SoundManager _soundManager;
 
     private const float MERGE_DURATION = 0.1f;
     private const float TIME_DELAY = 0.1f;
-
-    // private static readonly ProfilerMarker ProcessingTweenMaker = new("MyMaker.DOTweenSequence");
 
     private void Start()
     {
@@ -161,11 +155,6 @@ public class UIManager : Singleton<UIManager>
     public void RenderUI(List<BoardAction> actionsWrapList)
     {
         _actionsWrapList = actionsWrapList;
-        
-        // foreach (var actionListWrap in _actionsWrapList)
-        // {
-        //     Debug.Log("actionListWrap: " + JsonUtility.ToJson(actionListWrap));
-        // }
 
         if (_actionsWrapList.Count <= 0)
         {
@@ -199,7 +188,7 @@ public class UIManager : Singleton<UIManager>
         _sequence.OnComplete(() =>
         {
             _boardManager.isProcessing = false;
-            // SetComboUI();
+            SetComboUI();
 
             if (_boardManager.isGameOver)
             {
@@ -215,7 +204,8 @@ public class UIManager : Singleton<UIManager>
         if (comboCount > 2)
         {
             _soundManager.PlaySoundComboSfx();
-            _gamePlayScreen.ShowCombo();
+
+            Observer.Emit(Constants.EventKey.COMBO, new ComboEvent(comboCount, comboPos));
 
             var endNewValueMerge = _actionsWrapList
                 .Where(boardAction => boardAction.actionType == ActionType.MergeAllBlock)
@@ -231,8 +221,8 @@ public class UIManager : Singleton<UIManager>
     {
         idCount = 30;
         _soundManager.PlaySoundGameOverSfx();
-        _gamePlayScreen.ShowGameOverPopup();
         _boardManager.isProcessing = true;
+        Observer.Emit(Constants.EventKey.GAME_OVER_POPUP);
     }
 
     private void ShootUI(Sequence sequence, StepAction stepAction)
@@ -347,15 +337,12 @@ public class UIManager : Singleton<UIManager>
             _boardManager.highScore = _boardManager.score;
         }
 
-        if (gamePlayScreen is not null)
+        var data = new ScoreDataEvent()
         {
-            _gamePlayScreen = gamePlayScreen;
-        }
-
-        if (_gamePlayScreen is not null)
-        {
-            _gamePlayScreen.SetScore();
-        }
+            highScore = _boardManager.highScore,
+            score = _boardManager.score,
+        };
+        Observer.Emit(Constants.EventKey.SCORE, data);
     }
 
     private void SortUI(Sequence sequence, List<StepAction> mergerActionList)
@@ -374,7 +361,7 @@ public class UIManager : Singleton<UIManager>
                 {
                     var mergeEndPos = mergerAction.singleSquareSources.Position;
                     squareSourceGameObject.SetValue(mergerAction.newSquareValue);
-                    if ((mergeEndPos - comboPos).sqrMagnitude == 0 )
+                    if ((mergeEndPos - comboPos).sqrMagnitude == 0)
                     {
                         comboPos = mergerAction.squareTarget.Position;
                     }

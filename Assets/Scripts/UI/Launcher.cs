@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using Cysharp.Threading.Tasks;
-using DG.Tweening;
-using ZBase.UnityScreenNavigator.Core;
+﻿using ZBase.UnityScreenNavigator.Core;
 using ZBase.UnityScreenNavigator.Core.Modals;
 using ZBase.UnityScreenNavigator.Core.Screens;
 using ZBase.UnityScreenNavigator.Core.Views;
