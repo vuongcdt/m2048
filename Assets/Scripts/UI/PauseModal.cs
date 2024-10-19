@@ -1,13 +1,9 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using ZBase.UnityScreenNavigator.Core.Modals;
-using ZBase.UnityScreenNavigator.Core.Screens;
 
 namespace UI
 {
-    public class PauseModal : Modal
+    public class PauseModal : MonoBehaviour
     {
         [SerializeField] private Button continueButton;
         [SerializeField] private Button homeButton;
@@ -15,15 +11,17 @@ namespace UI
         [SerializeField] private Slider sliderMusic;
         [SerializeField] private Slider sliderSfx;
 
-        private SoundManager _soundManager;
         private BoardManager _boardManager;
-        private UIManager _uiManager;
 
-        public override UniTask Initialize(Memory<object> args)
+        public void Start()
         {
-            _soundManager = SoundManager.Instance;
+            Initialize();
+        }
+
+        public void Initialize()
+        {
+            Observer.On(Constants.EventKey.PAUSE_POPUP, e => ShowPausePopup());
             _boardManager = BoardManager.Instance;
-            _uiManager = UIManager.Instance;
 
             continueButton.onClick.RemoveAllListeners();
             continueButton.onClick.AddListener(OnContinueBtnClick);
@@ -35,31 +33,39 @@ namespace UI
             homeButton.onClick.AddListener(OnHomeBtnClick);
 
             SetVolumeUI();
-            return UniTask.CompletedTask;
+            gameObject.SetActive(false);
+        }
+
+        private void ShowPausePopup()
+        {
+            gameObject.SetActive(true);
         }
 
         private void OnNewGameBtnClick()
         {
             Prefs.HighScore = _boardManager.highScore;
             _boardManager.isPlaying = true;
-            _uiManager.ResetGame();
-            _soundManager.SaveVolume(sliderMusic.value, sliderSfx.value);
-            ModalContainer.Find(ContainerKey.Modals).Pop(true);
+
+            gameObject.SetActive(false);
+            Observer.Emit(Constants.EventKey.SAVE_VOLUMN, new SaveVolumeEvent(sliderMusic.value, sliderSfx.value));
+            Observer.Emit(Constants.EventKey.RESET_GAME);
         }
 
         private void OnHomeBtnClick()
         {
             _boardManager.isPlaying = false;
-            _soundManager.SaveVolume(sliderMusic.value, sliderSfx.value);
-            ModalContainer.Find(ContainerKey.Modals).Pop(true);
-            ScreenContainer.Find(ContainerKey.Screens).Pop(true);
+
+            Observer.Emit(Constants.EventKey.SAVE_VOLUMN, new SaveVolumeEvent(sliderMusic.value, sliderSfx.value));
+            gameObject.SetActive(false);
+            Observer.Emit(Constants.EventKey.HOME_SCREEN);
         }
 
         private void OnContinueBtnClick()
         {
             _boardManager.isPlaying = true;
-            _soundManager.SaveVolume(sliderMusic.value, sliderSfx.value);
-            ModalContainer.Find(ContainerKey.Modals).Pop(true);
+
+            gameObject.SetActive(false);
+            Observer.Emit(Constants.EventKey.SAVE_VOLUMN, new SaveVolumeEvent(sliderMusic.value, sliderSfx.value));
         }
 
         private void SetVolumeUI()
@@ -78,12 +84,12 @@ namespace UI
 
         public void OnChangeVolumeMusic()
         {
-            _soundManager.SetVolumeMusic(sliderMusic.value);
+            Observer.Emit(Constants.EventKey.SET_VOLUMN_MUSIC, sliderMusic.value);
         }
 
         public void OnChangeVolumeSFX()
         {
-            _soundManager.SetVolumeSoundShootSfx(sliderSfx.value);
+            Observer.Emit(Constants.EventKey.SET_VOLUMN_SOUND_SHOOT, sliderSfx.value);
         }
     }
 }

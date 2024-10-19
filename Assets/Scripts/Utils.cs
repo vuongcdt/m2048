@@ -52,7 +52,8 @@ public static class Utils
         var exponent = GetExponent(value);
 
         var colorIndex = exponent % 10;
-        return _colors[colorIndex];
+
+        return _colors[colorIndex < 0 ? 0 : colorIndex];
     }
 
     public static int GetExponent(float value)

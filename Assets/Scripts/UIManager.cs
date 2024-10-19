@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
-using UI;
 using UnityEngine;
-using uPools;
 using Random = UnityEngine.Random;
 using Sequence = DG.Tweening.Sequence;
 
@@ -23,21 +21,22 @@ public class UIManager : Singleton<UIManager>
     private List<BoardAction> _actionsWrapList = new();
     private Sequence _sequence;
     public int idCount = 30;
-    private bool _isSave;
-    private GameObjectPool _blockPool;
-    private GamePlayScreen _gamePlayScreen;
-    private SoundManager _soundManager;
 
     private const float MERGE_DURATION = 0.1f;
     private const float TIME_DELAY = 0.1f;
 
-    // private static readonly ProfilerMarker ProcessingTweenMaker = new("MyMaker.DOTweenSequence");
 
-    private void Start()
+
+    private void Init()
     {
-        _boardManager = BoardManager.Instance;
-        _soundManager = SoundManager.Instance;
+        Observer.On(Constants.EventKey.START_UI, e => StartUI(e));
+        Observer.On(Constants.EventKey.RESET_GAME, e => ResetGame());
+        Observer.On(Constants.EventKey.RESET_GAME_UI, e => ResetGameUI());
+        Observer.On(Constants.EventKey.RENDER_UI, e => RenderUI(e));
+        Observer.On(Constants.EventKey.SET_SCORE_UI, e => SetScoreUI());
 
+        _boardManager = BoardManager.Instance;
+        _squareScript = squarePrefab.GetComponent<Square>();
         GenerateStartChartScores();
     }
 
@@ -75,7 +74,7 @@ public class UIManager : Singleton<UIManager>
 
         for (var i = 0; i < 19; i++)
         {
-            var random = Random.Range(1000, 100000);
+            var random = Random.Range(1000, 100 * 1000);
             chartScores.Add(new Utils.ChartScore(random, nameList[i]));
         }
 
@@ -85,12 +84,35 @@ public class UIManager : Singleton<UIManager>
 
     #endregion
 
-    public void StartUI(List<SquareData> squaresData)
+    #region StartUI
+    public void StartUI(object data)
     {
+        Init();
         _squareScript = squarePrefab.GetComponent<Square>();
+        idCount = _boardManager.idCount;
+
         InitPoolObject();
-        ResetUI(squaresData);
+        ResetUI(data);
     }
+
+    private void ResetUI(object data)
+    {
+        var squaresData = (List<SquareData>)data;
+        foreach (var squareData in squaresData)
+        {
+            if (squareData.value <= 0)
+            {
+                continue;
+            }
+
+            var instanceNewSquareDataCommand = new InstanceNewSquareDataCommand(squareParentTransform, _squaresList, _squareScript, squareData.Position);
+            var newSquareData = instanceNewSquareDataCommand.Excute();
+
+            newSquareData.SetValue(squareData.value);
+            newSquareData.SetId(squareData.id);
+        }
+    }
+    #endregion
 
     private void InitPoolObject()
     {
@@ -102,70 +124,15 @@ public class UIManager : Singleton<UIManager>
         }
     }
 
-    private void ResetUI(List<SquareData> squaresData)
-    {
-        foreach (var squareData in squaresData)
-        {
-            if (squareData.value <= 0)
-            {
-                continue;
-            }
-
-            var newSquareData = InstanceNewSquareData(squareData.Position);
-
-            newSquareData.SetValue(squareData.value);
-            newSquareData.SetId(squareData.id);
-        }
-    }
-
-    #region ResetUI
-
-    private Square InstanceNewSquareData(Vector3 pos)
-    {
-        var squarePool = FindSquarePoolDeActive();
-        if (squarePool is null)
-        {
-            squarePool = Instantiate(_squareScript, pos, Quaternion.identity, squareParentTransform);
-
-            _squaresList.Add(squarePool);
-        }
-        else
-        {
-            squarePool.transform.position = pos;
-            squarePool.gameObject.SetActive(true);
-        }
-
-        return squarePool;
-    }
-
-    private Square FindSquarePoolDeActive()
-    {
-        for (var i = _squaresList.Count - 1; i >= 0; i--)
-        {
-            if (!_squaresList[i].gameObject.activeSelf)
-            {
-                return _squaresList[i];
-            }
-        }
-
-        return null;
-    }
-
-    #endregion
-
     public void ReturnPool(GameObject insObj)
     {
         insObj.SetActive(false);
     }
 
-    public void RenderUI(List<BoardAction> actionsWrapList)
+    #region RenderUI
+    public void RenderUI(object data)
     {
-        _actionsWrapList = actionsWrapList;
-        
-        // foreach (var actionListWrap in _actionsWrapList)
-        // {
-        //     Debug.Log("actionListWrap: " + JsonUtility.ToJson(actionListWrap));
-        // }
+        _actionsWrapList = (List<BoardAction>)data;
 
         if (_actionsWrapList.Count <= 0)
         {
@@ -182,16 +149,16 @@ public class UIManager : Singleton<UIManager>
             switch (actionListWrap.actionType)
             {
                 case ActionType.Shoot:
-                    ShootUI(_sequence, actionListWrap.stepActionList.First());
+                    new ShootUICommand(_squaresList, _sequence, actionListWrap.stepActionList[0], MERGE_DURATION, TIME_DELAY).Excute();
                     break;
                 case ActionType.MergeAllBlock:
-                    MergeUI(_sequence, actionListWrap.stepActionList);
+                    new MergeUICommand(_squaresList, _sequence, actionListWrap.stepActionList, MERGE_DURATION, TIME_DELAY).Excute();
                     break;
                 case ActionType.SortAllBlock:
-                    SortUI(_sequence, actionListWrap.stepActionList);
+                    new SortUICommand(_squaresList, _sequence, actionListWrap.stepActionList, MERGE_DURATION, TIME_DELAY).Excute();
                     break;
                 case ActionType.ClearMinBlock:
-                    ClearMinBlockUI(_sequence, actionListWrap.stepActionList);
+                    new ClearMinBlockUICommand(_squaresList, actionListWrap.stepActionList, _sequence).Excute();
                     break;
             }
         }
@@ -207,15 +174,14 @@ public class UIManager : Singleton<UIManager>
             }
         });
     }
-
-    #region RenderUI
+    #endregion
 
     private void SetComboUI()
     {
         if (comboCount > 2)
         {
-            _soundManager.PlaySoundComboSfx();
-            _gamePlayScreen.ShowCombo();
+            Observer.Emit(Constants.EventKey.COMBO, new ComboEvent(comboCount, comboPos));
+            Observer.Emit(Constants.EventKey.SOUND_COMBO);
 
             var endNewValueMerge = _actionsWrapList
                 .Where(boardAction => boardAction.actionType == ActionType.MergeAllBlock)
@@ -230,37 +196,9 @@ public class UIManager : Singleton<UIManager>
     private void SetGameOverUI()
     {
         idCount = 30;
-        _soundManager.PlaySoundGameOverSfx();
-        _gamePlayScreen.ShowGameOverPopup();
         _boardManager.isProcessing = true;
-    }
-
-    private void ShootUI(Sequence sequence, StepAction stepAction)
-    {
-        sequence.OnStart(_soundManager.PlaySoundShootSfx);
-        var squarePool = FindSquarePoolById(stepAction.singleSquareSources.id);
-
-        squarePool.SetValue(stepAction.newSquareValue);
-        squarePool.transform.position = stepAction.singleSquareSources.Position;
-
-        sequence.Append(squarePool.transform
-            .DOMoveY(stepAction.squareTarget.Position.y, MERGE_DURATION)
-            .SetEase(Ease.Linear));
-
-        sequence.AppendInterval(TIME_DELAY);
-    }
-
-    private Square FindSquarePoolById(int id)
-    {
-        for (var i = _squaresList.Count - 1; i >= 0; i--)
-        {
-            if (_squaresList[i].squareData.id == id)
-            {
-                return _squaresList[i];
-            }
-        }
-
-        return null;
+        Observer.Emit(Constants.EventKey.SOUND_OVER_GAME);
+        Observer.Emit(Constants.EventKey.GAME_OVER_POPUP);
     }
 
     private void InitNewSquareForShoot()
@@ -268,148 +206,21 @@ public class UIManager : Singleton<UIManager>
         idCount++;
         var newSquarePos = new Vector3(0, -10, 0);
 
-        var squarePool = InstanceNewSquareData(newSquarePos);
+        var instanceNewSquareDataCommand = new InstanceNewSquareDataCommand(squareParentTransform, _squaresList, _squareScript, newSquarePos);
+        var squarePool = instanceNewSquareDataCommand.Excute();
 
         squarePool.SetId(idCount);
     }
 
-    private void MergeUI(Sequence sequence, List<StepAction> mergerActionList)
+    public void SetScoreUI()
     {
-        Sequence mergerSequence = DOTween.Sequence();
-        comboCount++;
-
-        mergerSequence.OnStart(_soundManager.PlaySoundMergeSfx);
-        foreach (var mergerAction in mergerActionList)
-        {
-            var squareSourceGameObjectsList = FindAllSquareGameObjectsActiveSameValue(mergerAction);
-            var squareTargetGameObject = FindSquarePoolById(mergerAction.squareTarget.id);
-
-            foreach (var squareSourceGameObject in squareSourceGameObjectsList)
-            {
-                mergerSequence.Join(squareSourceGameObject.transform
-                    .DOMove(mergerAction.squareTarget.Position, MERGE_DURATION)
-                    .SetEase(Ease.Linear)
-                    .OnComplete(() =>
-                    {
-                        squareTargetGameObject.SetValue(mergerAction.newSquareValue);
-                        squareSourceGameObject.SetValue(0);
-                        squareSourceGameObject.ReturnPool();
-                    })
-                );
-            }
-
-            mergerSequence.OnComplete(() =>
-            {
-                comboPos = mergerAction.squareTarget.Position;
-                _boardManager.score += mergerAction.newSquareValue;
-                SetScoreUI();
-            });
-        }
-
-        sequence.Append(mergerSequence);
-        sequence.AppendInterval(TIME_DELAY);
-    }
-
-    private List<Square> FindAllSquareGameObjectsActiveSameValue(StepAction stepAction)
-    {
-        List<Square> list = new List<Square>();
-        foreach (var squareGameObj in _squaresList)
-        {
-            if (IsCompareSquareActiveSameId(stepAction.multiSquareSources, squareGameObj))
-            {
-                list.Add(squareGameObj);
-            }
-        }
-
-        return list;
-    }
-
-    private bool IsCompareSquareActiveSameId(List<SquareData> squareSources, Square squareGameObj)
-    {
-        var isSquareActiveSameIndex = false;
-        foreach (var squareData in squareSources)
-        {
-            if (squareData.id == squareGameObj.squareData.id && squareGameObj.gameObject.activeSelf)
-            {
-                isSquareActiveSameIndex = true;
-                break;
-            }
-        }
-
-        return isSquareActiveSameIndex;
-    }
-
-    public void SetScoreUI(GamePlayScreen gamePlayScreen = null)
-    {
+        _boardManager = BoardManager.Instance;
         if (_boardManager.score > _boardManager.highScore)
         {
             _boardManager.highScore = _boardManager.score;
         }
 
-        if (gamePlayScreen is not null)
-        {
-            _gamePlayScreen = gamePlayScreen;
-        }
-
-        if (_gamePlayScreen is not null)
-        {
-            _gamePlayScreen.SetScore();
-        }
+        Observer.Emit(Constants.EventKey.SCORE, new ScoreDataEvent(_boardManager.score, _boardManager.highScore));
     }
 
-    private void SortUI(Sequence sequence, List<StepAction> mergerActionList)
-    {
-        sequence.OnStart(_soundManager.PlaySoundSortSfx);
-        Sequence sortSequence = DOTween.Sequence();
-
-        foreach (var mergerAction in mergerActionList)
-        {
-            var squareSourceGameObject = FindSquarePoolById(mergerAction.singleSquareSources.id);
-
-            sortSequence.Join(squareSourceGameObject.transform
-                .DOMove(mergerAction.squareTarget.Position, MERGE_DURATION)
-                .SetEase(Ease.Linear)
-                .OnComplete(() =>
-                {
-                    var mergeEndPos = mergerAction.singleSquareSources.Position;
-                    squareSourceGameObject.SetValue(mergerAction.newSquareValue);
-                    if ((mergeEndPos - comboPos).sqrMagnitude == 0 )
-                    {
-                        comboPos = mergerAction.squareTarget.Position;
-                    }
-                })
-            );
-        }
-
-        sequence.Append(sortSequence);
-        sequence.AppendInterval(TIME_DELAY);
-    }
-
-    private void ClearMinBlockUI(Sequence sequence, List<StepAction> stepActionList)
-    {
-        Sequence clearMinValueSequence = DOTween.Sequence();
-
-        foreach (var squareGameObject in _squaresList)
-        {
-            foreach (var stepAction in stepActionList)
-            {
-                if (stepAction.squareTarget.id != squareGameObject.squareData.id)
-                {
-                    continue;
-                }
-
-                clearMinValueSequence.Join(squareGameObject.transform
-                    .DOMove(stepAction.squareTarget.Position, 0)
-                    .OnComplete(() =>
-                    {
-                        squareGameObject.SetValue(0);
-                        squareGameObject.ReturnPool();
-                    }));
-            }
-        }
-
-        sequence.Append(clearMinValueSequence);
-    }
-
-    #endregion
 }

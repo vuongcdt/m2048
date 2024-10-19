@@ -1,12 +1,10 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using ZBase.UnityScreenNavigator.Core.Modals;
 
 namespace UI
 {
-    public class SettingsModal : Modal
+    public class SettingsModal : MonoBehaviour
     {
         [SerializeField] private Button closeButton;
         [SerializeField] private Slider sliderMusic;
@@ -14,14 +12,19 @@ namespace UI
 
         private SoundManager _soundManager;
 
-        public override UniTask Initialize(Memory<object> args)
+        public void Start()
+        {
+            Initialize();
+        }
+
+        public void Initialize()
         {
             _soundManager = SoundManager.Instance;
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(OnCloseBtnClick);
 
             SetVolumeUI();
-            return UniTask.CompletedTask;
+            gameObject.SetActive(false);
         }
 
         private void SetVolumeUI()
@@ -50,8 +53,8 @@ namespace UI
 
         private void OnCloseBtnClick()
         {
-            _soundManager.SaveVolume(sliderMusic.value, sliderSfx.value);
-            ModalContainer.Of(transform).Pop(true);
+            // _soundManager.SaveVolume(sliderMusic.value, sliderSfx.value);
+            // ModalContainer.Of(transform).Pop(true);
         }
     }
 }

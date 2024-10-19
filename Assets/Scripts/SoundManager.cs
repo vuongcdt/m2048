@@ -15,6 +15,21 @@ public class SoundManager : Singleton<SoundManager>
 
     private void Start()
     {
+        Init();
+    }
+
+    private void Init()
+    {
+        Observer.On(Constants.EventKey.SOUND_COMBO, e => PlaySoundComboSfx());
+        Observer.On(Constants.EventKey.SOUND_MERGE, e => PlaySoundMergeSfx());
+        Observer.On(Constants.EventKey.SOUND_SORT, e => PlaySoundSortSfx());
+        Observer.On(Constants.EventKey.SOUND_SHOOT, e => PlaySoundShootSfx());
+        Observer.On(Constants.EventKey.SOUND_OVER_GAME, e => PlaySoundGameOverSfx());
+        Observer.On(Constants.EventKey.SOUND_MAX_ITEM_COLUMN, e => PlaySoundMaxItemColumnSfx());
+        Observer.On(Constants.EventKey.SET_VOLUMN_MUSIC, e => SetVolumeMusic(e));
+        Observer.On(Constants.EventKey.SET_VOLUMN_SOUND_SHOOT, e => SetVolumeSoundShootSfx(e));
+        Observer.On(Constants.EventKey.SAVE_VOLUMN, e => SaveVolume(e));
+
         if (Mathf.Approximately(Prefs.VolumeMusic, -1) || Mathf.Approximately(Prefs.VolumeSfx, -1))
         {
             audioSourceMusic.volume = Constants.Volume.VOLUME_DEFAULT;
@@ -71,20 +86,23 @@ public class SoundManager : Singleton<SoundManager>
         audioSourceClickSfx.Play();
     }
 
-    public void SetVolumeMusic(float value)
+    public void SetVolumeMusic(object data)
     {
+        var value = (float)data;
         audioSourceMusic.volume = value;
     }
 
-    public void SetVolumeSoundShootSfx(float value)
+    public void SetVolumeSoundShootSfx(object data)
     {
+        var value = (float)data;
         _volumeSfx = value;
         PlaySoundShootSfx();
     }
 
-    public void SaveVolume(float sliderMusicValue, float sliderSfxValue)
+    public void SaveVolume(object data)
     {
-        Prefs.VolumeMusic = sliderMusicValue;
-        Prefs.VolumeSfx = sliderSfxValue;
+        var dataSave = (SaveVolumeEvent)data;
+        Prefs.VolumeMusic = dataSave.sliderMusicValue;
+        Prefs.VolumeSfx = dataSave.sliderSfxValue;
     }
 }

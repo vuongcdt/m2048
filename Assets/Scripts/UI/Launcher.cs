@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using Cysharp.Threading.Tasks;
-using DG.Tweening;
-using ZBase.UnityScreenNavigator.Core;
+﻿using ZBase.UnityScreenNavigator.Core;
 using ZBase.UnityScreenNavigator.Core.Modals;
 using ZBase.UnityScreenNavigator.Core.Screens;
 using ZBase.UnityScreenNavigator.Core.Views;
@@ -30,7 +26,7 @@ namespace UI
             modalContainer = ModalContainer.Find(ContainerKey.Modals);
 
             PreloadingScreen();
-            ShowLoadingPage().Forget();
+            // ShowLoadingPage().Forget();
         }
 
         private void PreloadingScreen()
@@ -44,13 +40,13 @@ namespace UI
             modalContainer.Preload(ResourceKey.GameOverModalPrefab());
         }
 
-        private async UniTask ShowLoadingPage()
-        {
-            LoadingScreen loadingScreen = null;
-            var options = new ViewOptions(ResourceKey.LoadingScreenPrefab(), false, loadAsync: false, onLoaded: (view, _) => { loadingScreen = (LoadingScreen)view; });
-            await screenContainer.PushAsync(options);
-            DOVirtual.Float(0, 1, 4, value => { loadingScreen.SetLoading(value); }).OnComplete(ShowHomePage);
-        }
+        // private async UniTask ShowLoadingPage()
+        // {
+        //     LoadingScreen loadingScreen = null;
+        //     var options = new ViewOptions(ResourceKey.LoadingScreenPrefab(), false, loadAsync: false, onLoaded: (view, _) => { loadingScreen = (LoadingScreen)view; });
+        //     await screenContainer.PushAsync(options);
+        //     DOVirtual.Float(0, 1, 1, value => { loadingScreen.SetLoading(value); }).OnComplete(ShowHomePage);
+        // }
 
         private void ShowHomePage()
         {

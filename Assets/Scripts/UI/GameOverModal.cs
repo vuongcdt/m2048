@@ -1,36 +1,46 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using ZBase.UnityScreenNavigator.Core.Modals;
 
 namespace UI
 {
-    public class GameOverModal : Modal
+    public class GameOverModal : MonoBehaviour
     {
         [SerializeField] private Button replayButton;
 
-        private UIManager _uiManager;
         private BoardManager _boardManager;
 
-        public override UniTask Initialize(Memory<object> args)
+        public void Start()
         {
-            _uiManager = UIManager.Instance;
+            Initialize();
+        }
+
+        public void Initialize()
+        {
+            Observer.On(Constants.EventKey.GAME_OVER_POPUP, e => ShowGameOverPopup());
+
             _boardManager = BoardManager.Instance;
             replayButton.onClick.RemoveAllListeners();
             replayButton.onClick.AddListener(OnReplayBtnClick);
 
-            return UniTask.CompletedTask;
+            gameObject.SetActive(false);
         }
 
         private void OnReplayBtnClick()
         {
-            ModalContainer.Of(transform).Pop(true);
+            gameObject.SetActive(false);
+
             if (Prefs.HighScore < _boardManager.highScore)
             {
                 Prefs.HighScore = _boardManager.highScore;
             }
-            _uiManager.ResetGame();
+            
+            Observer.Emit(Constants.EventKey.RESET_GAME);
+        }
+
+
+        public void ShowGameOverPopup()
+        {
+            gameObject.SetActive(true);
         }
     }
 }

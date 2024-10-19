@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections;
-using Cysharp.Threading.Tasks;
+﻿using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
-using ZBase.UnityScreenNavigator.Core.Modals;
-using Screen = ZBase.UnityScreenNavigator.Core.Screens.Screen;
 
 namespace UI
 {
-    public class GamePlayScreen : Screen
+    public class GamePlayScreen : MonoBehaviour
     {
         [SerializeField] internal TMP_Text scoreText;
         [SerializeField] internal TMP_Text highScoreText;
@@ -24,60 +19,42 @@ namespace UI
         [SerializeField] private TMP_Text height;
 
         private Camera _cameraMain;
-        private UIManager _uiManager;
         private BoardManager _boardManager;
 
-        public override UniTask Initialize(Memory<object> args)
+        public void Start()
         {
-            base.OnEnable();
+            Initialize();
+        }
+
+        public void Initialize()
+        {
+            Observer.On(Constants.EventKey.GAME_PLAY_SCREEN, e => ShowGamePlayScreen());
+            Observer.On(Constants.EventKey.COMBO, e => ShowCombo(e));
+            Observer.On(Constants.EventKey.SCORE, e => SetScore(e));
+            Observer.On(Constants.EventKey.NEXT_SQUARE, e => SetNextSquare(e));
 
             _cameraMain = Camera.main;
-            _uiManager = UIManager.Instance;
             _boardManager = BoardManager.Instance;
-
-            SetLayout();
 
             pauseBtn.onClick.RemoveAllListeners();
             pauseBtn.onClick.AddListener(OnPauseBtnClick);
 
             comboPrefab.SetActive(false);
 
-            _uiManager.SetScoreUI(this);
-            _boardManager.SetNextSquareValue(this);
-
-            return UniTask.CompletedTask;
-        }
-
-        private void SetLayout()
-        {
-            var cameraMainPixelWidth = (float)_cameraMain.pixelWidth;
-            var cameraMainPixelHeight = (float)_cameraMain.pixelHeight;
-            var scaleX = cameraMainPixelWidth / 1920;
-            var scaleY = cameraMainPixelHeight / 1080;
-            var scale = scaleX / scaleY;
-
-            var boardWidth = 1080 * 1.2f ;
-            var mainPixelWidth = (1920 * scale - 200 * 2 - boardWidth) / 2 + boardWidth;
-            // gridLayoutGroup.spacing = new Vector2(mainPixelWidth, 0);
+            gameObject.SetActive(false);
         }
 
         private void OnPauseBtnClick()
         {
             _boardManager.isPlaying = false;
-            var options = new ModalOptions(ResourceKey.PauseModalPrefab());
-            ModalContainer.Find(ContainerKey.Modals).Push(options);
+            Observer.Emit(Constants.EventKey.PAUSE_POPUP);
         }
 
-        public void ShowGameOverPopup()
+        public void ShowCombo(object data)
         {
-            var options = new ModalOptions(ResourceKey.GameOverModalPrefab());
-            ModalContainer.Find(ContainerKey.Modals).Push(options);
-        }
-
-        public void ShowCombo()
-        {
-            comboText.text = string.Format(Constants.FomatText.COMBO_TEXT_FORMAT, _uiManager.comboCount);
-            var targetWorldPos = new Vector2(_uiManager.comboPos.x, _uiManager.comboPos.y - 1.3f);
+            var comboData = (ComboEvent)data;
+            comboText.text = string.Format(Constants.FomatText.COMBO_TEXT_FORMAT, comboData.count);
+            var targetWorldPos = new Vector2(comboData.pos.x, comboData.pos.y - 1.3f);
             comboPrefab.transform.position = _cameraMain.WorldToScreenPoint(targetWorldPos);
             comboPrefab.SetActive(true);
             StartCoroutine(DeActiveComboIE());
@@ -89,19 +66,29 @@ namespace UI
             comboPrefab.SetActive(false);
         }
 
-        public void SetNextSquare()
+        public void SetNextSquare(object data)
         {
-            nextSquareText.text = Utils.GetText(_boardManager.nextSquareValue);
+            var nextSquare = (float)data;
+            nextSquareText.text = Utils.GetText(nextSquare);
             if (background != null)
             {
-                background.color = Utils.GetColor(_boardManager.nextSquareValue);
+                background.color = Utils.GetColor(nextSquare);
             }
         }
 
-        public void SetScore()
+        public void SetScore(object data)
         {
-            scoreText.text = _boardManager.score.ToString(Constants.FomatText.FORMAT_SCORE);
-            highScoreText.text = _boardManager.highScore.ToString(Constants.FomatText.FORMAT_SCORE);
+            var scoreData = (ScoreDataEvent)data;
+            scoreText.text = scoreData.score.ToString(Constants.FomatText.FORMAT_SCORE);
+            highScoreText.text = scoreData.highScore.ToString(Constants.FomatText.FORMAT_SCORE);
+        }
+
+        public void ShowGamePlayScreen()
+        {
+            gameObject.SetActive(true);
+
+            Observer.Emit(Constants.EventKey.SCORE, new ScoreDataEvent(_boardManager.score, _boardManager.highScore));
+            Observer.Emit(Constants.EventKey.NEXT_SQUARE, _boardManager.nextSquareValue);
         }
     }
 }

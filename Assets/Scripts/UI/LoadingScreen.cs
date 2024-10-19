@@ -1,18 +1,27 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
+﻿using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
-using Screen = ZBase.UnityScreenNavigator.Core.Screens.Screen;
 
 namespace UI
 {
-    public class LoadingScreen : Screen
+    public class LoadingScreen : MonoBehaviour
     {
         [SerializeField] private Image loadingMask;
 
-        public override UniTask Initialize(Memory<object> args)
+        public void Start()
         {
-            return UniTask.CompletedTask;
+            Initialize();
+        }
+
+        public void Initialize()
+        {
+            DOVirtual
+            .Float(0, 1, 1, value => SetLoading(value))
+            .OnComplete(() =>
+            {
+                gameObject.SetActive(false);
+                Observer.Emit(Constants.EventKey.HOME_SCREEN);
+            });
         }
 
         public void SetLoading(float value)
