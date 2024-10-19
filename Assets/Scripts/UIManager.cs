@@ -181,6 +181,7 @@ public class UIManager : Singleton<UIManager>
         if (comboCount > 2)
         {
             Observer.Emit(Constants.EventKey.COMBO, new ComboEvent(comboCount, comboPos));
+            Observer.Emit(Constants.EventKey.SOUND_COMBO);
 
             var endNewValueMerge = _actionsWrapList
                 .Where(boardAction => boardAction.actionType == ActionType.MergeAllBlock)
