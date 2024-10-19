@@ -4,7 +4,7 @@ Demo: https://2048-build.vercel.app/
 
 This is a description of my awesome game developed using Unity.
 
-![Screenshot_2024 10 08_10 46 34 272](https://github.com/user-attachments/assets/97c318d2-209b-4ffa-a084-4464df81db51)
+![image](https://github.com/user-attachments/assets/87955a50-8dc9-49f5-9622-a1ecbe564f19)
 
 ## Features
 - 2D Platformer Game
