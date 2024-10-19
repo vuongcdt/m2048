@@ -37,12 +37,10 @@ public class MergeUICommand : CommandBase<bool>
         Sequence mergerSequence = DOTween.Sequence();
         _uiManager.comboCount++;
 
-        // mergerSequence.OnStart(_soundManager.PlaySoundMergeSfx);
+        mergerSequence.OnStart(() => Observer.Emit(Constants.EventKey.SOUND_MERGE));
         foreach (var mergerAction in _mergerActionList)
         {
-            // var squareSourceGameObjectsList = FindAllSquareGameObjectsActiveSameValue(mergerAction);
             var squareSourceGameObjectsList = new FindAllSquareGameObjectsActiveSameValueCommand(_squaresList, mergerAction).Excute();
-            // var squareTargetGameObject = FindSquarePoolById(mergerAction.squareTarget.id);
             var squareTargetGameObject = new FindSquarePoolByIdCommand(_squaresList, mergerAction.squareTarget.id).Excute();
 
             foreach (var squareSourceGameObject in squareSourceGameObjectsList)
@@ -63,7 +61,7 @@ public class MergeUICommand : CommandBase<bool>
             {
                 _uiManager.comboPos = mergerAction.squareTarget.Position;
                 _boardManager.score += mergerAction.newSquareValue;
-                // SetScoreUI();
+                Observer.Emit(Constants.EventKey.SET_SCORE_UI);
             });
         }
 

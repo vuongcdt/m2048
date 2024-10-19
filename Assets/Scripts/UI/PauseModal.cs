@@ -1,9 +1,5 @@
-﻿
-using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using ZBase.UnityScreenNavigator.Core.Modals;
-using ZBase.UnityScreenNavigator.Core.Screens;
 
 namespace UI
 {
@@ -15,9 +11,7 @@ namespace UI
         [SerializeField] private Slider sliderMusic;
         [SerializeField] private Slider sliderSfx;
 
-        private SoundManager _soundManager;
         private BoardManager _boardManager;
-        private UIManager _uiManager;
 
         public void Start()
         {
@@ -27,9 +21,7 @@ namespace UI
         public void Initialize()
         {
             Observer.On(Constants.EventKey.PAUSE_POPUP, e => ShowPausePopup());
-            _soundManager = SoundManager.Instance;
             _boardManager = BoardManager.Instance;
-            _uiManager = UIManager.Instance;
 
             continueButton.onClick.RemoveAllListeners();
             continueButton.onClick.AddListener(OnContinueBtnClick);
@@ -53,18 +45,17 @@ namespace UI
         {
             Prefs.HighScore = _boardManager.highScore;
             _boardManager.isPlaying = true;
-            _uiManager.ResetGame();
-            _soundManager.SaveVolume(sliderMusic.value, sliderSfx.value);
-            // ModalContainer.Find(ContainerKey.Modals).Pop(true);
+
             gameObject.SetActive(false);
+            Observer.Emit(Constants.EventKey.SAVE_VOLUMN, new SaveVolumeEvent(sliderMusic.value, sliderSfx.value));
+            Observer.Emit(Constants.EventKey.RESET_GAME);
         }
 
         private void OnHomeBtnClick()
         {
             _boardManager.isPlaying = false;
-            _soundManager.SaveVolume(sliderMusic.value, sliderSfx.value);
-            // ModalContainer.Find(ContainerKey.Modals).Pop(true);
-            // ScreenContainer.Find(ContainerKey.Screens).Pop(true);
+
+            Observer.Emit(Constants.EventKey.SAVE_VOLUMN, new SaveVolumeEvent(sliderMusic.value, sliderSfx.value));
             gameObject.SetActive(false);
             Observer.Emit(Constants.EventKey.HOME_SCREEN);
         }
@@ -72,9 +63,9 @@ namespace UI
         private void OnContinueBtnClick()
         {
             _boardManager.isPlaying = true;
-            _soundManager.SaveVolume(sliderMusic.value, sliderSfx.value);
-            // ModalContainer.Find(ContainerKey.Modals).Pop(true);
+
             gameObject.SetActive(false);
+            Observer.Emit(Constants.EventKey.SAVE_VOLUMN, new SaveVolumeEvent(sliderMusic.value, sliderSfx.value));
         }
 
         private void SetVolumeUI()
@@ -93,12 +84,12 @@ namespace UI
 
         public void OnChangeVolumeMusic()
         {
-            _soundManager.SetVolumeMusic(sliderMusic.value);
+            Observer.Emit(Constants.EventKey.SET_VOLUMN_MUSIC, sliderMusic.value);
         }
 
         public void OnChangeVolumeSFX()
         {
-            _soundManager.SetVolumeSoundShootSfx(sliderSfx.value);
+            Observer.Emit(Constants.EventKey.SET_VOLUMN_SOUND_SHOOT, sliderSfx.value);
         }
     }
 }

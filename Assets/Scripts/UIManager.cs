@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
-using UI;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using Sequence = DG.Tweening.Sequence;
@@ -22,16 +21,25 @@ public class UIManager : Singleton<UIManager>
     private List<BoardAction> _actionsWrapList = new();
     private Sequence _sequence;
     public int idCount = 30;
-    private SoundManager _soundManager;
 
     private const float MERGE_DURATION = 0.1f;
     private const float TIME_DELAY = 0.1f;
 
     private void Start()
     {
-        _boardManager = BoardManager.Instance;
-        _soundManager = SoundManager.Instance;
+        Init();
+    }
 
+    private void Init()
+    {
+        Observer.On(Constants.EventKey.START_UI, e => StartUI(e));
+        Observer.On(Constants.EventKey.RESET_GAME, e => ResetGame());
+        Observer.On(Constants.EventKey.RESET_GAME_UI, e => ResetGameUI());
+        Observer.On(Constants.EventKey.RENDER_UI, e => RenderUI(e));
+        Observer.On(Constants.EventKey.SET_SCORE_UI, e => SetScoreUI());
+
+        _boardManager = BoardManager.Instance;
+        _squareScript = squarePrefab.GetComponent<Square>();
         GenerateStartChartScores();
     }
 
@@ -69,7 +77,7 @@ public class UIManager : Singleton<UIManager>
 
         for (var i = 0; i < 19; i++)
         {
-            var random = Random.Range(1000, 100000);
+            var random = Random.Range(1000, 100 * 1000);
             chartScores.Add(new Utils.ChartScore(random, nameList[i]));
         }
 
@@ -80,15 +88,32 @@ public class UIManager : Singleton<UIManager>
     #endregion
 
     #region StartUI
-    public void StartUI(List<SquareData> squaresData)
+    public void StartUI(object data)
     {
+         _boardManager = BoardManager.Instance;
         _squareScript = squarePrefab.GetComponent<Square>();
+        idCount = _boardManager.idCount;
         InitPoolObject();
-        // ResetUI(squaresData);
-        var resetUICommand = new ResetUICommnad(squareParentTransform, _squaresList, _squareScript, squaresData);
-        resetUICommand.Excute();
+        ResetUI(data);
     }
 
+    private void ResetUI(object data)
+    {
+        var squaresData = (List<SquareData>)data;
+        foreach (var squareData in squaresData)
+        {
+            if (squareData.value <= 0)
+            {
+                continue;
+            }
+
+            var instanceNewSquareDataCommand = new InstanceNewSquareDataCommand(squareParentTransform, _squaresList, _squareScript, squareData.Position);
+            var newSquareData = instanceNewSquareDataCommand.Excute();
+
+            newSquareData.SetValue(squareData.value);
+            newSquareData.SetId(squareData.id);
+        }
+    }
     #endregion
 
     private void InitPoolObject()
@@ -107,9 +132,9 @@ public class UIManager : Singleton<UIManager>
     }
 
     #region RenderUI
-    public void RenderUI(List<BoardAction> actionsWrapList)
+    public void RenderUI(object data)
     {
-        _actionsWrapList = actionsWrapList;
+        _actionsWrapList = (List<BoardAction>)data;
 
         if (_actionsWrapList.Count <= 0)
         {
@@ -151,14 +176,12 @@ public class UIManager : Singleton<UIManager>
             }
         });
     }
-
+    #endregion
 
     private void SetComboUI()
     {
         if (comboCount > 2)
         {
-            _soundManager.PlaySoundComboSfx();
-
             Observer.Emit(Constants.EventKey.COMBO, new ComboEvent(comboCount, comboPos));
 
             var endNewValueMerge = _actionsWrapList
@@ -174,8 +197,8 @@ public class UIManager : Singleton<UIManager>
     private void SetGameOverUI()
     {
         idCount = 30;
-        _soundManager.PlaySoundGameOverSfx();
         _boardManager.isProcessing = true;
+        Observer.Emit(Constants.EventKey.SOUND_OVER_GAME);
         Observer.Emit(Constants.EventKey.GAME_OVER_POPUP);
     }
 
@@ -190,7 +213,7 @@ public class UIManager : Singleton<UIManager>
         squarePool.SetId(idCount);
     }
 
-    public void SetScoreUI(GamePlayScreen gamePlayScreen = null)
+    public void SetScoreUI()
     {
         _boardManager = BoardManager.Instance;
         if (_boardManager.score > _boardManager.highScore)
@@ -198,13 +221,7 @@ public class UIManager : Singleton<UIManager>
             _boardManager.highScore = _boardManager.score;
         }
 
-        var data = new ScoreDataEvent()
-        {
-            highScore = _boardManager.highScore,
-            score = _boardManager.score,
-        };
-        Observer.Emit(Constants.EventKey.SCORE, data);
+        Observer.Emit(Constants.EventKey.SCORE, new ScoreDataEvent(_boardManager.score, _boardManager.highScore));
     }
 
-    #endregion
 }

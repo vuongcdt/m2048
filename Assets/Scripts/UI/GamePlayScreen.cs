@@ -86,6 +86,7 @@ namespace UI
         public void ShowGamePlayScreen()
         {
             gameObject.SetActive(true);
+
             Observer.Emit(Constants.EventKey.SCORE, new ScoreDataEvent(_boardManager.score, _boardManager.highScore));
             Observer.Emit(Constants.EventKey.NEXT_SQUARE, _boardManager.nextSquareValue);
         }

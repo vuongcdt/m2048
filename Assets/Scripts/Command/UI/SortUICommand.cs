@@ -32,12 +32,10 @@ public class SortUICommand : CommandBase<bool>
 
     private void SortUI()
     {
-        // _sequence.OnStart(_soundManager.PlaySoundSortSfx);
         Sequence sortSequence = DOTween.Sequence();
 
         foreach (var mergerAction in _mergerActionList)
         {
-            // var squareSourceGameObject = FindSquarePoolById(mergerAction.singleSquareSources.id);
             var squareSourceGameObject = new FindSquarePoolByIdCommand(_squaresList, mergerAction.singleSquareSources.id).Excute();
 
             sortSequence.Join(squareSourceGameObject.transform

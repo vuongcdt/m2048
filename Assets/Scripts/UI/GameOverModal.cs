@@ -7,7 +7,6 @@ namespace UI
     {
         [SerializeField] private Button replayButton;
 
-        private UIManager _uiManager;
         private BoardManager _boardManager;
 
         public void Start()
@@ -19,7 +18,6 @@ namespace UI
         {
             Observer.On(Constants.EventKey.GAME_OVER_POPUP, e => ShowGameOverPopup());
 
-            _uiManager = UIManager.Instance;
             _boardManager = BoardManager.Instance;
             replayButton.onClick.RemoveAllListeners();
             replayButton.onClick.AddListener(OnReplayBtnClick);
@@ -35,7 +33,8 @@ namespace UI
             {
                 Prefs.HighScore = _boardManager.highScore;
             }
-            _uiManager.ResetGame();
+            
+            Observer.Emit(Constants.EventKey.RESET_GAME);
         }
 
 

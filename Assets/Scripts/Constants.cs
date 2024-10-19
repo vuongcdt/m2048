@@ -38,8 +38,19 @@
         public const string NEXT_SQUARE = nameof(NEXT_SQUARE);
 
         public const string START_UI = nameof(START_UI);
+        public const string RESET_GAME = nameof(RESET_GAME);
         public const string RESET_GAME_UI = nameof(RESET_GAME_UI);
         public const string RENDER_UI = nameof(RENDER_UI);
+        public const string SET_SCORE_UI = nameof(SET_SCORE_UI);
 
+        public const string SOUND_MERGE = nameof(SOUND_MERGE);
+        public const string SOUND_SORT = nameof(SOUND_SORT);
+        public const string SOUND_SHOOT = nameof(SOUND_SHOOT);
+        public const string SOUND_COMBO = nameof(SOUND_COMBO);
+        public const string SOUND_OVER_GAME = nameof(SOUND_OVER_GAME);
+        public const string SOUND_MAX_ITEM_COLUMN = nameof(SOUND_MAX_ITEM_COLUMN);
+        public const string SET_VOLUMN_MUSIC = nameof(SET_VOLUMN_MUSIC);
+        public const string SET_VOLUMN_SOUND_SHOOT = nameof(SET_VOLUMN_SOUND_SHOOT);
+        public const string SAVE_VOLUMN = nameof(SAVE_VOLUMN);
     }
 }

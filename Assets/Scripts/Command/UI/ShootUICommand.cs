@@ -9,7 +9,7 @@ public class ShootUICommand : CommandBase<bool>
     private float _mergeDuration;
     private float _timeDelay;
 
-    public ShootUICommand(List<Square> squaresList, Sequence sequence,StepAction stepAction, float mergeDuration, float timeDelay)
+    public ShootUICommand(List<Square> squaresList, Sequence sequence, StepAction stepAction, float mergeDuration, float timeDelay)
     {
         _squaresList = squaresList;
         _sequence = sequence;
@@ -30,7 +30,7 @@ public class ShootUICommand : CommandBase<bool>
 
     private void ShootUI()
     {
-        // sequence.OnStart(_soundManager.PlaySoundShootSfx);
+        _sequence.OnStart(() => Observer.Emit(Constants.EventKey.SOUND_SHOOT));
         var squarePool = new FindSquarePoolByIdCommand(_squaresList, _stepAction.singleSquareSources.id).Excute();
 
         squarePool.SetValue(_stepAction.newSquareValue);

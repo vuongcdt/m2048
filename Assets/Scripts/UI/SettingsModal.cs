@@ -53,8 +53,8 @@ namespace UI
 
         private void OnCloseBtnClick()
         {
-            _soundManager.SaveVolume(sliderMusic.value, sliderSfx.value);
-            ModalContainer.Of(transform).Pop(true);
+            // _soundManager.SaveVolume(sliderMusic.value, sliderSfx.value);
+            // ModalContainer.Of(transform).Pop(true);
         }
     }
 }

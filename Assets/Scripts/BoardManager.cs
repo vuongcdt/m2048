@@ -23,8 +23,6 @@ public class BoardManager : Singleton<BoardManager>
     public SquareData processingSquare;
 
     private bool _isSave;
-    private UIManager _uiManager;
-    private SoundManager _soundManager;
     private List<GameObject> _lineColumnList = new();
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
@@ -33,8 +31,6 @@ public class BoardManager : Singleton<BoardManager>
     private void Start()
     {
         Application.targetFrameRate = 60;
-        _uiManager = UIManager.Instance;
-        _soundManager = SoundManager.Instance;
 
         RenderLineColumn();
 
@@ -44,7 +40,7 @@ public class BoardManager : Singleton<BoardManager>
         CheckGameOver();
         if (isGameOver)
         {
-            _uiManager.ResetGameUI();
+            Observer.Emit(Constants.EventKey.RESET_GAME_UI);
             RestartGame();
             isProcessing = false;
             isGameOver = false;
@@ -57,7 +53,8 @@ public class BoardManager : Singleton<BoardManager>
             nextSquareValue = 2;
         }
 
-        _uiManager.StartUI(squaresData);
+        UIManager.Instance.StartUI(squaresData);
+        // Observer.Emit(Constants.EventKey.START_UI, squaresData);
     }
 
     private void RenderLineColumn()
@@ -111,7 +108,7 @@ public class BoardManager : Singleton<BoardManager>
 
         CheckGameOver();
 
-        _uiManager.RenderUI(_actionsWrapList);
+        Observer.Emit(Constants.EventKey.RENDER_UI, _actionsWrapList);
     }
 
 
@@ -122,7 +119,8 @@ public class BoardManager : Singleton<BoardManager>
 
         if (_actionsWrapList.Count <= 0)
         {
-            _soundManager.PlaySoundMaxItemColumnSfx();
+            Observer.Emit(Constants.EventKey.SOUND_MAX_ITEM_COLUMN);
+
             return;
         }
 

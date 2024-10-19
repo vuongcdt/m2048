@@ -25,7 +25,8 @@ public class LoadGameCommand : CommandBase<bool>
 
     private void LoadDataFromPrefs()
     {
-        // RenderBoard();
+        // _boardManager = BoardManager.Instance;
+        // _uiManager = UIManager.Instance;
         var renderBoardCommand = new RenderBoardCommand();
         renderBoardCommand.Excute();
 
@@ -36,7 +37,7 @@ public class LoadGameCommand : CommandBase<bool>
 
         _boardManager.score = Prefs.Score;
         _boardManager.idCount = Prefs.IdCount == 0 ? 30 : Prefs.IdCount;
-        _uiManager.idCount = _boardManager.idCount;
+        // _uiManager.idCount = _boardManager.idCount;
 
         LoadHighScore();
         LoadSquareValueList();

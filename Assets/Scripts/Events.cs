@@ -25,4 +25,17 @@ public struct ComboEvent
     }
 }
 
+public struct SaveVolumeEvent
+{
+    public float sliderMusicValue;
+    public float sliderSfxValue;
+
+    public SaveVolumeEvent(float sliderMusicValue,float sliderSfxValue)
+    {
+        this.sliderMusicValue = sliderMusicValue;
+        this.sliderSfxValue = sliderSfxValue;
+    }
+}
+
+
 

@@ -7,9 +7,9 @@ public class ShootCommand : CommandBase<bool>
     private List<StepAction> _actionsList = new();
     private List<BoardAction> _actionsWrapList = new();
     private int _columnSelect;
-    public float _nextSquareValue;
+    private float _nextSquareValue;
+    private int _boardRow;
     private BoardManager _boardManager;
-    public int _boardRow;
 
     public ShootCommand(List<SquareData> squaresData, List<StepAction> actionsList,
      List<BoardAction> actionsWrapList, int columnSelect, float nextSquareValue, int boardRow)

@@ -27,7 +27,7 @@ public class Observer
         Listeners.Remove(name);
     }
 
-    public static void Emit(string name,object data= null)
+    public static void Emit(string name, object data = null)
     {
         if (!Listeners.ContainsKey(name))
         {
