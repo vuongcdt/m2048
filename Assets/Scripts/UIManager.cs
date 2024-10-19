@@ -25,10 +25,7 @@ public class UIManager : Singleton<UIManager>
     private const float MERGE_DURATION = 0.1f;
     private const float TIME_DELAY = 0.1f;
 
-    private void Start()
-    {
-        Init();
-    }
+
 
     private void Init()
     {
@@ -90,9 +87,10 @@ public class UIManager : Singleton<UIManager>
     #region StartUI
     public void StartUI(object data)
     {
-         _boardManager = BoardManager.Instance;
+        Init();
         _squareScript = squarePrefab.GetComponent<Square>();
         idCount = _boardManager.idCount;
+
         InitPoolObject();
         ResetUI(data);
     }
